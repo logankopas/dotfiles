@@ -35,7 +35,7 @@ fi
 
 # Recursively map dotfiles to home directory
 echo "Linking dotfiles..."
-for file in bashrc bash_aliases;  do
+for file in bashrc bash_aliases bash_profile;  do
     target="$HOME/.$file"
     if [ -L $target ]; then
         rm $target
@@ -54,6 +54,6 @@ git clone https://github.com/gmarik/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 
 # Load up new profile
 echo "Loading Profile"
-source ~/.profile
+source ~/.bash_profile
 
 
