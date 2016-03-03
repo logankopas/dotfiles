@@ -59,10 +59,10 @@ Plugin 'tpope/vim-surround'
 " ysiw] -> surround word with []
 " yss) -> surround line with ()
 " } doesn't add space, { does
-
 Plugin 'justinmk/vim-sneak'
 " s{character}{character}
 " like <f> navigation on steriods
+Plugin 'tpope/vim-dispatch'
 
 call vundle#end()
 "''''''''''''''''''''''''' End plugins
@@ -138,13 +138,16 @@ let g:syntastic_flake8_max_line_length='139'
 " gundo
 nnoremap <leader>z :GundoToggle<CR>
 
-" ctrlp
+" ctrlp and the like
 map <C-m> :CtrlPTag<CR>
 let g:ctrlp_cache_dir = $HOME . '/.cache/ctrlp'
 if executable('ag')
     let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+    set grepprg=ag\ --nogroup\ --nocolor
 endif
 let g:ctrlp_match_func = { 'match': 'pymatcher#PyMatch' }
+" TODO get this to work with dispatch
+nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
 
 " vim-coffee
 let coffee_compiler='/Users/logankopas/work/regiondb/node_modules/coffee-script/bin/coffee'
@@ -168,6 +171,7 @@ if has("mac") || has("macunix")
   vmap <D-j> <M-j>
   vmap <D-k> <M-k>
 endif
+map <leader>t :tab split<CR>
 
 " edit vimrc and load it
 nnoremap <leader>ev :vsp $HOME/dotfiles/vimrc<CR> 
