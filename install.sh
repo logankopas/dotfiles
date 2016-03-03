@@ -35,7 +35,7 @@ fi
 
 # Recursively map dotfiles to home directory
 echo "Linking dotfiles..."
-for file in bashrc bash_aliases bash_profile;  do
+for file in bashrc bash_aliases bash_profile vimrc;  do
     target="$HOME/.$file"
     if [ -L $target ]; then
         rm $target
