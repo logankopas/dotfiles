@@ -1,0 +1,28 @@
+# This is Git's per-user configuration file.
+[core]
+# Please adapt and uncomment the following lines:
+#	user = Logan Kopas
+#	email = logan@ncconsulting.ca
+[user]
+	name = Logan
+	email = logan@ncconsulting.ca
+[alias]
+	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	conflicts = !git ls-files -u | cut -f 2 | sort -u
+	alias = config --get-regexp ^alias\\.
+    leg = ! git log --oneline --color | emojify | less -r
+[push]
+	default = matching
+[core]
+	excludesfile = /Users/logankopas/.gitignore_global
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
+[merge]
+	tool = vimdiff
+	conflictstyle = diff3
+[diff]
+	tool = vimdiff
