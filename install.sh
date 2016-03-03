@@ -35,7 +35,7 @@ fi
 
 # Recursively map dotfiles to home directory
 echo "Linking dotfiles..."
-for file in bashrc gitconfig profile vimrc tmux.conf zshrc gitignore_global; do
+for file in bashrc;  do
     target="$HOME/.$file"
     if [ -L $target ]; then
         rm $target
