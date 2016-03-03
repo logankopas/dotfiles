@@ -35,7 +35,7 @@ fi
 
 # Recursively map dotfiles to home directory
 echo "Linking dotfiles..."
-for file in bashrc bash_aliases bash_profile vimrc;  do
+for file in bashrc bash_aliases bash_profile vimrc tmux.conf;  do
     target="$HOME/.$file"
     if [ -L $target ]; then
         rm $target
