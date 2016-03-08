@@ -63,8 +63,17 @@ Plugin 'justinmk/vim-sneak'
 " s{character}{character}
 " like <f> navigation on steriods
 Plugin 'tpope/vim-dispatch'
+" for running things asynchronously
+Plugin 'janko-m/vim-test'
+" better test runner, lacks quickfix hotlinking
 
 call vundle#end()
+"'''''''''''''''''''''''''  Plug
+call plug#begin('~/.vim/plugged')
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': 'yes \| ./install' }
+Plug 'junegunn/fzf.vim'
+set rtp+=~/.fzf
+call plug#end()
 "''''''''''''''''''''''''' End plugins
 
 
@@ -97,7 +106,9 @@ set relativenumber  " YASSSSSSS
 vnoremap <silent> * :call VisualSelection('f')<CR> 
 vnoremap <silent> # :call VisualSelection('b')<CR>
 " because I like white screens
-hi Visual term=reverse ctermbg=8 guibg=LightGrey
+highlight Visual term=reverse ctermbg=8 guibg=LightGrey
+highlight DiffChange cterm=None ctermfg=LightMagenta ctermbg=LightRed 
+highlight DiffText cterm=None
 
 let mapleader="\<Space>"
 
@@ -152,6 +163,9 @@ nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
 " vim-coffee
 let coffee_compiler='/Users/logankopas/work/regiondb/node_modules/coffee-script/bin/coffee'
 let coffee_make_options='--map'
+
+" vim-test
+let test#strategy = "dispatch"
 "''''''''''''''''''''''''' end plugin config
 
 syntax on
@@ -219,7 +233,6 @@ nnoremap <leader>n :call ToggleNumber()<CR>
 nnoremap <leader>c :cclose<CR>
 nnoremap <leader>p :pclose<CR>
 
-" testing this
 " Delete trailing white space on save, useful for Python and CoffeeScript ;)
 func! DeleteTrailingWS()
   exe "normal mz"
@@ -259,6 +272,30 @@ vnoremap <silent> gv :call VisualSelection('gv')<CR>
 " When you press <leader>r you can search and replace the selected text
 vnoremap <silent> <leader>r :call VisualSelection('replace')<CR>
 
-" TODO look at setting up fzf
+function! s:tags_sink(line)
+    let parts = split(a:line, '\t\zs')
+    let excmd = matchstr(parts[2:], '^.*\ze;"\t')
+    execute 'silent e' parts[1][:-2]
+    let [magic, &magic] = [&magic, 0]
+    execute excmd
+    let &magic = magic
+endfunction
+
+function! s:tags()
+    if empty(tagfiles())
+        echohl WarningMsg
+        echom 'Preparing tags'
+        echohl None
+        call system('ctags -R')
+    endif
+
+    call fzf#run({
+                \ 'source':  'cat '.join(map(tagfiles(), 'fnamemodify(v:val, ":S")')).
+                \            '| grep -v ^!',
+                \ 'options': '+m -d "\t" --with-nth 1,4.. -n 1 --tiebreak=index',
+                \ 'down':    '40%',
+                \ 'sink':    function('s:tags_sink')})
+endfunction
+
+command! Tags call s:tags()
 " TODO and autoenv
-" TODO and vim-dispatch

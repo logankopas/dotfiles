@@ -90,3 +90,5 @@ gr ()
 # nvbn/thefuck
 # awesome repo, screws up my git history though :/
 eval "$(thefuck --alias)"
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
