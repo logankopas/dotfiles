@@ -1,0 +1,22 @@
+# ~/.pythonrc
+HEADER = '\033[95m'
+OKBLUE = '\033[94m'
+OKGREEN = '\033[92m'
+WARNING = '\033[93m'
+FAIL = '\033[91m'
+ENDC = '\033[0m'
+BOLD = '\033[1m'
+UNDERLINE = '\033[4m'
+
+print FAIL + "*"*40 + ENDC
+print WARNING + "Welcome, Logan! :) " + ENDC
+print FAIL + "*"*40 + ENDC
+
+# enable tab completion
+# yasssss
+import readline
+import rlcompleter
+if 'libedit' in readline.__doc__:
+    readline.parse_and_bind("bind ^I rl_complete")
+else:
+    readline.parse_and_bind("tab: complete")

@@ -88,7 +88,7 @@ set expandtab
 set autoindent
 set fileformat=unix  " because screw windows
 set laststatus=2  " makes powerline work
-set showtabline=2  " always show the tab bar
+" set showtabline=2  " always show the tab bar
 set noshowmode  " powerline shows us what mode we're in, so vim doesn't have to
 set cursorline  " so I don't go searching for my cursor (I still do though)
 set wildmenu  " tab completion in commands
@@ -115,6 +115,7 @@ let mapleader="\<Space>"
 "''''''''''''''''''''''''' plugin config
 " YouCompleteMe
 let g:ycm_autoclose_preview_window_after_completion=1
+let g:ycm_collect_identifiers_from_tag_files=1
 map <leader>g  :YcmCompleter GoToDefinitionElseDeclaration<CR>
 map <leader>G  :YcmCompleter GetDoc<CR>
 map <leader>u  :YcmCompleter GoToReferences<CR>
