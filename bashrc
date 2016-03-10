@@ -92,3 +92,23 @@ gr ()
 eval "$(thefuck --alias)"
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+# fbr - checkout git branch (including remote branches)
+
+# fzf commands
+# checkout a branch or remote branch
+fbr() {
+  local branches branch
+  branches=$(git branch --all | grep -v HEAD) &&
+  branch=$(echo "$branches" |
+           fzf-tmux -d $(( 2 + $(wc -l <<< "$branches") )) +m) &&
+  git checkout $(echo "$branch" | sed "s/.* //" | sed "s#remotes/[^/]*/##")
+}
+
+# fd - cd to selected directory
+fd() {
+  local dir
+  dir=$(find ${1:-*} -path '*/\.*' -prune \
+                  -o -type d -print 2> /dev/null | fzf +m) &&
+  cd "$dir"
+}

@@ -19,6 +19,8 @@ alias gs='git status'
 
 alias s='cd ..'
 
+alias cim='vim'
+
 # another cool git alias, gets the name of the current branch, 
 # I use it for ``` git push origin `cb` ```
 alias cb='git branch | grep "*" | cut -d" " -f2'
@@ -35,3 +37,6 @@ alias glances="glances --theme-white"
 
 # rsync is WAAAAAY better than cp or scp
 alias cp="rsync"
+
+alias glog='git log --branches --remotes --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold
+blue)<%an>%Creset" --abbrev-commit --no-min-parents --no-max-parents'

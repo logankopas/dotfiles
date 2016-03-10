@@ -27,10 +27,6 @@ endif
 Plugin 'scrooloose/syntastic'
 Plugin 'nvie/vim-flake8'
 " F7 to run 
-Plugin 'kien/ctrlp.vim'
-" ctrl-p to file search
-" ctrl-m to tag search
-" ctrl-t to open in tab
 
 Bundle 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
 Plugin 'scrooloose/nerdtree'
@@ -42,8 +38,6 @@ Plugin 'JarrodCTaylor/vim-python-test-runner'
 " :DjangoTestApp seems to be the only one that works
 " TODO fork this and make it work for the general case, 
 " TODO along with specifying arbitrary django tests
-Plugin 'FelikZ/ctrlp-py-matcher'
-" speeds up ctrlp
 Plugin 'yssl/QFEnter'
 " space-tab to open quickfix in tab
 Plugin 'sjl/gundo.vim'
@@ -66,6 +60,10 @@ Plugin 'tpope/vim-dispatch'
 " for running things asynchronously
 Plugin 'janko-m/vim-test'
 " better test runner, lacks quickfix hotlinking
+Plugin 'terryma/vim-multiple-cursors'
+" self explanatory
+Plugin 'tpope/vim-abolish'
+" for comprehensive text substitution
 
 call vundle#end()
 "'''''''''''''''''''''''''  Plug
@@ -105,6 +103,8 @@ set relativenumber  " YASSSSSSS
 " * searching in visual mode
 vnoremap <silent> * :call VisualSelection('f')<CR> 
 vnoremap <silent> # :call VisualSelection('b')<CR>
+" pasting in visual mode
+xnoremap p pgvy
 " because I like white screens
 highlight Visual term=reverse ctermbg=8 guibg=LightGrey
 highlight DiffChange cterm=None ctermfg=LightMagenta ctermbg=LightRed 
@@ -149,14 +149,6 @@ let g:syntastic_flake8_max_line_length='139'
 " gundo
 nnoremap <leader>z :GundoToggle<CR>
 
-" ctrlp and the like
-map <C-m> :CtrlPTag<CR>
-let g:ctrlp_cache_dir = $HOME . '/.cache/ctrlp'
-if executable('ag')
-    let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
-    set grepprg=ag\ --nogroup\ --nocolor
-endif
-let g:ctrlp_match_func = { 'match': 'pymatcher#PyMatch' }
 " TODO get this to work with dispatch
 nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
 
@@ -166,6 +158,14 @@ let coffee_make_options='--map'
 
 " vim-test
 let test#strategy = "dispatch"
+
+" multicursor
+" because it overwrites ALL of my mappings
+let g:multi_curor_use_default_mapping=0
+let g:multi_cursor_next_key='<C-h>'
+let g:multi_cursor_prev_key='<C-g>'
+let g:multi_cursor_skip_key='<C-x>'
+let g:multi_cursor_quit_key='<Esc>'
 "''''''''''''''''''''''''' end plugin config
 
 syntax on
@@ -191,6 +191,10 @@ map <leader>t :tab split<CR>
 nnoremap <leader>ev :vsp $HOME/dotfiles/vimrc<CR> 
 nnoremap <leader>sv :source $HOME/dotfiles/vimrc<CR>
 
+" fzf mappings
+map <C-m> :Tags<CR>
+map <C-p> :FZF -m<CR>
+
 
 " python files
 au BufNewFile,BufRead *.py
@@ -206,7 +210,7 @@ au BufNewFile,BufRead *.py
 au BufNewFile,BufRead *.py 
     \ let $DJANGO_SETTINGS_MODULE='deploy_settings.testing'
 " web files
-au BufNewFile,BufRead *.coffee,*.js,*.html,*.css,*.scss
+au BufNewFile,BufRead *.coffee,*.js,*.html,*.css,*.scss,*.rb
     \ set tabstop=2
     \ softtabstop=2
     \ shiftwidth=2
@@ -232,6 +236,9 @@ nnoremap <leader>n :call ToggleNumber()<CR>
 
 nnoremap <leader>c :cclose<CR>
 nnoremap <leader>p :pclose<CR>
+
+" Fix my clumsy fingers
+iabbrev impoer import
 
 " Delete trailing white space on save, useful for Python and CoffeeScript ;)
 func! DeleteTrailingWS()
@@ -298,4 +305,20 @@ function! s:tags()
 endfunction
 
 command! Tags call s:tags()
+command! -nargs=0 -bar Qargs execute 'args' QuickfixFilenames()
+function! QuickfixFilenames()
+  " Building a hash ensures we get each buffer only once
+  let buffer_numbers = {}
+  for quickfix_item in getqflist()
+    let buffer_numbers[quickfix_item['bufnr']] = bufname(quickfix_item['bufnr'])
+  endfor
+  return join(map(values(buffer_numbers), 'fnameescape(v:val)'))
+endfunction
+"''' example usage
+" :args *.txt
+" :vimgrep /Vimcasts\.\zscom/g ##
+" :Qargs
+" :argdo %s/Vimcasts\.\zscom/org/ge
+" :argdo update
+
 " TODO and autoenv
