@@ -113,3 +113,7 @@ fd() {
                   -o -type d -print 2> /dev/null | fzf +m) &&
   cd "$dir"
 }
+
+gitroot(){
+    echo `git rev-parse --show-toplevel`
+}

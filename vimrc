@@ -1,4 +1,4 @@
-set nocompatible
+
 " this is a bug that was fixed in vim 7.4
 if version < 704
     filetype on
@@ -30,22 +30,24 @@ Plugin 'nvie/vim-flake8'
 
 Bundle 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
 Plugin 'scrooloose/nerdtree'
+Plugin 'jistr/vim-nerdtree-tabs'
 " ctrl-n to open
 " <t> to open in tab
-Plugin 'jistr/vim-nerdtree-tabs'
+"
 Plugin 'kchmck/vim-coffee-script'
-Plugin 'JarrodCTaylor/vim-python-test-runner'
-" :DjangoTestApp seems to be the only one that works
-" TODO fork this and make it work for the general case, 
-" TODO along with specifying arbitrary django tests
+"
 Plugin 'yssl/QFEnter'
 " space-tab to open quickfix in tab
+
 Plugin 'sjl/gundo.vim'
 " space-z to open gundo tree
+
 Plugin 'rking/ag.vim'
 " :Ag for search
+
 Plugin 'tpope/vim-repeat'
 " <.> repeats plugin commands
+
 Plugin 'tpope/vim-surround'
 " cs, ds, yss
 " <command><selection><substitution>
@@ -53,17 +55,25 @@ Plugin 'tpope/vim-surround'
 " ysiw] -> surround word with []
 " yss) -> surround line with ()
 " } doesn't add space, { does
+
 Plugin 'justinmk/vim-sneak'
 " s{character}{character}
 " like <f> navigation on steriods
+
 Plugin 'tpope/vim-dispatch'
 " for running things asynchronously
+
 Plugin 'janko-m/vim-test'
 " better test runner, lacks quickfix hotlinking
+
 Plugin 'terryma/vim-multiple-cursors'
 " self explanatory
+
 Plugin 'tpope/vim-abolish'
 " for comprehensive text substitution
+
+Plugin 'christoomey/vim-tmux-navigator'
+
 
 call vundle#end()
 "'''''''''''''''''''''''''  Plug
@@ -193,8 +203,8 @@ nnoremap <leader>ev :vsp $HOME/dotfiles/vimrc<CR>
 nnoremap <leader>sv :source $HOME/dotfiles/vimrc<CR>
 
 " fzf mappings
-map <C-m> :Tags<CR>
-map <C-p> :FZF -m<CR>
+noremap <C-m> :Tags<CR>
+noremap <C-p> :FZF -m<CR>
 
 
 " python files
@@ -321,5 +331,3 @@ endfunction
 " :Qargs
 " :argdo %s/Vimcasts\.\zscom/org/ge
 " :argdo update
-
-" TODO and autoenv
