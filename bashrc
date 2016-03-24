@@ -30,8 +30,9 @@ PS1='\[\033[1;31m\][\u]\[\033[1;34m\]\$\[\033[0m\] '
 export NDK_ROOT="${HOME}/android-ndk-r7"
 export ANDROID_SDK_ROOT="${HOME}/android-sdk-mac_x86"
 export ANDROID_NDK_ROOT="$NDK_ROOT"
-export PATH=$PATH:$ANDROID_NDK_ROOT:/usr/local/sbin/
+export PATH=$PATH:$ANDROID_NDK_ROOT:/usr/local/sbin/:$HOME/neovim/bin
 export PYTHONSTARTUP=~/.pythonrc
+export THEFUCK_ALTER_HISTORY=false
 
 # private stuff, like homebrew github tokens
 [[ -e ~/.tokens ]] && . ~/.tokens

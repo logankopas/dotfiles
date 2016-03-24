@@ -7,48 +7,43 @@ endif
 filetype off
 
 "''''''''''''''''''''''''' Begin plugins
-" Include vundle and initialize
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-
-" This one is required for vundle
-Plugin 'gmarik/Vundle.vim'
+call plug#begin('~/.vim/plugged')
 
 " Plugins
-Plugin 'vim-scripts/indentpython.vim'
+Plug 'vim-scripts/indentpython.vim'
 " YouCompleteMe
 if version > 703
-    Bundle 'Valloric/YouCompleteMe'
+    Plug 'Valloric/YouCompleteMe'
 endif
 " space-g go to definition
 " space-G open doc
 " space-u tag usages (replaces utags, maybe bring it back?)
 
-Plugin 'scrooloose/syntastic'
-Plugin 'nvie/vim-flake8'
+Plug 'scrooloose/syntastic'
+Plug 'nvie/vim-flake8'
 " F7 to run 
 
-Bundle 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
-Plugin 'scrooloose/nerdtree'
-Plugin 'jistr/vim-nerdtree-tabs'
+Plug 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
+Plug 'scrooloose/nerdtree'
+Plug 'jistr/vim-nerdtree-tabs'
 " ctrl-n to open
 " <t> to open in tab
 "
-Plugin 'kchmck/vim-coffee-script'
+Plug 'kchmck/vim-coffee-script'
 "
-Plugin 'yssl/QFEnter'
+Plug 'yssl/QFEnter'
 " space-tab to open quickfix in tab
 
-Plugin 'sjl/gundo.vim'
+Plug 'sjl/gundo.vim'
 " space-z to open gundo tree
 
-Plugin 'rking/ag.vim'
+Plug 'rking/ag.vim'
 " :Ag for search
 
-Plugin 'tpope/vim-repeat'
+Plug 'tpope/vim-repeat'
 " <.> repeats plugin commands
 
-Plugin 'tpope/vim-surround'
+Plug 'tpope/vim-surround'
 " cs, ds, yss
 " <command><selection><substitution>
 " cs)' -> replace ) with '
@@ -56,30 +51,47 @@ Plugin 'tpope/vim-surround'
 " yss) -> surround line with ()
 " } doesn't add space, { does
 
-Plugin 'justinmk/vim-sneak'
+Plug 'justinmk/vim-sneak'
 " s{character}{character}
 " like <f> navigation on steriods
 
-Plugin 'tpope/vim-dispatch'
+Plug 'tpope/vim-dispatch'
 " for running things asynchronously
 
-Plugin 'janko-m/vim-test'
+Plug 'janko-m/vim-test'
 " better test runner, lacks quickfix hotlinking
 
-Plugin 'terryma/vim-multiple-cursors'
+Plug 'terryma/vim-multiple-cursors'
 " self explanatory
 
-Plugin 'tpope/vim-abolish'
+Plug 'tpope/vim-abolish'
 " for comprehensive text substitution
 
-Plugin 'christoomey/vim-tmux-navigator'
+Plug 'jeetsukumaran/vim-buffergator'
+" for using buffers instead of tabs
+nnoremap gt :bnext<CR>
+nnoremap gT :bprev<CR>
 
+Plug 'christoomey/vim-tmux-navigator'
+Plug 'jceb/vim-orgmode'
+nnoremap pp :split ~/todo.org<CR>
+Plug 'tpope/vim-speeddating'
 
-call vundle#end()
-"'''''''''''''''''''''''''  Plug
-call plug#begin('~/.vim/plugged')
+Plug 'mattn/emmet-vim'
+" html creation
+
+Plug 'ChrisPenner/vim-emacs-bindings'
+" ctrl-a, ctrl-e, etc
+
+" fuzzyfinder
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': 'yes \| ./install' }
 Plug 'junegunn/fzf.vim'
+Plug 'junegunn/vim-easy-align'
+" Start interactive EasyAlign in visual mode (e.g. vipga)
+xmap ga <Plug>(EasyAlign)
+
+" Start interactive EasyAlign for a motion/text object (e.g. gaip)
+nmap ga <Plug>(EasyAlign)
 set rtp+=~/.fzf
 call plug#end()
 "''''''''''''''''''''''''' End plugins
@@ -98,7 +110,7 @@ set expandtab
 set autoindent
 set fileformat=unix  " because screw windows
 set laststatus=2  " makes powerline work
-" set showtabline=2  " always show the tab bar
+set showtabline=2  " always show the tab bar
 set noshowmode  " powerline shows us what mode we're in, so vim doesn't have to
 set cursorline  " so I don't go searching for my cursor (I still do though)
 set wildmenu  " tab completion in commands
@@ -119,6 +131,11 @@ xnoremap p pgvy
 highlight Visual term=reverse ctermbg=8 guibg=LightGrey
 highlight DiffChange cterm=None ctermfg=LightMagenta ctermbg=LightRed 
 highlight DiffText cterm=None
+" Here's a vimdiff to try
+" highlight DiffAdd cterm=none ctermfg=fg ctermbg=Blue gui=none guifg=fg guibg=Blue
+" highlight DiffDelete cterm=none ctermfg=fg ctermbg=Blue gui=none guifg=fg guibg=Blue
+" highlight DiffChange cterm=none ctermfg=fg ctermbg=Blue gui=none guifg=fg guibg=Blue
+" highlight DiffText cterm=none ctermfg=bg ctermbg=White gui=none guifg=bg guibg=White
 
 let mapleader="\<Space>"
 
@@ -142,6 +159,7 @@ EOF
 let python_highlight_all=1
 
 " NERDTree
+let NERDTreeQuitOnOpen=1
 map <C-n> :NERDTreeToggle %<CR>
 
 " powerline font stuff
@@ -161,7 +179,7 @@ let g:syntastic_flake8_max_line_length='139'
 nnoremap <leader>z :GundoToggle<CR>
 
 " TODO get this to work with dispatch
-nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
+nnoremap K :Ag "\b<C-R><C-W>\b"<CR>:cw<CR>
 
 " vim-coffee
 let coffee_compiler='/Users/logankopas/work/regiondb/node_modules/coffee-script/bin/coffee'
@@ -172,9 +190,9 @@ let test#strategy = "dispatch"
 
 " multicursor
 " because it overwrites ALL of my mappings
-let g:multi_curor_use_default_mapping=0
-let g:multi_cursor_next_key='<C-h>'
-let g:multi_cursor_prev_key='<C-g>'
+let g:multi_cursor_use_default_mapping=0
+let g:multi_cursor_next_key='<C-e>'
+let g:multi_cursor_prev_key='<C-a>'
 let g:multi_cursor_skip_key='<C-x>'
 let g:multi_cursor_quit_key='<Esc>'
 "''''''''''''''''''''''''' end plugin config
@@ -202,8 +220,12 @@ map <leader>t :tab split<CR>
 nnoremap <leader>ev :vsp $HOME/dotfiles/vimrc<CR> 
 nnoremap <leader>sv :source $HOME/dotfiles/vimrc<CR>
 
+" run tests easily
+nnoremap tt :TestLast<CR>
+nnoremap tn :TestNearest<CR>
+
 " fzf mappings
-noremap <C-m> :Tags<CR>
+noremap <C-b> :Tags<CR>
 noremap <C-p> :FZF -m<CR>
 
 
@@ -230,6 +252,16 @@ au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
 " compile coffeescript on save
 au BufWritePost,FileWritePost *.coffee 
     \ silent make -o '%:p:h/../js/'
+au FileType make 
+    \ set noexpandtab
+    \ shiftwidth=8
+    \ softtabstop=0
+au FileType org
+    \ let maplocalleader='\'
+au FileType org
+    \ setlocal noautoindent
+    \ nocindent
+    \ nosmartindent
 " set the current file to the working directory
 " au BufEnter * lcd %:p:h
 
@@ -331,3 +363,7 @@ endfunction
 " :Qargs
 " :argdo %s/Vimcasts\.\zscom/org/ge
 " :argdo update
+
+" XKCD jokes
+nnoremap xk :.s/\(.*\)/\=system('a='."https:\/\/api.stackexchange.com\/2.2\/".'; q=`curl -s -G --data-urlencode "q='.submatch(1).'" --compressed "'."${a}search\/advanced?order=desc&sort=relevance&site=stackoverflow".'" \| python -c "'."exec(\\\"import sys \\nimport json\\nprint(json.loads(''.join(sys.stdin.readlines()))['items'][0]['question_id'])\\\")".'"`; curl -s --compressed "'."${a}questions\/$q\/answers?order=desc&sort=votes&site=stackoverflow&filter=withbody".'" \| python -c "'."exec(\\\"import sys\\nimport json\\nprint(json.loads(''.join(sys.stdin.readlines()))['items'][0]['body']).encode('utf8')\\\")".'"')/<CR>
+
