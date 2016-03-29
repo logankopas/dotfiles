@@ -53,19 +53,14 @@ let g:syntastic_flake8_max_line_length='139'
 Plug 'nvie/vim-flake8'
 " F7 to run 
 
-Plug 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
+
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+" Plug 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
 " powerline font stuff
-let g:minBufExplForceSyntaxEnable = 1
-if ! has('gui_running')
-   set ttimeoutlen=10
-   augroup FastEscape
-      autocmd!
-      au InsertEnter * set timeoutlen=0
-      au InsertLeave * set timeoutlen=1000
-   augroup END
-endif
+let g:airline_powerline_fonts=1
+let g:airline#extensions#tabline#enabled=1
 set guifont=Inconsolata\ for\ Powerline:h15
-let g:Powerline_symbols = 'fancy'
 set encoding=utf-8
 set t_Co=256
 set fillchars+=stl:\ ,stlnc:\
@@ -148,9 +143,6 @@ Plug 'jceb/vim-orgmode'
 nnoremap pp :split ~/todo.org<CR>
 Plug 'tpope/vim-speeddating'
 
-Plug 'mattn/emmet-vim'
-" html creation
-
 Plug 'ChrisPenner/vim-emacs-bindings'
 " ctrl-a, ctrl-e, etc
 
@@ -160,6 +152,13 @@ xmap ga <Plug>(EasyAlign)
 
 " Start interactive EasyAlign for a motion/text object (e.g. gaip)
 nmap ga <Plug>(EasyAlign)
+
+Plug 'mattn/emmet-vim'
+" html creation
+let g:user_emmet_mode='a'
+
+Plug 'chriskempson/vim-tomorrow-theme'
+
 call plug#end()
 "''''''''''''''''''''''''' End plugins
 
@@ -181,7 +180,7 @@ set showtabline=2  " always show the tab bar
 set noshowmode  " powerline shows us what mode we're in, so vim doesn't have to
 set cursorline  " so I don't go searching for my cursor (I still do though)
 set wildmenu  " tab completion in commands
-" set lazyredraw
+set lazyredraw
 set ttyfast
 set showmatch
 set mat=2
@@ -196,14 +195,17 @@ vnoremap <silent> # :call VisualSelection('b')<CR>
 " pasting in visual mode
 xnoremap p pgvy
 " because I like white screens
-highlight Visual term=reverse ctermbg=8 guibg=LightGrey
-highlight DiffChange cterm=None ctermfg=LightMagenta ctermbg=LightRed 
-highlight DiffText cterm=None
+" highlight Visual term=reverse ctermbg=8 guibg=LightGrey
+" highlight DiffChange cterm=None ctermfg=LightMagenta ctermbg=LightRed 
+" highlight DiffText cterm=None
 " Here's a vimdiff to try
 " highlight DiffAdd cterm=none ctermfg=fg ctermbg=Blue gui=none guifg=fg guibg=Blue
 " highlight DiffDelete cterm=none ctermfg=fg ctermbg=Blue gui=none guifg=fg guibg=Blue
 " highlight DiffChange cterm=none ctermfg=fg ctermbg=Blue gui=none guifg=fg guibg=Blue
 " highlight DiffText cterm=none ctermfg=bg ctermbg=White gui=none guifg=bg guibg=White
+set background=light
+colorscheme Tomorrow
+set t_ut=
 
 let mapleader="\<Space>"
 
@@ -267,10 +269,10 @@ au FileType org
     \ nosmartindent
 " set the current file to the working directory
 " au BufEnter * lcd %:p:h
-au BufReadPre,FileReadPre,WinEnter,WinLeave *
-    \ set t_Co=256
-au BufReadPre,FileReadPre,WinEnter,WinLeave * 
-    \ set term=xterm-256color
+" au BufReadPre,FileReadPre,WinEnter,WinLeave *
+"     \ set t_Co=256
+" au BufReadPre,FileReadPre,WinEnter,WinLeave * 
+"     \ set term=xterm-256color
 
 " function to toggle relativenumber
 function! ToggleNumber()
