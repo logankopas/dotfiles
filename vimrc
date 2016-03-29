@@ -6,6 +6,8 @@ if version < 704
 endif
 filetype off
 
+let file_ignore_regex = ['\.pyc$', '\.min\.js$']  
+
 "''''''''''''''''''''''''' Begin plugins
 call plug#begin('~/.vim/plugged')
 
@@ -18,16 +20,46 @@ endif
 " space-g go to definition
 " space-G open doc
 " space-u tag usages (replaces utags, maybe bring it back?)
+let g:ycm_autoclose_preview_window_after_completion=1
+let g:ycm_collect_identifiers_from_tag_files=1
+map <leader>g  :YcmCompleter GoToDefinitionElseDeclaration<CR>
+map <leader>G  :YcmCompleter GetDoc<CR>
+map <leader>u  :YcmCompleter GoToReferences<CR>
+" python support for youcompleteme
+" python with virtualenv support
+py << EOF
+import os
+import sys
+if 'VIRTUAL_ENV' in os.environ:
+    project_base_dir = os.environ['VIRTUAL_ENV']
+    activate_this = os.path.join(project_base_dir, 'bin/activate_this.py')
+    execfile(activate_this, dict(__file__=activate_this))
+EOF
+let python_highlight_all=1
+
+" fuzzyfinder
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': 'yes \| ./install' }
+Plug 'junegunn/fzf.vim'
+" fzf mappings
+let $FZF_DEFAULT_COMMAND='ag -l -g ""'
+noremap <C-b> :Tags<CR>
+noremap <C-p> :FZF -m<CR>
+set rtp+=~/.fzf
 
 Plug 'scrooloose/syntastic'
 Plug 'nvie/vim-flake8'
 " F7 to run 
 
 Plug 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
+
 Plug 'scrooloose/nerdtree'
 Plug 'jistr/vim-nerdtree-tabs'
 " ctrl-n to open
 " <t> to open in tab
+let NERDTreeQuitOnOpen=1
+let NERDTreeIgnore = file_ignore_regex
+map <C-n> :NERDTreeToggle %<CR>
+
 "
 Plug 'kchmck/vim-coffee-script'
 "
@@ -83,16 +115,12 @@ Plug 'mattn/emmet-vim'
 Plug 'ChrisPenner/vim-emacs-bindings'
 " ctrl-a, ctrl-e, etc
 
-" fuzzyfinder
-Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': 'yes \| ./install' }
-Plug 'junegunn/fzf.vim'
 Plug 'junegunn/vim-easy-align'
 " Start interactive EasyAlign in visual mode (e.g. vipga)
 xmap ga <Plug>(EasyAlign)
 
 " Start interactive EasyAlign for a motion/text object (e.g. gaip)
 nmap ga <Plug>(EasyAlign)
-set rtp+=~/.fzf
 call plug#end()
 "''''''''''''''''''''''''' End plugins
 
@@ -114,7 +142,8 @@ set showtabline=2  " always show the tab bar
 set noshowmode  " powerline shows us what mode we're in, so vim doesn't have to
 set cursorline  " so I don't go searching for my cursor (I still do though)
 set wildmenu  " tab completion in commands
-set lazyredraw
+" set lazyredraw
+set ttyfast
 set showmatch
 set mat=2
 set foldenable
@@ -139,30 +168,17 @@ highlight DiffText cterm=None
 
 let mapleader="\<Space>"
 
-"''''''''''''''''''''''''' plugin config
-" YouCompleteMe
-let g:ycm_autoclose_preview_window_after_completion=1
-let g:ycm_collect_identifiers_from_tag_files=1
-map <leader>g  :YcmCompleter GoToDefinitionElseDeclaration<CR>
-map <leader>G  :YcmCompleter GetDoc<CR>
-map <leader>u  :YcmCompleter GoToReferences<CR>
-" python support for youcompleteme
-" python with virtualenv support
-py << EOF
-import os
-import sys
-if 'VIRTUAL_ENV' in os.environ:
-    project_base_dir = os.environ['VIRTUAL_ENV']
-    activate_this = os.path.join(project_base_dir, 'bin/activate_this.py')
-    execfile(activate_this, dict(__file__=activate_this))
-EOF
-let python_highlight_all=1
-
-" NERDTree
-let NERDTreeQuitOnOpen=1
-map <C-n> :NERDTreeToggle %<CR>
 
 " powerline font stuff
+let g:minBufExplForceSyntaxEnable = 1
+if ! has('gui_running')
+   set ttimeoutlen=10
+   augroup FastEscape
+      autocmd!
+      au InsertEnter * set timeoutlen=0
+      au InsertLeave * set timeoutlen=1000
+   augroup END
+endif
 set guifont=Inconsolata\ for\ Powerline:h15
 let g:Powerline_symbols = 'fancy'
 set encoding=utf-8
@@ -224,10 +240,6 @@ nnoremap <leader>sv :source $HOME/dotfiles/vimrc<CR>
 nnoremap tt :TestLast<CR>
 nnoremap tn :TestNearest<CR>
 
-" fzf mappings
-noremap <C-b> :Tags<CR>
-noremap <C-p> :FZF -m<CR>
-
 
 " python files
 au BufNewFile,BufRead *.py
@@ -264,6 +276,10 @@ au FileType org
     \ nosmartindent
 " set the current file to the working directory
 " au BufEnter * lcd %:p:h
+au BufReadPre,FileReadPre,WinEnter,WinLeave *
+    \ set t_Co=256
+au BufReadPre,FileReadPre,WinEnter,WinLeave * 
+    \ set term=xterm-256color
 
 " function to toggle relativenumber
 function! ToggleNumber()
@@ -282,6 +298,7 @@ nnoremap <leader>p :pclose<CR>
 
 " Fix my clumsy fingers
 iabbrev impoer import
+iabbrev )L ):
 
 " Delete trailing white space on save, useful for Python and CoffeeScript ;)
 func! DeleteTrailingWS()

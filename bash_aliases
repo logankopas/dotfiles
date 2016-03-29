@@ -40,3 +40,4 @@ alias cp="rsync"
 
 alias glog='git log --branches --remotes --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold
 blue)<%an>%Creset" --abbrev-commit --no-min-parents --no-max-parents'
+
