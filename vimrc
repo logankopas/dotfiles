@@ -47,10 +47,31 @@ noremap <C-p> :FZF -m<CR>
 set rtp+=~/.fzf
 
 Plug 'scrooloose/syntastic'
+let g:syntastic_python_checkers=['flake8']
+let g:syntastic_flake8_max_line_length='139'
+
 Plug 'nvie/vim-flake8'
 " F7 to run 
 
 Plug 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
+" powerline font stuff
+let g:minBufExplForceSyntaxEnable = 1
+if ! has('gui_running')
+   set ttimeoutlen=10
+   augroup FastEscape
+      autocmd!
+      au InsertEnter * set timeoutlen=0
+      au InsertLeave * set timeoutlen=1000
+   augroup END
+endif
+set guifont=Inconsolata\ for\ Powerline:h15
+let g:Powerline_symbols = 'fancy'
+set encoding=utf-8
+set t_Co=256
+set fillchars+=stl:\ ,stlnc:\
+set term=xterm-256color
+set termencoding=utf-8
+
 
 Plug 'scrooloose/nerdtree'
 Plug 'jistr/vim-nerdtree-tabs'
@@ -62,15 +83,22 @@ map <C-n> :NERDTreeToggle %<CR>
 
 "
 Plug 'kchmck/vim-coffee-script'
-"
+" vim-coffee
+let coffee_compiler='/Users/logankopas/work/regiondb/node_modules/coffee-script/bin/coffee'
+let coffee_make_options='--map'
+
 Plug 'yssl/QFEnter'
 " space-tab to open quickfix in tab
 
 Plug 'sjl/gundo.vim'
 " space-z to open gundo tree
+nnoremap <leader>z :GundoToggle<CR>
+
 
 Plug 'rking/ag.vim'
 " :Ag for search
+nnoremap K :Ag "\b<C-R><C-W>\b"<CR>:cw<CR>
+
 
 Plug 'tpope/vim-repeat'
 " <.> repeats plugin commands
@@ -92,9 +120,20 @@ Plug 'tpope/vim-dispatch'
 
 Plug 'janko-m/vim-test'
 " better test runner, lacks quickfix hotlinking
+let test#strategy = "dispatch"
+" run tests easily
+nnoremap tt :TestLast<CR>
+nnoremap tn :TestNearest<CR>
+
 
 Plug 'terryma/vim-multiple-cursors'
 " self explanatory
+" because it overwrites ALL of my mappings
+let g:multi_cursor_use_default_mapping=0
+let g:multi_cursor_next_key='<C-e>'
+let g:multi_cursor_prev_key='<C-a>'
+let g:multi_cursor_skip_key='<C-x>'
+let g:multi_cursor_quit_key='<Esc>'
 
 Plug 'tpope/vim-abolish'
 " for comprehensive text substitution
@@ -168,49 +207,6 @@ highlight DiffText cterm=None
 
 let mapleader="\<Space>"
 
-
-" powerline font stuff
-let g:minBufExplForceSyntaxEnable = 1
-if ! has('gui_running')
-   set ttimeoutlen=10
-   augroup FastEscape
-      autocmd!
-      au InsertEnter * set timeoutlen=0
-      au InsertLeave * set timeoutlen=1000
-   augroup END
-endif
-set guifont=Inconsolata\ for\ Powerline:h15
-let g:Powerline_symbols = 'fancy'
-set encoding=utf-8
-set t_Co=256
-set fillchars+=stl:\ ,stlnc:\
-set term=xterm-256color
-set termencoding=utf-8
-
-" syntastic
-let g:syntastic_python_checkers=['flake8']
-let g:syntastic_flake8_max_line_length='139'
-
-" gundo
-nnoremap <leader>z :GundoToggle<CR>
-
-" TODO get this to work with dispatch
-nnoremap K :Ag "\b<C-R><C-W>\b"<CR>:cw<CR>
-
-" vim-coffee
-let coffee_compiler='/Users/logankopas/work/regiondb/node_modules/coffee-script/bin/coffee'
-let coffee_make_options='--map'
-
-" vim-test
-let test#strategy = "dispatch"
-
-" multicursor
-" because it overwrites ALL of my mappings
-let g:multi_cursor_use_default_mapping=0
-let g:multi_cursor_next_key='<C-e>'
-let g:multi_cursor_prev_key='<C-a>'
-let g:multi_cursor_skip_key='<C-x>'
-let g:multi_cursor_quit_key='<Esc>'
 "''''''''''''''''''''''''' end plugin config
 
 syntax on
@@ -235,11 +231,6 @@ map <leader>t :tab split<CR>
 " edit vimrc and load it
 nnoremap <leader>ev :vsp $HOME/dotfiles/vimrc<CR> 
 nnoremap <leader>sv :source $HOME/dotfiles/vimrc<CR>
-
-" run tests easily
-nnoremap tt :TestLast<CR>
-nnoremap tn :TestNearest<CR>
-
 
 " python files
 au BufNewFile,BufRead *.py
