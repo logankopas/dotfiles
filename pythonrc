@@ -8,9 +8,9 @@ ENDC = '\033[0m'
 BOLD = '\033[1m'
 UNDERLINE = '\033[4m'
 
-print FAIL + "*"*40 + ENDC
-print WARNING + "Welcome, Logan! :) " + ENDC
-print FAIL + "*"*40 + ENDC
+# print FAIL + "*"*40 + ENDC
+# print WARNING + "Welcome, Logan! :) " + ENDC
+# print FAIL + "*"*40 + ENDC
 
 # enable tab completion
 # yasssss

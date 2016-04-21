@@ -7,6 +7,7 @@ endif
 filetype off
 
 let file_ignore_regex = ['\.pyc$', '\.min\.js$']  
+let mapleader="\<Space>"
 
 "''''''''''''''''''''''''' Begin plugins
 call plug#begin('~/.vim/plugged')
@@ -60,6 +61,7 @@ Plug 'vim-airline/vim-airline-themes'
 " powerline font stuff
 let g:airline_powerline_fonts=1
 let g:airline#extensions#tabline#enabled=1
+let g:airline_theme='bubblegum'
 set guifont=Inconsolata\ for\ Powerline:h15
 set encoding=utf-8
 set t_Co=256
@@ -119,6 +121,7 @@ let test#strategy = "dispatch"
 " run tests easily
 nnoremap tt :TestLast<CR>
 nnoremap tn :TestNearest<CR>
+nnoremap tf :TestFile<CR>
 
 
 Plug 'terryma/vim-multiple-cursors'
@@ -133,10 +136,12 @@ let g:multi_cursor_quit_key='<Esc>'
 Plug 'tpope/vim-abolish'
 " for comprehensive text substitution
 
-Plug 'jeetsukumaran/vim-buffergator'
+Plug 'logan-ncc/vim-buffergator'
 " for using buffers instead of tabs
+let g:buffergator_suppress_keymaps=1
 nnoremap gt :bnext<CR>
 nnoremap gT :bprev<CR>
+nnoremap <leader>b :BuffergatorToggle<CR>
 
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'jceb/vim-orgmode'
@@ -158,6 +163,16 @@ Plug 'mattn/emmet-vim'
 let g:user_emmet_mode='a'
 
 Plug 'chriskempson/vim-tomorrow-theme'
+
+Plug 'ConradIrwin/vim-bracketed-paste'
+" allows you to <c-v> without setting paste
+
+Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
+" let's try out snippets for a bit
+let g:UltiSnipsExpandTrigger="<C-y>."
+let g:UltiSnipsJumpForwardTrigger="<C-y>e"
+let g:UltiSnipsJumpBackwardTrigger="<C-y>a"
 
 call plug#end()
 "''''''''''''''''''''''''' End plugins
@@ -207,7 +222,12 @@ set background=light
 colorscheme Tomorrow
 set t_ut=
 
-let mapleader="\<Space>"
+" Persistent undo
+set undofile
+set undodir=$HOME/.vim/undo
+
+set undolevels=1000
+set undoreload=10000
 
 "''''''''''''''''''''''''' end plugin config
 
@@ -233,6 +253,12 @@ map <leader>t :tab split<CR>
 " edit vimrc and load it
 nnoremap <leader>ev :vsp $HOME/dotfiles/vimrc<CR> 
 nnoremap <leader>sv :source $HOME/dotfiles/vimrc<CR>
+
+" practice not using arrows
+nnoremap <Right> :vertical resize +5<CR>
+nnoremap <Left> :vertical resize -5<CR>
+nnoremap <Up> :resize +5<CR>
+nnoremap <Down> :resize -5<CR>
 
 " python files
 au BufNewFile,BufRead *.py
@@ -267,6 +293,8 @@ au FileType org
     \ setlocal noautoindent
     \ nocindent
     \ nosmartindent
+au BufWritePost,FileWritePost *.tex
+    \ Make
 " set the current file to the working directory
 " au BufEnter * lcd %:p:h
 " au BufReadPre,FileReadPre,WinEnter,WinLeave *

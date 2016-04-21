@@ -40,6 +40,8 @@ export THEFUCK_ALTER_HISTORY=false
 # cool shortcuts
 [[ -e ~/.bash_aliases ]] && . ~/.bash_aliases
 
+[[ -e ~/dotfiles/j.sh ]] && . ~/dotfiles/j.sh
+
 export EDITOR="vi"
 
 # for when django misbehaves
@@ -117,4 +119,17 @@ fd() {
 
 gitroot(){
     echo `git rev-parse --show-toplevel`
+}
+rmsync() {
+    mkdir empty && rsync -r --delete empty/ $1 && rmdir $1 
+}
+rebuild_venv(){
+    . ~/work/regiondb/venv/bin/activate
+    pip freeze | xargs pip uninstall -y
+    pip install -r ~/work/regiondb/requirements/dev.txt
+    pip install pudb bpython django_extensions
+}
+mkcd(){
+    mkdir -p $1
+    cd $1
 }
