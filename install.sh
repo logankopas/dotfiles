@@ -56,4 +56,15 @@ git clone https://github.com/gmarik/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 echo "Loading Profile"
 source ~/.bash_profile
 
+# Neovim
+target="${HOME}/.config/nvim"
+if [ -L $target ]; then
+    rm $target
+fi
+if [ -d $target ]; then
+    echo "*** $target exists, cowardly refusing to overwrite it."
+else
+    ln -s "${dotfiles}/nvim" "$target"
+    echo -e "Linked $target"
+fi
 

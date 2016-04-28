@@ -127,7 +127,7 @@ rebuild_venv(){
     . ~/work/regiondb/venv/bin/activate
     pip freeze | xargs pip uninstall -y
     pip install -r ~/work/regiondb/requirements/dev.txt
-    pip install pudb bpython django_extensions
+    pip install pudb bpython django_extensions neovim
 }
 mkcd(){
     mkdir -p $1
