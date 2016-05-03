@@ -1,3 +1,5 @@
+" set verbosefile=./vim.log
+" set verbose=2
 "vein Scripts-----------------------------
 if &compatible
   set nocompatible               " Be iMproved
@@ -50,7 +52,6 @@ set fillchars+=stl:\ ,stlnc:\
 set termencoding=utf-8
 
 call dein#add('morhetz/gruvbox')
-
 
 call dein#add('scrooloose/nerdtree')
 call dein#add('jistr/vim-nerdtree-tabs')
@@ -170,9 +171,16 @@ let g:limelight_conceal_guifg = '#777777'
 nnoremap <leader>l :Limelight!!<CR>
 
 call dein#add('Shougo/deoplete.nvim')
-call dein#add('zchee/deoplete-jedi')
+call dein#add('Shougo/neoinclude.vim')
+call dein#add('Shougo/neco-syntax')
+call dein#add('Shougo/neco-vim')
+" call dein#add('zchee/deoplete-jedi')
+
 let g:deoplete#enable_at_startup = 1
-let g:deoplete#sources#jedi#show_docstring = 1
+let g:deoplete#sources = {}
+let g:deoplete#sources._ = ['buffer', 'file', 'member']
+let g:deoplete#sources.python = ['omni', 'buffer', 'tag', 'member', 'file']
+
 
 " <Tab> completion:
 " 1. If popup menu is visible, select and insert next item
@@ -197,6 +205,9 @@ function! s:is_whitespace() "{{{
 endfunction
 
 "''''''''''''''''''''''''' End plugins
+
+set completeopt=menuone,preview
+
 " Required:
 call dein#end()
 
@@ -433,7 +444,7 @@ nnoremap xk :.s/\(.*\)/\=system('a='."https:\/\/api.stackexchange.com\/2.2\/".';
 nnoremap <leader>ev :vsp $HOME/dotfiles/nvim/init.vim<CR> 
 nnoremap <leader>sv :source $HOME/dotfiles/nvim/init.vim<CR>
 
-imap <C-k>     <Plug>(neosnippet_expand_or_jump)
+inoremap <C-k>     <Plug>(neosnippet_expand_or_jump)
 snoremap <C-k>     <Plug>(neosnippet_expand_or_jump)
 xnoremap <C-k>     <Plug>(neosnippet_expand_target)
 
@@ -441,3 +452,8 @@ if has('nvim')
   " Hack to get C-h working in NeoVim
   nmap <BS> <C-W>h
 endif
+
+tmap <C-h> <C-\><C-n>:TmuxNavigateLeft<CR>
+tmap <C-j> <C-\><C-n>:TmuxNavigateDown<CR>
+tmap <C-k> <C-\><C-n>:TmuxNavigateUp<CR>
+tmap <C-l> <C-\><C-n>:TmuxNavigateRight<CR>
