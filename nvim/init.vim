@@ -27,7 +27,7 @@ call dein#add('junegunn/fzf.vim')
 " fzf mappings
 let $FZF_DEFAULT_COMMAND='ag -l -g ""'
 noremap <C-b> :Tags<CR>
-noremap <C-p> :FZF -m<CR>
+" noremap <C-p> :FZF -m<CR>
 set rtp+=~/.fzf
 let g:fzf_command_prefix = 'Fzf'
 
@@ -154,8 +154,15 @@ call dein#add('hynek/vim-python-pep8-indent')
 
 call dein#add('Yggdroot/indentLine')
 
+call dein#add('Shougo/vimproc.vim', {'build': 'make'})
 call dein#add('Shougo/neosnippet.vim')
 call dein#add('Shougo/neosnippet-snippets')
+call dein#add('Shougo/unite.vim')
+call unite#filters#matcher_default#use(['matcher_fuzzy'])
+nnoremap UU :Unite<CR>
+nnoremap UB :Unite -quick-match buffer<CR>
+nnoremap UF :Unite file<CR>
+nnoremap <C-p> :Unite file_rec/async<CR>
 
 call dein#add('mhinz/vim-startify')
 
@@ -170,16 +177,20 @@ let g:limelight_conceal_guifg = '#777777'
 
 nnoremap <leader>l :Limelight!!<CR>
 
-call dein#add('Shougo/deoplete.nvim')
-call dein#add('Shougo/neoinclude.vim')
-call dein#add('Shougo/neco-syntax')
-call dein#add('Shougo/neco-vim')
-" call dein#add('zchee/deoplete-jedi')
 
-let g:deoplete#enable_at_startup = 1
-let g:deoplete#sources = {}
-let g:deoplete#sources._ = ['buffer', 'file', 'member']
-let g:deoplete#sources.python = ['omni', 'buffer', 'tag', 'member', 'file']
+call dein#add('zchee/deoplete-jedi')
+call dein#add('davidhalter/jedi-vim')
+call dein#add('ervandew/supertab')
+
+let g:jedi#completions_enabled = 0
+let g:jedi#goto_command = "<leader>g"
+let g:jedi#goto_assignments_command = "<leader>a"
+let g:jedi#goto_definitions_command = "L"
+let g:jedi#documentation_command = "<leader>G"
+let g:jedi#usages_command = "<leader>u"
+let g:jedi#completions_command = "<C-Space>"
+let g:jedi#rename_command = "<leader>r"
+let g:SuperTabDefaultCompletionType = "<C-n>"
 
 
 " <Tab> completion:
@@ -187,15 +198,15 @@ let g:deoplete#sources.python = ['omni', 'buffer', 'tag', 'member', 'file']
 " 2. Otherwise, if within a snippet, jump to next input
 " 3. Otherwise, if preceding chars are whitespace, insert tab char
 " 4. Otherwise, start manual autocomplete
-imap <silent><expr><Tab> pumvisible() ? "\<C-n>"
-	\ : (neosnippet#jumpable() ? "\<Plug>(neosnippet_jump)"
-	\ : (<SID>is_whitespace() ? "\<Tab>"
-	\ : deoplete#mappings#manual_complete()))
-
-smap <silent><expr><Tab> pumvisible() ? "\<C-n>"
-	\ : (neosnippet#jumpable() ? "\<Plug>(neosnippet_jump)"
-	\ : (<SID>is_whitespace() ? "\<Tab>"
-	\ : deoplete#mappings#manual_complete()))
+" imap <silent><expr><Tab> pumvisible() ? "\<C-n>"
+" 	\ : (neosnippet#jumpable() ? "\<Plug>(neosnippet_jump)"
+" 	\ : (<SID>is_whitespace() ? "\<Tab>"
+" 	\ : deoplete#mappings#manual_complete()))
+" 
+" smap <silent><expr><Tab> pumvisible() ? "\<C-n>"
+" 	\ : (neosnippet#jumpable() ? "\<Plug>(neosnippet_jump)"
+" 	\ : (<SID>is_whitespace() ? "\<Tab>"
+" 	\ : deoplete#mappings#manual_complete()))
 
 inoremap <expr><S-Tab>  pumvisible() ? "\<C-p>" : "\<C-h>"
 
@@ -334,6 +345,8 @@ au FileType org
     \ nosmartindent
 au BufWritePost,FileWritePost *.tex
     \ Make
+" get rid of the __doc__ buffer after use
+au BufWinEnter '__doc__' setlocal bufhidden=delete
 
 " function to toggle relativenumber
 function! ToggleNumber()
@@ -453,6 +466,7 @@ if has('nvim')
   nmap <BS> <C-W>h
 endif
 
+tmap <esc> <C-\><C-n>
 tmap <C-h> <C-\><C-n>:TmuxNavigateLeft<CR>
 tmap <C-j> <C-\><C-n>:TmuxNavigateDown<CR>
 tmap <C-k> <C-\><C-n>:TmuxNavigateUp<CR>
