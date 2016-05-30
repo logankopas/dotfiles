@@ -38,6 +38,8 @@ if 'VIRTUAL_ENV' in os.environ:
 EOF
 let python_highlight_all=1
 
+Plug 'danro/rename.vim'
+
 " fuzzyfinder
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': 'yes \| ./install' }
 Plug 'junegunn/fzf.vim'
@@ -174,6 +176,19 @@ let g:UltiSnipsExpandTrigger="<C-y>."
 let g:UltiSnipsJumpForwardTrigger="<C-y>e"
 let g:UltiSnipsJumpBackwardTrigger="<C-y>a"
 
+Plug 'Yggdroot/indentLine'
+
+Plug 'mhinz/vim-startify'
+Plug 'junegunn/limelight.vim'
+let g:limelight_conceal_ctermfg = 'gray'
+let g:limelight_conceal_ctermfg = 240
+
+let g:limelight_conceal_guifg = 'DarkGray'
+let g:limelight_conceal_guifg = '#777777'
+nnoremap <leader>l :Limelight!!
+
+Plug 'ryanoasis/vim-devicons'
+
 call plug#end()
 "''''''''''''''''''''''''' End plugins
 
@@ -295,12 +310,9 @@ au FileType org
     \ nosmartindent
 au BufWritePost,FileWritePost *.tex
     \ Make
-" set the current file to the working directory
-" au BufEnter * lcd %:p:h
-" au BufReadPre,FileReadPre,WinEnter,WinLeave *
-"     \ set t_Co=256
-" au BufReadPre,FileReadPre,WinEnter,WinLeave * 
-"     \ set term=xterm-256color
+au BufWinEnter '__doc__' setlocal bufhidden=delete
+au BufWinLeave,WinLeave * setlocal nocursorline
+au BufWinEnter,WinEnter * setlocal cursorline
 
 " function to toggle relativenumber
 function! ToggleNumber()
@@ -405,3 +417,65 @@ endfunction
 " XKCD jokes
 nnoremap xk :.s/\(.*\)/\=system('a='."https:\/\/api.stackexchange.com\/2.2\/".'; q=`curl -s -G --data-urlencode "q='.submatch(1).'" --compressed "'."${a}search\/advanced?order=desc&sort=relevance&site=stackoverflow".'" \| python -c "'."exec(\\\"import sys \\nimport json\\nprint(json.loads(''.join(sys.stdin.readlines()))['items'][0]['question_id'])\\\")".'"`; curl -s --compressed "'."${a}questions\/$q\/answers?order=desc&sort=votes&site=stackoverflow&filter=withbody".'" \| python -c "'."exec(\\\"import sys\\nimport json\\nprint(json.loads(''.join(sys.stdin.readlines()))['items'][0]['body']).encode('utf8')\\\")".'"')/<CR>
 
+function s:Kwbd(kwbdStage)
+  if(a:kwbdStage == 1)
+    if(!buflisted(winbufnr(0)))
+      bd!
+      return
+    endif
+    let s:kwbdBufNum = bufnr("%")
+    let s:kwbdWinNum = winnr()
+    windo call s:Kwbd(2)
+    execute s:kwbdWinNum . 'wincmd w'
+    let s:buflistedLeft = 0
+    let s:bufFinalJump = 0
+    let l:nBufs = bufnr("$")
+    let l:i = 1
+    while(l:i <= l:nBufs)
+      if(l:i != s:kwbdBufNum)
+        if(buflisted(l:i))
+          let s:buflistedLeft = s:buflistedLeft + 1
+        else
+          if(bufexists(l:i) && !strlen(bufname(l:i)) && !s:bufFinalJump)
+            let s:bufFinalJump = l:i
+          endif
+        endif
+      endif
+      let l:i = l:i + 1
+    endwhile
+    if(!s:buflistedLeft)
+      if(s:bufFinalJump)
+        windo if(buflisted(winbufnr(0))) | execute "b! " . s:bufFinalJump | endif
+      else
+        enew
+        let l:newBuf = bufnr("%")
+        windo if(buflisted(winbufnr(0))) | execute "b! " . l:newBuf | endif
+      endif
+      execute s:kwbdWinNum . 'wincmd w'
+    endif
+    if(buflisted(s:kwbdBufNum) || s:kwbdBufNum == bufnr("%"))
+      execute "bd! " . s:kwbdBufNum
+    endif
+    if(!s:buflistedLeft)
+      set buflisted
+      set bufhidden=delete
+        set buftype=
+      setlocal noswapfile
+    endif
+  else
+    if(bufnr("%") == s:kwbdBufNum)
+      let prevbufvar = bufnr("#")
+      if(prevbufvar > 0 && buflisted(prevbufvar) && prevbufvar != s:kwbdBufNum)
+        b #
+      else
+        bn
+      endif
+    endif
+  endif
+endfunction
+
+command! Kwbd call s:Kwbd(1)
+nnoremap bd <Plug>Kwbd
+nnoremap <silent> <Plug>Kwbd :<C-u>Kwbd<CR>
+
+inoremap # X<c-h>#

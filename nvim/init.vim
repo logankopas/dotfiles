@@ -33,7 +33,7 @@ call dein#add('junegunn/fzf.vim')
 " fzf mappings
 let $FZF_DEFAULT_COMMAND='ag -l -g ""'
 noremap <C-b> :Tags<CR>
-" noremap <C-p> :FZF -m<CR>
+noremap <C-p> :FZF -m<CR>
 set rtp+=~/.fzf
 let g:fzf_command_prefix = 'Fzf'
 
@@ -169,7 +169,7 @@ call unite#filters#matcher_default#use(['matcher_fuzzy'])
 nnoremap UU :Unite<CR>
 nnoremap UB :Unite -quick-match buffer<CR>
 nnoremap UF :Unite file<CR>
-nnoremap <C-p> :Unite file_rec<CR>
+" nnoremap <C-p> :Unite file_rec<CR>
 
 call dein#add('mhinz/vim-startify')
 
