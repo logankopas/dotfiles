@@ -21,6 +21,12 @@ call dein#add('Shougo/dein.vim')
 " Plugins
 call dein#add('vim-scripts/indentpython.vim')
 
+call dein#add('danro/rename.vim')
+
+call dein#add('Superbil/llvm.vim')
+
+call dein#add('elixir-lang/vim-elixir')
+
 " fuzzyfinder
 call dein#add('junegunn/fzf', { 'dir': '~/.fzf', 'do': 'yes \| ./install'})
 call dein#add('junegunn/fzf.vim')
@@ -33,11 +39,10 @@ let g:fzf_command_prefix = 'Fzf'
 
 call dein#add('scrooloose/syntastic')
 let g:syntastic_python_checkers=['flake8']
-let g:syntastic_flake8_max_line_length='139'
+let g:syntastic_flake8_max_line_length='119'
 
 call dein#add('nvie/vim-flake8')
 " F7 to run 
-
 
 call dein#add('vim-airline/vim-airline')
 call dein#add('vim-airline/vim-airline-themes')
@@ -45,7 +50,8 @@ call dein#add('vim-airline/vim-airline-themes')
 let g:airline_powerline_fonts=1
 let g:airline#extensions#tabline#enabled=1
 let g:airline_theme='bubblegum'
-set guifont=Inconsolata\ for\ Powerline:h15
+"set guifont=Inconsolata\ for\ Powerline:h15
+set guifont=Droid\ Sans\ Mono\ for\ Powerline\ Nerd\ Font\ Complete.otf:h11
 set encoding=utf-8
 set t_Co=256
 set fillchars+=stl:\ ,stlnc:\
@@ -60,6 +66,7 @@ call dein#add('jistr/vim-nerdtree-tabs')
 let NERDTreeQuitOnOpen=1
 let NERDTreeIgnore = file_ignore_regex
 map <C-n> :NERDTreeToggle %<CR>
+map <C-n>. :NERDTree %<CR>
 
 "
 call dein#add('kchmck/vim-coffee-script')
@@ -162,7 +169,7 @@ call unite#filters#matcher_default#use(['matcher_fuzzy'])
 nnoremap UU :Unite<CR>
 nnoremap UB :Unite -quick-match buffer<CR>
 nnoremap UF :Unite file<CR>
-nnoremap <C-p> :Unite file_rec/async<CR>
+nnoremap <C-p> :Unite file_rec<CR>
 
 call dein#add('mhinz/vim-startify')
 
@@ -178,11 +185,11 @@ let g:limelight_conceal_guifg = '#777777'
 nnoremap <leader>l :Limelight!!<CR>
 
 
-call dein#add('zchee/deoplete-jedi')
+" call dein#add('zchee/deoplete-jedi')
 call dein#add('davidhalter/jedi-vim')
 call dein#add('ervandew/supertab')
 
-let g:jedi#completions_enabled = 0
+let g:jedi#completions_enabled = 1
 let g:jedi#goto_command = "<leader>g"
 let g:jedi#goto_assignments_command = "<leader>a"
 let g:jedi#goto_definitions_command = "L"
@@ -192,6 +199,7 @@ let g:jedi#completions_command = "<C-Space>"
 let g:jedi#rename_command = "<leader>r"
 let g:SuperTabDefaultCompletionType = "<C-n>"
 
+call dein#add('ryanoasis/vim-devicons')
 
 " <Tab> completion:
 " 1. If popup menu is visible, select and insert next item
@@ -238,14 +246,13 @@ set nu
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
-set textwidth=139
+set textwidth=120
 set expandtab
-set autoindent
 set fileformat=unix  " because screw windows
 set laststatus=2  " makes powerline work
 set showtabline=2  " always show the tab bar
 set noshowmode  " powerline shows us what mode we're in, so vim doesn't have to
-set cursorline  " so I don't go searching for my cursor (I still do though)
+" set cursorline  " so I don't go searching for my cursor (I still do though)
 set wildmenu  " tab completion in commands
 set lazyredraw
 set ttyfast
@@ -315,9 +322,8 @@ au BufNewFile,BufRead *.py
     \ set tabstop=4
     \ softtabstop=4
     \ shiftwidth=4
-    \ textwidth=139
+    \ textwidth=120
     \ expandtab
-    \ autoindent
     \ fileformat=unix
     \ foldmethod=indent
 " this is so I can use my testrunners
@@ -347,6 +353,11 @@ au BufWritePost,FileWritePost *.tex
     \ Make
 " get rid of the __doc__ buffer after use
 au BufWinEnter '__doc__' setlocal bufhidden=delete
+au BufWinLeave,WinLeave * setlocal nocursorline
+au BufWinEnter,WinEnter * setlocal cursorline
+augroup filetype
+    au! BufRead,BufNewFile *.ll     set filetype=llvm
+augroup END
 
 " function to toggle relativenumber
 function! ToggleNumber()
@@ -451,7 +462,71 @@ endfunction
 " XKCD jokes
 nnoremap xk :.s/\(.*\)/\=system('a='."https:\/\/api.stackexchange.com\/2.2\/".'; q=`curl -s -G --data-urlencode "q='.submatch(1).'" --compressed "'."${a}search\/advanced?order=desc&sort=relevance&site=stackoverflow".'" \| python -c "'."exec(\\\"import sys \\nimport json\\nprint(json.loads(''.join(sys.stdin.readlines()))['items'][0]['question_id'])\\\")".'"`; curl -s --compressed "'."${a}questions\/$q\/answers?order=desc&sort=votes&site=stackoverflow&filter=withbody".'" \| python -c "'."exec(\\\"import sys\\nimport json\\nprint(json.loads(''.join(sys.stdin.readlines()))['items'][0]['body']).encode('utf8')\\\")".'"')/<CR>
 
+" http://vim.wikia.com/wiki/Deleting_a_buffer_without_closing_the_window
+"here is a more exotic version of my original Kwbd script
+"delete the buffer; keep windows; create a scratch buffer if no buffers left
+function s:Kwbd(kwbdStage)
+  if(a:kwbdStage == 1)
+    if(!buflisted(winbufnr(0)))
+      bd!
+      return
+    endif
+    let s:kwbdBufNum = bufnr("%")
+    let s:kwbdWinNum = winnr()
+    windo call s:Kwbd(2)
+    execute s:kwbdWinNum . 'wincmd w'
+    let s:buflistedLeft = 0
+    let s:bufFinalJump = 0
+    let l:nBufs = bufnr("$")
+    let l:i = 1
+    while(l:i <= l:nBufs)
+      if(l:i != s:kwbdBufNum)
+        if(buflisted(l:i))
+          let s:buflistedLeft = s:buflistedLeft + 1
+        else
+          if(bufexists(l:i) && !strlen(bufname(l:i)) && !s:bufFinalJump)
+            let s:bufFinalJump = l:i
+          endif
+        endif
+      endif
+      let l:i = l:i + 1
+    endwhile
+    if(!s:buflistedLeft)
+      if(s:bufFinalJump)
+        windo if(buflisted(winbufnr(0))) | execute "b! " . s:bufFinalJump | endif
+      else
+        enew
+        let l:newBuf = bufnr("%")
+        windo if(buflisted(winbufnr(0))) | execute "b! " . l:newBuf | endif
+      endif
+      execute s:kwbdWinNum . 'wincmd w'
+    endif
+    if(buflisted(s:kwbdBufNum) || s:kwbdBufNum == bufnr("%"))
+      execute "bd! " . s:kwbdBufNum
+    endif
+    if(!s:buflistedLeft)
+      set buflisted
+      set bufhidden=delete
+      set buftype=
+      setlocal noswapfile
+    endif
+  else
+    if(bufnr("%") == s:kwbdBufNum)
+      let prevbufvar = bufnr("#")
+      if(prevbufvar > 0 && buflisted(prevbufvar) && prevbufvar != s:kwbdBufNum)
+        b #
+      else
+        bn
+      endif
+    endif
+  endif
+endfunction
 
+command! Kwbd call s:Kwbd(1)
+nnoremap <silent> <Plug>Kwbd :<C-u>Kwbd<CR>
+
+" Create a mapping (e.g. in your .vimrc) like this:
+nmap bd <Plug>Kwbd
 
 " edit vimrc and load it
 nnoremap <leader>ev :vsp $HOME/dotfiles/nvim/init.vim<CR> 
@@ -471,3 +546,5 @@ tmap <C-h> <C-\><C-n>:TmuxNavigateLeft<CR>
 tmap <C-j> <C-\><C-n>:TmuxNavigateDown<CR>
 tmap <C-k> <C-\><C-n>:TmuxNavigateUp<CR>
 tmap <C-l> <C-\><C-n>:TmuxNavigateRight<CR>
+
+inoremap # X<c-h>#

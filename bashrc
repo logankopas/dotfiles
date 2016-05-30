@@ -126,7 +126,7 @@ rmsync() {
 rebuild_venv(){
     . ~/work/regiondb/venv/bin/activate
     pip freeze | xargs pip uninstall -y
-    pip install -r ~/work/regiondb/requirements/dev.txt
+    env "CFLAGS=-I/usr/local/include -L/usr/local/lib" pip install -r ~/work/regiondb/requirements/dev.txt
     pip install pudb bpython django_extensions neovim
 }
 mkcd(){
