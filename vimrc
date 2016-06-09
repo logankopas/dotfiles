@@ -79,6 +79,7 @@ Plug 'jistr/vim-nerdtree-tabs'
 let NERDTreeQuitOnOpen=1
 let NERDTreeIgnore = file_ignore_regex
 map <C-n> :NERDTreeToggle %<CR>
+map <C-n>. :NERDTree %<CR>
 
 "
 Plug 'kchmck/vim-coffee-script'
@@ -138,6 +139,8 @@ let g:multi_cursor_quit_key='<Esc>'
 Plug 'tpope/vim-abolish'
 " for comprehensive text substitution
 
+Plug 'tpope/vim-sensible'
+
 Plug 'logan-ncc/vim-buffergator'
 " for using buffers instead of tabs
 let g:buffergator_suppress_keymaps=1
@@ -180,14 +183,21 @@ Plug 'Yggdroot/indentLine'
 
 Plug 'mhinz/vim-startify'
 Plug 'junegunn/limelight.vim'
-let g:limelight_conceal_ctermfg = 'gray'
-let g:limelight_conceal_ctermfg = 240
+" let g:limelight_conceal_ctermfg = 'gray'
+" let g:limelight_conceal_ctermfg = 240
+" 
+" let g:limelight_conceal_guifg = 'DarkGray'
+" let g:limelight_conceal_guifg = '#777777'
+let g:limelight_default_coefficient = 0.7
 
-let g:limelight_conceal_guifg = 'DarkGray'
-let g:limelight_conceal_guifg = '#777777'
-nnoremap <leader>l :Limelight!!
+nnoremap <leader>l :Limelight!!<CR>
 
 Plug 'ryanoasis/vim-devicons'
+
+Plug 'godlygeek/tabular'
+Plug 'plasticboy/vim-markdown'
+
+Plug 'tpope/vim-fugitive'
 
 call plug#end()
 "''''''''''''''''''''''''' End plugins
@@ -417,6 +427,9 @@ endfunction
 " XKCD jokes
 nnoremap xk :.s/\(.*\)/\=system('a='."https:\/\/api.stackexchange.com\/2.2\/".'; q=`curl -s -G --data-urlencode "q='.submatch(1).'" --compressed "'."${a}search\/advanced?order=desc&sort=relevance&site=stackoverflow".'" \| python -c "'."exec(\\\"import sys \\nimport json\\nprint(json.loads(''.join(sys.stdin.readlines()))['items'][0]['question_id'])\\\")".'"`; curl -s --compressed "'."${a}questions\/$q\/answers?order=desc&sort=votes&site=stackoverflow&filter=withbody".'" \| python -c "'."exec(\\\"import sys\\nimport json\\nprint(json.loads(''.join(sys.stdin.readlines()))['items'][0]['body']).encode('utf8')\\\")".'"')/<CR>
 
+" http://vim.wikia.com/wiki/Deleting_a_buffer_without_closing_the_window
+"here is a more exotic version of my original Kwbd script
+"delete the buffer; keep windows; create a scratch buffer if no buffers left
 function s:Kwbd(kwbdStage)
   if(a:kwbdStage == 1)
     if(!buflisted(winbufnr(0)))
@@ -459,7 +472,7 @@ function s:Kwbd(kwbdStage)
     if(!s:buflistedLeft)
       set buflisted
       set bufhidden=delete
-        set buftype=
+      set buftype=
       setlocal noswapfile
     endif
   else
@@ -475,7 +488,15 @@ function s:Kwbd(kwbdStage)
 endfunction
 
 command! Kwbd call s:Kwbd(1)
-nnoremap bd <Plug>Kwbd
 nnoremap <silent> <Plug>Kwbd :<C-u>Kwbd<CR>
 
+" debugger
+nnoremap bp Oimport pudb; pu.db<C-c>
+
+" Create a mapping (e.g. in your .vimrc) like this:
+nmap bd <Plug>Kwbd
+
 inoremap # X<c-h>#
+set cinkeys-=0#
+set indentkeys-=0#
+set incsearch

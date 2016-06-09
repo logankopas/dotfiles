@@ -19,7 +19,6 @@ call dein#begin(expand('/Users/logankopas/git/dein'))
 call dein#add('Shougo/dein.vim')
 
 " Plugins
-call dein#add('vim-scripts/indentpython.vim')
 
 call dein#add('danro/rename.vim')
 
@@ -227,6 +226,7 @@ endfunction
 
 set completeopt=menuone,preview
 
+call dein#add('vim-scripts/indentpython.vim')
 " Required:
 call dein#end()
 
@@ -547,4 +547,7 @@ tmap <C-j> <C-\><C-n>:TmuxNavigateDown<CR>
 tmap <C-k> <C-\><C-n>:TmuxNavigateUp<CR>
 tmap <C-l> <C-\><C-n>:TmuxNavigateRight<CR>
 
-inoremap # X<c-h>#
+inoremap # X<C-h>#
+set cinkeys-=0#
+set indentkeys-=0#
+set incsearch

@@ -5,6 +5,11 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
+# log every command to ~/.logs
+# this isn't working :(
+export PROMPT_COMMAND='if [ "$(id -u)" -ne 0 ]; then echo "$(date "+%Y-%m-%d.%H:%M:%S") $(pwd) $(history 1)" >> ~/.logs/bash-history-$(date "+%Y-%m-%d").log; fi'
+
+
 # from github mrzool/bash-sensible
 # pretty cool repo, there's some great settings in there,
 # but needs the latest bash to use them all
@@ -132,4 +137,9 @@ rebuild_venv(){
 mkcd(){
     mkdir -p $1
     cd $1
+}
+start_ngrok() {
+URL=`curl http://localhost:4040/api/tunnels | jq '.tunnels | .[0] | .public_url' | tail -1`;
+echo starting ngrok with url: $URL ;
+sed -e"s^TWILIO_URL_PREFIX =.*# logan keep this updated^TWILIO_URL_PREFIX = $URL  # logan keep this updated^g" -i".orig" ~/work/regiondb/regiondb/deploy_settings/local_override.py;
 }
