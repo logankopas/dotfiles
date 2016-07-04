@@ -97,8 +97,9 @@ nnoremap <leader>z :GundoToggle<CR>
 
 Plug 'rking/ag.vim'
 " :Ag for search
-nnoremap K :Ag "\b<C-R><C-W>\b"<CR>:cw<CR>
+nnoremap K :Ag! "\b<C-R><C-W>\b"<CR>:cw<CR>
 
+ca Ag Ag!
 
 Plug 'tpope/vim-repeat'
 " <.> repeats plugin commands
@@ -199,6 +200,10 @@ Plug 'plasticboy/vim-markdown'
 
 Plug 'tpope/vim-fugitive'
 
+Plug 'tweekmonster/django-plus.vim'
+Plug 'tweekmonster/braceless.vim'
+au FileType python BracelessEnable +indent
+
 call plug#end()
 "''''''''''''''''''''''''' End plugins
 
@@ -273,7 +278,6 @@ if has("mac") || has("macunix")
   vmap <D-j> <M-j>
   vmap <D-k> <M-k>
 endif
-map <leader>t :tab split<CR>
 
 " edit vimrc and load it
 nnoremap <leader>ev :vsp $HOME/dotfiles/vimrc<CR> 
@@ -311,6 +315,7 @@ au BufWritePost,FileWritePost *.coffee
 au FileType make 
     \ set noexpandtab
     \ shiftwidth=8
+    \ tabstop=8
     \ softtabstop=0
 au FileType org
     \ let maplocalleader='\'
@@ -318,6 +323,7 @@ au FileType org
     \ setlocal noautoindent
     \ nocindent
     \ nosmartindent
+au FileType gitcommit set tw=72
 au BufWritePost,FileWritePost *.tex
     \ Make
 au BufWinEnter '__doc__' setlocal bufhidden=delete
@@ -425,7 +431,7 @@ endfunction
 " :argdo update
 
 " XKCD jokes
-nnoremap xk :.s/\(.*\)/\=system('a='."https:\/\/api.stackexchange.com\/2.2\/".'; q=`curl -s -G --data-urlencode "q='.submatch(1).'" --compressed "'."${a}search\/advanced?order=desc&sort=relevance&site=stackoverflow".'" \| python -c "'."exec(\\\"import sys \\nimport json\\nprint(json.loads(''.join(sys.stdin.readlines()))['items'][0]['question_id'])\\\")".'"`; curl -s --compressed "'."${a}questions\/$q\/answers?order=desc&sort=votes&site=stackoverflow&filter=withbody".'" \| python -c "'."exec(\\\"import sys\\nimport json\\nprint(json.loads(''.join(sys.stdin.readlines()))['items'][0]['body']).encode('utf8')\\\")".'"')/<CR>
+nnoremap <leader>xk :.s/\(.*\)/\=system('a='."https:\/\/api.stackexchange.com\/2.2\/".'; q=`curl -s -G --data-urlencode "q='.submatch(1).'" --compressed "'."${a}search\/advanced?order=desc&sort=relevance&site=stackoverflow".'" \| python -c "'."exec(\\\"import sys \\nimport json\\nprint(json.loads(''.join(sys.stdin.readlines()))['items'][0]['question_id'])\\\")".'"`; curl -s --compressed "'."${a}questions\/$q\/answers?order=desc&sort=votes&site=stackoverflow&filter=withbody".'" \| python -c "'."exec(\\\"import sys\\nimport json\\nprint(json.loads(''.join(sys.stdin.readlines()))['items'][0]['body']).encode('utf8')\\\")".'"')/<CR>
 
 " http://vim.wikia.com/wiki/Deleting_a_buffer_without_closing_the_window
 "here is a more exotic version of my original Kwbd script
@@ -500,3 +506,15 @@ inoremap # X<c-h>#
 set cinkeys-=0#
 set indentkeys-=0#
 set incsearch
+set nojoinspaces
+
+" Testing envs
+function TestDB(db)
+  if(a:db ==? 'm')
+    let $TEST_DATABASE='mysql'
+  elseif(a:db ==? 'p')
+    let $TEST_DATABASE='postgres'
+  else
+    let $TEST_DATABASE='sqlite'
+  endif
+endfunction

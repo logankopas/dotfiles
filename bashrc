@@ -47,6 +47,14 @@ export THEFUCK_ALTER_HISTORY=false
 
 [[ -e ~/dotfiles/j.sh ]] && . ~/dotfiles/j.sh
 
+# autocompletes
+if [ -f $(brew --prefix)/etc/bash_completion ]; then
+    . $(brew --prefix)/etc/bash_completion
+fi
+# for f in /usr/local/etc/bash_completion.d/*; do
+#     source $f
+# done
+
 export EDITOR="vi"
 
 # for when django misbehaves
@@ -142,4 +150,20 @@ start_ngrok() {
 URL=`curl http://localhost:4040/api/tunnels | jq '.tunnels | .[0] | .public_url' | tail -1`;
 echo starting ngrok with url: $URL ;
 sed -e"s^TWILIO_URL_PREFIX =.*# logan keep this updated^TWILIO_URL_PREFIX = $URL  # logan keep this updated^g" -i".orig" ~/work/regiondb/regiondb/deploy_settings/local_override.py;
+}
+confirm () {
+# call with a prompt string or use a default
+read -r -p "${1:-Are you sure? [y/N]} " response
+case $response in
+    [yY][eE][sS]|[yY])
+        true
+        ;;
+    *)
+        false
+        ;;
+esac
+}
+clean(){
+find . -name "$1";
+confirm && find . -name "$1" | xargs rm || echo "Aborted";
 }

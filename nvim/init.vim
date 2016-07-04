@@ -22,9 +22,11 @@ call dein#add('Shougo/dein.vim')
 
 call dein#add('danro/rename.vim')
 
-call dein#add('Superbil/llvm.vim')
+call dein#add('Superbil/llvm.vim', {'on_ft': 'llvm'})
 
 call dein#add('elixir-lang/vim-elixir')
+
+call dein#add('tpope/vim-fugitive')
 
 " fuzzyfinder
 call dein#add('junegunn/fzf', { 'dir': '~/.fzf', 'do': 'yes \| ./install'})
@@ -83,8 +85,7 @@ nnoremap <leader>z :GundoToggle<CR>
 
 call dein#add('rking/ag.vim')
 " :Ag for search
-nnoremap K :Ag "<C-R><C-W>"<CR>
-
+ca Ag Ag!
 
 call dein#add('tpope/vim-repeat')
 " <.> repeats plugin commands
@@ -160,7 +161,8 @@ call dein#add('hynek/vim-python-pep8-indent')
 
 call dein#add('Yggdroot/indentLine')
 
-call dein#add('Shougo/vimproc.vim', {'build': 'make'})
+call dein#add('Shougo/vimproc.vim', {'build' : 'make'})
+
 call dein#add('Shougo/neosnippet.vim')
 call dein#add('Shougo/neosnippet-snippets')
 call dein#add('Shougo/unite.vim')
@@ -184,36 +186,31 @@ let g:limelight_conceal_guifg = '#777777'
 nnoremap <leader>l :Limelight!!<CR>
 
 
-" call dein#add('zchee/deoplete-jedi')
-call dein#add('davidhalter/jedi-vim')
-call dein#add('ervandew/supertab')
+call dein#add('Valloric/YouCompleteMe', {
+    \'build': './install.py --clang-completer'})
+" space-g go to definition
+" space-G open doc
+" space-u tag usages (replaces utags, maybe bring it back?)
+let g:ycm_autoclose_preview_window_after_completion=1
+let g:ycm_collect_identifiers_from_tag_files=1
+map <leader>g  :YcmCompleter GoToDefinitionElseDeclaration<CR>
+map <leader>G  :YcmCompleter GetDoc<CR>
+map <leader>u  :YcmCompleter GoToReferences<CR>
+" python support for youcompleteme
+" python with virtualenv support
+py << EOF
+import os
+import sys
+if 'VIRTUAL_ENV' in os.environ:
+    project_base_dir = os.environ['VIRTUAL_ENV']
+    activate_this = os.path.join(project_base_dir, 'bin/activate_this.py')
+    execfile(activate_this, dict(__file__=activate_this))
+EOF
+let python_highlight_all=1
 
-let g:jedi#completions_enabled = 1
-let g:jedi#goto_command = "<leader>g"
-let g:jedi#goto_assignments_command = "<leader>a"
-let g:jedi#goto_definitions_command = "L"
-let g:jedi#documentation_command = "<leader>G"
-let g:jedi#usages_command = "<leader>u"
-let g:jedi#completions_command = "<C-Space>"
-let g:jedi#rename_command = "<leader>r"
-let g:SuperTabDefaultCompletionType = "<C-n>"
+nnoremap K :Ag! "<C-R><C-W>"<CR>
 
 call dein#add('ryanoasis/vim-devicons')
-
-" <Tab> completion:
-" 1. If popup menu is visible, select and insert next item
-" 2. Otherwise, if within a snippet, jump to next input
-" 3. Otherwise, if preceding chars are whitespace, insert tab char
-" 4. Otherwise, start manual autocomplete
-" imap <silent><expr><Tab> pumvisible() ? "\<C-n>"
-" 	\ : (neosnippet#jumpable() ? "\<Plug>(neosnippet_jump)"
-" 	\ : (<SID>is_whitespace() ? "\<Tab>"
-" 	\ : deoplete#mappings#manual_complete()))
-" 
-" smap <silent><expr><Tab> pumvisible() ? "\<C-n>"
-" 	\ : (neosnippet#jumpable() ? "\<Plug>(neosnippet_jump)"
-" 	\ : (<SID>is_whitespace() ? "\<Tab>"
-" 	\ : deoplete#mappings#manual_complete()))
 
 inoremap <expr><S-Tab>  pumvisible() ? "\<C-p>" : "\<C-h>"
 
@@ -221,6 +218,14 @@ function! s:is_whitespace() "{{{
 	let col = col('.') - 1
 	return ! col || getline('.')[col - 1] =~? '\s'
 endfunction
+
+" call dein#add('easymotion/vim-easymotion')
+
+call dein#add('tweekmonster/django-plus.vim')
+call dein#add('tweekmonster/braceless.vim')
+autocmd FileType python BracelessEnable +indent
+map <Leader> <Plug>(easymotion-prefix)
+
 
 "''''''''''''''''''''''''' End plugins
 
@@ -309,7 +314,6 @@ if has("mac") || has("macunix")
   vmap <D-j> <M-j>
   vmap <D-k> <M-k>
 endif
-map <leader>t :tab split<CR>
 
 " practice not using arrows
 nnoremap <Right> :vertical resize +5<CR>
@@ -342,6 +346,7 @@ au BufWritePost,FileWritePost *.coffee
 au FileType make 
     \ set noexpandtab
     \ shiftwidth=8
+    \ tabstop=8
     \ softtabstop=0
 au FileType org
     \ let maplocalleader='\'
@@ -349,6 +354,10 @@ au FileType org
     \ setlocal noautoindent
     \ nocindent
     \ nosmartindent
+au Filetype asm
+    \ set tabstop=2
+    \ softtabstop=2
+    \ shiftwidth=2
 au BufWritePost,FileWritePost *.tex
     \ Make
 " get rid of the __doc__ buffer after use
@@ -460,7 +469,7 @@ endfunction
 " :argdo update
 
 " XKCD jokes
-nnoremap xk :.s/\(.*\)/\=system('a='."https:\/\/api.stackexchange.com\/2.2\/".'; q=`curl -s -G --data-urlencode "q='.submatch(1).'" --compressed "'."${a}search\/advanced?order=desc&sort=relevance&site=stackoverflow".'" \| python -c "'."exec(\\\"import sys \\nimport json\\nprint(json.loads(''.join(sys.stdin.readlines()))['items'][0]['question_id'])\\\")".'"`; curl -s --compressed "'."${a}questions\/$q\/answers?order=desc&sort=votes&site=stackoverflow&filter=withbody".'" \| python -c "'."exec(\\\"import sys\\nimport json\\nprint(json.loads(''.join(sys.stdin.readlines()))['items'][0]['body']).encode('utf8')\\\")".'"')/<CR>
+nnoremap <leader>xk :.s/\(.*\)/\=system('a='."https:\/\/api.stackexchange.com\/2.2\/".'; q=`curl -s -G --data-urlencode "q='.submatch(1).'" --compressed "'."${a}search\/advanced?order=desc&sort=relevance&site=stackoverflow".'" \| python -c "'."exec(\\\"import sys \\nimport json\\nprint(json.loads(''.join(sys.stdin.readlines()))['items'][0]['question_id'])\\\")".'"`; curl -s --compressed "'."${a}questions\/$q\/answers?order=desc&sort=votes&site=stackoverflow&filter=withbody".'" \| python -c "'."exec(\\\"import sys\\nimport json\\nprint(json.loads(''.join(sys.stdin.readlines()))['items'][0]['body']).encode('utf8')\\\")".'"')/<CR>
 
 " http://vim.wikia.com/wiki/Deleting_a_buffer_without_closing_the_window
 "here is a more exotic version of my original Kwbd script
@@ -551,3 +560,15 @@ inoremap # X<C-h>#
 set cinkeys-=0#
 set indentkeys-=0#
 set incsearch
+set nojoinspaces
+
+" Testing envs 
+function TestDB(db)
+  if(a:db ==? 'm')
+    let $TEST_DATABASE='mysql'
+  elseif(a:db ==? 'p')
+    let $TEST_DATABASE='postgres'
+  else
+    let $TEST_DATABASE='sqlite'
+  endif
+endfunction
