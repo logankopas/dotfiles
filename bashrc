@@ -35,9 +35,13 @@ PS1='\[\033[1;31m\][\u]\[\033[1;34m\]\$\[\033[0m\] '
 export NDK_ROOT="${HOME}/android-ndk-r7"
 export ANDROID_SDK_ROOT="${HOME}/android-sdk-mac_x86"
 export ANDROID_NDK_ROOT="$NDK_ROOT"
-export PATH=$PATH:$ANDROID_NDK_ROOT:/usr/local/sbin/:$HOME/neovim/bin
+export PATH=$PATH:$ANDROID_NDK_ROOT:/usr/local/sbin/:$HOME/neovim/bin:$HOME/.go/bin
+export PATH=/Users/logankopas/Library/Android/sdk/tools:$PATH
+export PATH=/Users/logankopas/Library/Android/sdk/platform-tools:$PATH
 export PYTHONSTARTUP=~/.pythonrc
 export THEFUCK_ALTER_HISTORY=false
+export GOPATH=~/.go
+export PGDATA=/usr/local/var/postgres
 
 # private stuff, like homebrew github tokens
 [[ -e ~/.tokens ]] && . ~/.tokens
@@ -167,3 +171,13 @@ clean(){
 find . -name "$1";
 confirm && find . -name "$1" | xargs rm || echo "Aborted";
 }
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f /Users/logankopas/Downloads/google-cloud-sdk/path.bash.inc ]; then
+  source '/Users/logankopas/Downloads/google-cloud-sdk/path.bash.inc'
+fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f /Users/logankopas/Downloads/google-cloud-sdk/completion.bash.inc ]; then
+  source '/Users/logankopas/Downloads/google-cloud-sdk/completion.bash.inc'
+fi

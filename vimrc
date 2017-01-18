@@ -21,8 +21,14 @@ endif
 " space-g go to definition
 " space-G open doc
 " space-u tag usages (replaces utags, maybe bring it back?)
-let g:ycm_autoclose_preview_window_after_completion=1
+let g:ycm_autoclose_preview_window_after_completion=0
+let g:ycm_autoclose_preview_window_after_insertion=0
 let g:ycm_collect_identifiers_from_tag_files=1
+let g:ycm_use_ultisnips_completer = 1
+let g:ycm_seed_identifiers_with_syntax = 1
+let g:ycm_python_binary_path = 'python'
+let g:ycm_auto_start_csharp_server = 1
+
 map <leader>g  :YcmCompleter GoToDefinitionElseDeclaration<CR>
 map <leader>G  :YcmCompleter GetDoc<CR>
 map <leader>u  :YcmCompleter GoToReferences<CR>
@@ -38,7 +44,10 @@ if 'VIRTUAL_ENV' in os.environ:
 EOF
 let python_highlight_all=1
 
-Plug 'danro/rename.vim'
+Plug 'tpope/vim-eunuch'
+
+Plug 'vim-scripts/haskell.vim'
+Plug 'elixir-lang/vim-elixir'
 
 " fuzzyfinder
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': 'yes \| ./install' }
@@ -51,7 +60,8 @@ set rtp+=~/.fzf
 
 Plug 'scrooloose/syntastic'
 let g:syntastic_python_checkers=['flake8']
-let g:syntastic_flake8_max_line_length='139'
+let g:syntastic_flake8_max_line_length='119'
+" let g:syntastic_filetype_map = { 'htmldjango': 'html' }
 
 Plug 'nvie/vim-flake8'
 " F7 to run 
@@ -64,6 +74,7 @@ Plug 'vim-airline/vim-airline-themes'
 let g:airline_powerline_fonts=1
 let g:airline#extensions#tabline#enabled=1
 let g:airline_theme='bubblegum'
+let g:airline#extensions#branch#enabled = 0
 set guifont=Inconsolata\ for\ Powerline:h15
 set encoding=utf-8
 set t_Co=256
@@ -121,7 +132,8 @@ Plug 'tpope/vim-dispatch'
 
 Plug 'janko-m/vim-test'
 " better test runner, lacks quickfix hotlinking
-let test#strategy = "dispatch"
+let test#strategy = "basic"
+let g:test#preserve_screen = 1
 " run tests easily
 nnoremap tt :TestLast<CR>
 nnoremap tn :TestNearest<CR>
@@ -180,6 +192,9 @@ let g:UltiSnipsExpandTrigger="<C-y>."
 let g:UltiSnipsJumpForwardTrigger="<C-y>e"
 let g:UltiSnipsJumpBackwardTrigger="<C-y>a"
 
+Plug 'sukima/xmledit'
+Plug 'jmcomets/vim-pony'
+
 Plug 'Yggdroot/indentLine'
 
 Plug 'mhinz/vim-startify'
@@ -201,8 +216,22 @@ Plug 'plasticboy/vim-markdown'
 Plug 'tpope/vim-fugitive'
 
 Plug 'tweekmonster/django-plus.vim'
-Plug 'tweekmonster/braceless.vim'
-au FileType python BracelessEnable +indent
+
+Plug 'junkblocker/patchreview-vim'
+Plug 'codegram/vim-codereview'
+
+" Prevent jumping outside of current buffer
+Plug 'vim-scripts/ingo-library'
+Plug 'vim-scripts/EnhancedJumps'
+nmap <C-o>         <Plug>EnhancedJumpsLocalOlder
+nmap <C-i>         <Plug>EnhancedJumpsLocalNewer
+nmap <leader><C-o> <Plug>EnhancedJumpsOlder
+nmap <leader><C-i> <Plug>EnhancedJumpsNewer
+
+Plug 'jiangmiao/auto-pairs'
+let g:AutoPairsFlyMode = 0
+let g:AutoPairsShortcutBackInsert = '∫'  " Alt+B
+let g:AutoPairsShortcutFastWrap = '∑'  " Alt+W
 
 call plug#end()
 "''''''''''''''''''''''''' End plugins
@@ -212,11 +241,12 @@ filetype plugin indent on
 
 " defaults
 " set whichwrap+=<,>,h,l,[,]
+set hidden  " move off a file without saving
 set nu
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
-set textwidth=139
+set textwidth=0
 set expandtab
 set autoindent
 set fileformat=unix  " because screw windows
@@ -234,6 +264,10 @@ set foldlevelstart=99  " all open by default
 set wildignore+=*.pyc,*/tmp/*,\.git/*,*.zip,*.gz,*.swp
 set tags+=~/.mytags
 set relativenumber  " YASSSSSSS
+set wrap
+set linebreak
+set nolist
+set breakat=^I!@*-+;:,./?\(\[\{
 " * searching in visual mode
 vnoremap <silent> * :call VisualSelection('f')<CR> 
 vnoremap <silent> # :call VisualSelection('b')<CR>
@@ -290,11 +324,11 @@ nnoremap <Up> :resize +5<CR>
 nnoremap <Down> :resize -5<CR>
 
 " python files
-au BufNewFile,BufRead *.py
+au BufNewFile,BufRead *.py,*.hs
     \ set tabstop=4
     \ softtabstop=4
     \ shiftwidth=4
-    \ textwidth=139
+    \ textwidth=120
     \ expandtab
     \ autoindent
     \ fileformat=unix
@@ -303,7 +337,7 @@ au BufNewFile,BufRead *.py
 au BufNewFile,BufRead *.py 
     \ let $DJANGO_SETTINGS_MODULE='deploy_settings.testing'
 " web files
-au BufNewFile,BufRead *.coffee,*.js,*.html,*.css,*.scss,*.rb
+au BufNewFile,BufRead *.coffee,*.js,*.html,*.css,*.scss,*.rb,*.yml
     \ set tabstop=2
     \ softtabstop=2
     \ shiftwidth=2
@@ -323,7 +357,7 @@ au FileType org
     \ setlocal noautoindent
     \ nocindent
     \ nosmartindent
-au FileType gitcommit set tw=72
+au FileType gitcommit set tw=120
 au BufWritePost,FileWritePost *.tex
     \ Make
 au BufWinEnter '__doc__' setlocal bufhidden=delete
@@ -357,6 +391,11 @@ func! DeleteTrailingWS()
 endfunc
 autocmd BufWrite *.py :call DeleteTrailingWS()
 autocmd BufWrite *.coffee :call DeleteTrailingWS()
+
+" augroup vimrc_autocmds
+"   autocmd BufEnter *.py highlight OverLength ctermbg=darkgrey guibg=#592929
+"   autocmd BufEnter *.py match OverLength /\%120v.*/
+" augroup END
 
 function! CmdLine(str)
     exe "menu Foo.Bar :" . a:str
@@ -436,7 +475,7 @@ nnoremap <leader>xk :.s/\(.*\)/\=system('a='."https:\/\/api.stackexchange.com\/2
 " http://vim.wikia.com/wiki/Deleting_a_buffer_without_closing_the_window
 "here is a more exotic version of my original Kwbd script
 "delete the buffer; keep windows; create a scratch buffer if no buffers left
-function s:Kwbd(kwbdStage)
+function! s:Kwbd(kwbdStage)
   if(a:kwbdStage == 1)
     if(!buflisted(winbufnr(0)))
       bd!
@@ -509,7 +548,7 @@ set incsearch
 set nojoinspaces
 
 " Testing envs
-function TestDB(db)
+function! TestDB(db)
   if(a:db ==? 'm')
     let $TEST_DATABASE='mysql'
   elseif(a:db ==? 'p')
@@ -517,4 +556,14 @@ function TestDB(db)
   else
     let $TEST_DATABASE='sqlite'
   endif
+endfunction
+
+function! ToggleVerbose()
+    if !&verbose
+        set verbosefile=~/.log/vim/verbose.log
+        set verbose=12
+    else
+        set verbose=0
+        set verbosefile=
+    endif
 endfunction
