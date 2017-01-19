@@ -1,198 +1,34 @@
-" set verbosefile=./vim.log
-" set verbose=2
-"vein Scripts-----------------------------
-if &compatible
-  set nocompatible               " Be iMproved
+
+" this is a bug that was fixed in vim 7.4
+if version < 704
+    filetype on
+    filetype off
 endif
+filetype off
 
 let file_ignore_regex = ['\.pyc$', '\.min\.js$']  
 let mapleader="\<Space>"
 
-" Required:
-set runtimepath^=/Users/logankopas/git/dein/repos/github.com/Shougo/dein.vim
-
-" Required:
-call dein#begin(expand('/Users/logankopas/git/dein'))
-
-" Let dein manage dein
-" Required:
-call dein#add('Shougo/dein.vim')
+"''''''''''''''''''''''''' Begin plugins
+call plug#begin('~/.local/share/nvim/plugged')
 
 " Plugins
-
-call dein#add('danro/rename.vim')
-
-call dein#add('Superbil/llvm.vim', {'on_ft': 'llvm'})
-
-call dein#add('elixir-lang/vim-elixir')
-
-call dein#add('tpope/vim-fugitive')
-
-" fuzzyfinder
-call dein#add('junegunn/fzf', { 'dir': '~/.fzf', 'do': 'yes \| ./install'})
-call dein#add('junegunn/fzf.vim')
-" fzf mappings
-let $FZF_DEFAULT_COMMAND='ag -l -g ""'
-noremap <C-b> :Tags<CR>
-noremap <C-p> :FZF -m<CR>
-set rtp+=~/.fzf
-let g:fzf_command_prefix = 'Fzf'
-
-call dein#add('scrooloose/syntastic')
-let g:syntastic_python_checkers=['flake8']
-let g:syntastic_flake8_max_line_length='119'
-
-call dein#add('nvie/vim-flake8')
-" F7 to run 
-
-call dein#add('vim-airline/vim-airline')
-call dein#add('vim-airline/vim-airline-themes')
-" powerline font stuff
-let g:airline_powerline_fonts=1
-let g:airline#extensions#tabline#enabled=1
-let g:airline_theme='bubblegum'
-"set guifont=Inconsolata\ for\ Powerline:h15
-set guifont=Droid\ Sans\ Mono\ for\ Powerline\ Nerd\ Font\ Complete.otf:h11
-set encoding=utf-8
-set t_Co=256
-set fillchars+=stl:\ ,stlnc:\
-set termencoding=utf-8
-
-call dein#add('morhetz/gruvbox')
-
-call dein#add('scrooloose/nerdtree')
-call dein#add('jistr/vim-nerdtree-tabs')
-" ctrl-n to open
-" <t> to open in tab
-let NERDTreeQuitOnOpen=1
-let NERDTreeIgnore = file_ignore_regex
-map <C-n> :NERDTreeToggle %<CR>
-map <C-n>. :NERDTree %<CR>
-
-"
-call dein#add('kchmck/vim-coffee-script')
-" vim-coffee
-let coffee_compiler='/Users/logankopas/work/regiondb/node_modules/coffee-script/bin/coffee'
-let coffee_make_options='--map'
-
-call dein#add('yssl/QFEnter')
-" space-tab to open quickfix in tab
-
-call dein#add('sjl/gundo.vim')
-" space-z to open gundo tree
-nnoremap <leader>z :GundoToggle<CR>
-
-
-call dein#add('rking/ag.vim')
-" :Ag for search
-ca Ag Ag!
-
-call dein#add('tpope/vim-repeat')
-" <.> repeats plugin commands
-
-call dein#add('tpope/vim-surround')
-" cs, ds, yss
-" <command><selection><substitution>
-" cs)' -> replace ) with '
-" ysiw] -> surround word with []
-" yss) -> surround line with ()
-" } doesn't add space, { does
-
-call dein#add('justinmk/vim-sneak')
-" s{character}{character}
-" like <f> navigation on steriods
-
-call dein#add('tpope/vim-dispatch')
-" for running things asynchronously
-
-call dein#add('janko-m/vim-test')
-" better test runner, lacks quickfix hotlinking
-let test#strategy = "dispatch"
-" run tests easily
-nnoremap tt :TestLast<CR>
-nnoremap tn :TestNearest<CR>
-nnoremap tf :TestFile<CR>
-
-
-call dein#add('terryma/vim-multiple-cursors')
-" self explanatory
-" because it overwrites ALL of my mappings
-let g:multi_cursor_use_default_mapping=0
-let g:multi_cursor_next_key='<C-e>'
-let g:multi_cursor_prev_key='<C-a>'
-let g:multi_cursor_skip_key='<C-x>'
-let g:multi_cursor_quit_key='<Esc>'
-
-call dein#add('tpope/vim-abolish')
-" for comprehensive text substitution
-
-call dein#add('logan-ncc/vim-buffergator')
-" for using buffers instead of tabs
-let g:buffergator_suppress_keymaps=1
-nnoremap gt :bnext<CR>
-nnoremap gT :bprev<CR>
-nnoremap <leader>b :BuffergatorToggle<CR>
-
-call dein#add('christoomey/vim-tmux-navigator')
-call dein#add('jceb/vim-orgmode')
-nnoremap pp :split ~/todo.org<CR>
-call dein#add('tpope/vim-speeddating')
-
-call dein#add('ChrisPenner/vim-emacs-bindings')
-" ctrl-a, ctrl-e, etc
-
-call dein#add('junegunn/vim-easy-align')
-" Start interactive EasyAlign in visual mode (e.g. vipga)
-xmap ga <Plug>(EasyAlign)
-
-" Start interactive EasyAlign for a motion/text object (e.g. gaip)
-nmap ga <Plug>(EasyAlign)
-
-call dein#add('mattn/emmet-vim')
-" html creation
-let g:user_emmet_mode='a'
-
-call dein#add('chriskempson/vim-tomorrow-theme')
-
-call dein#add('ConradIrwin/vim-bracketed-paste')
-" allows you to <c-v> without setting paste
-
-call dein#add('hynek/vim-python-pep8-indent')
-
-call dein#add('Yggdroot/indentLine')
-
-call dein#add('Shougo/vimproc.vim', {'build' : 'make'})
-
-call dein#add('Shougo/neosnippet.vim')
-call dein#add('Shougo/neosnippet-snippets')
-call dein#add('Shougo/unite.vim')
-call unite#filters#matcher_default#use(['matcher_fuzzy'])
-nnoremap UU :Unite<CR>
-nnoremap UB :Unite -quick-match buffer<CR>
-nnoremap UF :Unite file<CR>
-" nnoremap <C-p> :Unite file_rec<CR>
-
-call dein#add('mhinz/vim-startify')
-
-call dein#add('junegunn/limelight.vim')
-" Color name (:help cterm-colors) or ANSI code
-let g:limelight_conceal_ctermfg = 'gray'
-let g:limelight_conceal_ctermfg = 240
-
-" Color name (:help gui-colors) or RGB color
-let g:limelight_conceal_guifg = 'DarkGray'
-let g:limelight_conceal_guifg = '#777777'
-
-nnoremap <leader>l :Limelight!!<CR>
-
-
-call dein#add('Valloric/YouCompleteMe', {
-    \'build': './install.py --clang-completer'})
+Plug 'vim-scripts/indentpython.vim'
+" YouCompleteMe
+if version > 703
+    Plug 'Valloric/YouCompleteMe'
+endif
 " space-g go to definition
 " space-G open doc
 " space-u tag usages (replaces utags, maybe bring it back?)
-let g:ycm_autoclose_preview_window_after_completion=1
+let g:ycm_autoclose_preview_window_after_completion=0
+let g:ycm_autoclose_preview_window_after_insertion=0
 let g:ycm_collect_identifiers_from_tag_files=1
+let g:ycm_use_ultisnips_completer = 1
+let g:ycm_seed_identifiers_with_syntax = 1
+let g:ycm_python_binary_path = 'python'
+let g:ycm_auto_start_csharp_server = 1
+
 map <leader>g  :YcmCompleter GoToDefinitionElseDeclaration<CR>
 map <leader>G  :YcmCompleter GetDoc<CR>
 map <leader>u  :YcmCompleter GoToReferences<CR>
@@ -208,56 +44,217 @@ if 'VIRTUAL_ENV' in os.environ:
 EOF
 let python_highlight_all=1
 
-nnoremap K :Ag! "<C-R><C-W>"<CR>
+Plug 'tpope/vim-eunuch'
 
-call dein#add('ryanoasis/vim-devicons')
+Plug 'vim-scripts/haskell.vim'
+Plug 'elixir-lang/vim-elixir'
 
-inoremap <expr><S-Tab>  pumvisible() ? "\<C-p>" : "\<C-h>"
+" fuzzyfinder
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': 'yes \| ./install' }
+Plug 'junegunn/fzf.vim'
+" fzf mappings
+let $FZF_DEFAULT_COMMAND='ag -l -g ""'
+noremap <C-b> :Tags<CR>
+noremap <C-p> :FZF -m<CR>
+set rtp+=~/.fzf
 
-function! s:is_whitespace() "{{{
-	let col = col('.') - 1
-	return ! col || getline('.')[col - 1] =~? '\s'
-endfunction
+Plug 'scrooloose/syntastic'
+let g:syntastic_python_checkers=['flake8']
+let g:syntastic_flake8_max_line_length='119'
+" let g:syntastic_filetype_map = { 'htmldjango': 'html' }
 
-" call dein#add('easymotion/vim-easymotion')
-
-call dein#add('tweekmonster/django-plus.vim')
-call dein#add('tweekmonster/braceless.vim')
-autocmd FileType python BracelessEnable +indent
-map <Leader> <Plug>(easymotion-prefix)
+Plug 'nvie/vim-flake8'
+" F7 to run 
 
 
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+" Plug 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
+" powerline font stuff
+let g:airline_powerline_fonts=1
+let g:airline#extensions#tabline#enabled=1
+let g:airline_theme='bubblegum'
+let g:airline#extensions#branch#enabled = 0
+set guifont=Inconsolata\ for\ Powerline:h15
+set encoding=utf-8
+set t_Co=256
+set fillchars+=stl:\ ,stlnc:\
+set termencoding=utf-8
+
+
+Plug 'scrooloose/nerdtree'
+Plug 'jistr/vim-nerdtree-tabs'
+" ctrl-n to open
+" <t> to open in tab
+let NERDTreeQuitOnOpen=1
+let NERDTreeIgnore = file_ignore_regex
+map <C-n> :NERDTreeToggle %<CR>
+map <C-n>. :NERDTree %<CR>
+
+"
+Plug 'kchmck/vim-coffee-script'
+" vim-coffee
+let coffee_compiler='/Users/logankopas/work/regiondb/node_modules/coffee-script/bin/coffee'
+let coffee_make_options='--map'
+
+Plug 'yssl/QFEnter'
+" space-tab to open quickfix in tab
+
+Plug 'sjl/gundo.vim'
+" space-z to open gundo tree
+nnoremap <leader>z :GundoToggle<CR>
+
+
+Plug 'rking/ag.vim'
+" :Ag for search
+nnoremap K :Ag! "\b<C-R><C-W>\b"<CR>:cw<CR>
+
+ca Ag Ag!
+
+Plug 'tpope/vim-repeat'
+" <.> repeats plugin commands
+
+Plug 'tpope/vim-surround'
+" cs, ds, yss
+" <command><selection><substitution>
+" cs)' -> replace ) with '
+" ysiw] -> surround word with []
+" yss) -> surround line with ()
+" } doesn't add space, { does
+
+Plug 'justinmk/vim-sneak'
+" s{character}{character}
+" like <f> navigation on steriods
+
+Plug 'tpope/vim-dispatch'
+" for running things asynchronously
+
+Plug 'janko-m/vim-test'
+" better test runner, lacks quickfix hotlinking
+let test#strategy = "dispatch"
+let g:test#preserve_screen = 1
+" run tests easily
+nnoremap tt :TestLast<CR>
+nnoremap tn :TestNearest<CR>
+nnoremap tf :TestFile<CR>
+
+
+Plug 'terryma/vim-multiple-cursors'
+" self explanatory
+" because it overwrites ALL of my mappings
+let g:multi_cursor_use_default_mapping=0
+let g:multi_cursor_next_key='<C-e>'
+let g:multi_cursor_prev_key='<C-a>'
+let g:multi_cursor_skip_key='<C-x>'
+let g:multi_cursor_quit_key='<Esc>'
+
+Plug 'tpope/vim-abolish'
+" for comprehensive text substitution
+
+Plug 'tpope/vim-sensible'
+
+Plug 'logan-ncc/vim-buffergator'
+" for using buffers instead of tabs
+let g:buffergator_suppress_keymaps=1
+nnoremap gt :bnext<CR>
+nnoremap gT :bprev<CR>
+nnoremap <leader>b :BuffergatorToggle<CR>
+
+Plug 'christoomey/vim-tmux-navigator'
+Plug 'jceb/vim-orgmode'
+nnoremap pp :split ~/todo.org<CR>
+Plug 'tpope/vim-speeddating'
+
+Plug 'ChrisPenner/vim-emacs-bindings'
+" ctrl-a, ctrl-e, etc
+
+Plug 'junegunn/vim-easy-align'
+" Start interactive EasyAlign in visual mode (e.g. vipga)
+xmap ga <Plug>(EasyAlign)
+
+" Start interactive EasyAlign for a motion/text object (e.g. gaip)
+nmap ga <Plug>(EasyAlign)
+
+Plug 'mattn/emmet-vim'
+" html creation
+let g:user_emmet_mode='a'
+
+Plug 'chriskempson/vim-tomorrow-theme'
+
+Plug 'ConradIrwin/vim-bracketed-paste'
+" allows you to <c-v> without setting paste
+
+Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
+" let's try out snippets for a bit
+let g:UltiSnipsExpandTrigger="<C-y>."
+let g:UltiSnipsJumpForwardTrigger="<C-y>e"
+let g:UltiSnipsJumpBackwardTrigger="<C-y>a"
+
+Plug 'sukima/xmledit'
+Plug 'jmcomets/vim-pony'
+
+Plug 'Yggdroot/indentLine'
+
+Plug 'mhinz/vim-startify'
+Plug 'junegunn/limelight.vim'
+" let g:limelight_conceal_ctermfg = 'gray'
+" let g:limelight_conceal_ctermfg = 240
+" 
+" let g:limelight_conceal_guifg = 'DarkGray'
+" let g:limelight_conceal_guifg = '#777777'
+let g:limelight_default_coefficient = 0.7
+
+nnoremap <leader>l :Limelight!!<CR>
+
+Plug 'ryanoasis/vim-devicons'
+
+Plug 'godlygeek/tabular'
+Plug 'plasticboy/vim-markdown'
+
+Plug 'tpope/vim-fugitive'
+
+Plug 'tweekmonster/django-plus.vim'
+
+Plug 'junkblocker/patchreview-vim'
+Plug 'codegram/vim-codereview'
+
+" Prevent jumping outside of current buffer
+Plug 'vim-scripts/ingo-library'
+Plug 'vim-scripts/EnhancedJumps'
+nmap <C-o>         <Plug>EnhancedJumpsLocalOlder
+nmap <C-i>         <Plug>EnhancedJumpsLocalNewer
+nmap <leader><C-o> <Plug>EnhancedJumpsOlder
+nmap <leader><C-i> <Plug>EnhancedJumpsNewer
+
+Plug 'jiangmiao/auto-pairs'
+let g:AutoPairsFlyMode = 0
+let g:AutoPairsShortcutBackInsert = '∫'  " Alt+B
+let g:AutoPairsShortcutFastWrap = '∑'  " Alt+W
+
+Plug 'morhetz/gruvbox'
+
+call plug#end()
 "''''''''''''''''''''''''' End plugins
 
-set completeopt=menuone,preview
 
-call dein#add('vim-scripts/indentpython.vim')
-" Required:
-call dein#end()
-
-" Required:
 filetype plugin indent on
-
-" If you want to install not installed plugins on startup.
-"if dein#check_install()
-"  call dein#install()
-"endif
-
-"End dein Scripts-------------------------
 
 " defaults
 " set whichwrap+=<,>,h,l,[,]
+set hidden  " move off a file without saving
 set nu
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
-set textwidth=120
+set textwidth=0
 set expandtab
+set autoindent
 set fileformat=unix  " because screw windows
 set laststatus=2  " makes powerline work
 set showtabline=2  " always show the tab bar
 set noshowmode  " powerline shows us what mode we're in, so vim doesn't have to
-" set cursorline  " so I don't go searching for my cursor (I still do though)
+set cursorline  " so I don't go searching for my cursor (I still do though)
 set wildmenu  " tab completion in commands
 set lazyredraw
 set ttyfast
@@ -265,11 +262,13 @@ set showmatch
 set mat=2
 set foldenable
 set foldlevelstart=99  " all open by default
-set wildignore+=*.pyc,*/tmp/*,\.git/*,*.zip,*.gz,*.swp,*.min.js,js/*.js
+set wildignore+=*.pyc,*/tmp/*,\.git/*,*.zip,*.gz,*.swp
 set tags+=~/.mytags
 set relativenumber  " YASSSSSSS
-set timeoutlen=300
-set ttimeoutlen=10
+set wrap
+set linebreak
+set nolist
+set breakat=^I!@*-+;:,./?\(\[\{
 " * searching in visual mode
 vnoremap <silent> * :call VisualSelection('f')<CR> 
 vnoremap <silent> # :call VisualSelection('b')<CR>
@@ -285,7 +284,7 @@ xnoremap p pgvy
 " highlight DiffChange cterm=none ctermfg=fg ctermbg=Blue gui=none guifg=fg guibg=Blue
 " highlight DiffText cterm=none ctermfg=bg ctermbg=White gui=none guifg=bg guibg=White
 set background=dark
-colorscheme gruvbox 
+colorscheme gruvbox
 set t_ut=
 
 " Persistent undo
@@ -299,6 +298,11 @@ set undoreload=10000
 
 syntax on
 highlight BadWhitespace ctermbg=red guibg=darkred
+
+if has('nvim')
+  " Hack to get C-h working in NeoVim
+  nmap <BS> <C-W>h
+endif
 
 nnoremap <leader>s :mksession<CR>
 map j gj
@@ -315,6 +319,10 @@ if has("mac") || has("macunix")
   vmap <D-k> <M-k>
 endif
 
+" edit vimrc and load it
+nnoremap <leader>ev :vsp $HOME/dotfiles/nvim/init.vim<CR> 
+nnoremap <leader>sv :source $HOME/dotfiles/nvim/init.vim<CR>
+
 " practice not using arrows
 nnoremap <Right> :vertical resize +5<CR>
 nnoremap <Left> :vertical resize -5<CR>
@@ -322,19 +330,20 @@ nnoremap <Up> :resize +5<CR>
 nnoremap <Down> :resize -5<CR>
 
 " python files
-au BufNewFile,BufRead *.py
+au BufNewFile,BufRead *.py,*.hs
     \ set tabstop=4
     \ softtabstop=4
     \ shiftwidth=4
     \ textwidth=120
     \ expandtab
+    \ autoindent
     \ fileformat=unix
     \ foldmethod=indent
 " this is so I can use my testrunners
 au BufNewFile,BufRead *.py 
     \ let $DJANGO_SETTINGS_MODULE='deploy_settings.testing'
 " web files
-au BufNewFile,BufRead *.coffee,*.js,*.html,*.css,*.scss,*.rb
+au BufNewFile,BufRead *.coffee,*.js,*.html,*.css,*.scss,*.rb,*.yml
     \ set tabstop=2
     \ softtabstop=2
     \ shiftwidth=2
@@ -354,19 +363,12 @@ au FileType org
     \ setlocal noautoindent
     \ nocindent
     \ nosmartindent
-au Filetype asm
-    \ set tabstop=2
-    \ softtabstop=2
-    \ shiftwidth=2
+au FileType gitcommit set tw=120
 au BufWritePost,FileWritePost *.tex
     \ Make
-" get rid of the __doc__ buffer after use
 au BufWinEnter '__doc__' setlocal bufhidden=delete
 au BufWinLeave,WinLeave * setlocal nocursorline
 au BufWinEnter,WinEnter * setlocal cursorline
-augroup filetype
-    au! BufRead,BufNewFile *.ll     set filetype=llvm
-augroup END
 
 " function to toggle relativenumber
 function! ToggleNumber()
@@ -395,6 +397,11 @@ func! DeleteTrailingWS()
 endfunc
 autocmd BufWrite *.py :call DeleteTrailingWS()
 autocmd BufWrite *.coffee :call DeleteTrailingWS()
+
+" augroup vimrc_autocmds
+"   autocmd BufEnter *.py highlight OverLength ctermbg=darkgrey guibg=#592929
+"   autocmd BufEnter *.py match OverLength /\%120v.*/
+" augroup END
 
 function! CmdLine(str)
     exe "menu Foo.Bar :" . a:str
@@ -474,7 +481,7 @@ nnoremap <leader>xk :.s/\(.*\)/\=system('a='."https:\/\/api.stackexchange.com\/2
 " http://vim.wikia.com/wiki/Deleting_a_buffer_without_closing_the_window
 "here is a more exotic version of my original Kwbd script
 "delete the buffer; keep windows; create a scratch buffer if no buffers left
-function s:Kwbd(kwbdStage)
+function! s:Kwbd(kwbdStage)
   if(a:kwbdStage == 1)
     if(!buflisted(winbufnr(0)))
       bd!
@@ -534,36 +541,20 @@ endfunction
 command! Kwbd call s:Kwbd(1)
 nnoremap <silent> <Plug>Kwbd :<C-u>Kwbd<CR>
 
+" debugger
+nnoremap bp Oimport pudb; pu.db<C-c>
+
 " Create a mapping (e.g. in your .vimrc) like this:
 nmap bd <Plug>Kwbd
 
-" edit vimrc and load it
-nnoremap <leader>ev :vsp $HOME/dotfiles/nvim/init.vim<CR> 
-nnoremap <leader>sv :source $HOME/dotfiles/nvim/init.vim<CR>
-
-inoremap <C-k>     <Plug>(neosnippet_expand_or_jump)
-snoremap <C-k>     <Plug>(neosnippet_expand_or_jump)
-xnoremap <C-k>     <Plug>(neosnippet_expand_target)
-
-if has('nvim')
-  " Hack to get C-h working in NeoVim
-  nmap <BS> <C-W>h
-endif
-
-tmap <esc> <C-\><C-n>
-tmap <C-h> <C-\><C-n>:TmuxNavigateLeft<CR>
-tmap <C-j> <C-\><C-n>:TmuxNavigateDown<CR>
-tmap <C-k> <C-\><C-n>:TmuxNavigateUp<CR>
-tmap <C-l> <C-\><C-n>:TmuxNavigateRight<CR>
-
-inoremap # X<C-h>#
+inoremap # X<c-h>#
 set cinkeys-=0#
 set indentkeys-=0#
 set incsearch
 set nojoinspaces
 
-" Testing envs 
-function TestDB(db)
+" Testing envs
+function! TestDB(db)
   if(a:db ==? 'm')
     let $TEST_DATABASE='mysql'
   elseif(a:db ==? 'p')
@@ -571,4 +562,14 @@ function TestDB(db)
   else
     let $TEST_DATABASE='sqlite'
   endif
+endfunction
+
+function! ToggleVerbose()
+    if !&verbose
+        set verbosefile=~/.log/vim/verbose.log
+        set verbose=12
+    else
+        set verbose=0
+        set verbosefile=
+    endif
 endfunction
