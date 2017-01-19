@@ -130,13 +130,25 @@ Plug 'tpope/vim-dispatch'
 " for running things asynchronously
 
 Plug 'janko-m/vim-test'
-" better test runner, lacks quickfix hotlinking
+" So the dispatch option opens a new tmux split,
+" the make strategy blocks, but uses the quickfix window.
+" I need to figure out how to make the dispatch strategy use the proper make compiler
 let test#strategy = "dispatch"
 let g:test#preserve_screen = 1
 " run tests easily
 nnoremap tt :TestLast<CR>
 nnoremap tn :TestNearest<CR>
 nnoremap tf :TestFile<CR>
+
+" This isn't working, maybe if I tried a little harder I could get it to work
+" Look here for more info https://github.com/janko-m/vim-test/issues/14
+" Looks like I just need to set ther error format and makeprg
+" Plug 'reinh/vim-makegreen'
+" function MakeGreenStrategy(cmd) abort
+"     call MakeGreen(join(split(a:cmd)[1:]))
+" endfunction
+" let g:test#custom_strategies = {'makegreen': function('MakeGreenStrategy')}
+" let g:test#strategy = 'makegreen'
 
 
 Plug 'terryma/vim-multiple-cursors'
