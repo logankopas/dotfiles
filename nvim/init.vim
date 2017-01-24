@@ -28,6 +28,8 @@ let g:ycm_use_ultisnips_completer = 1
 let g:ycm_seed_identifiers_with_syntax = 1
 let g:ycm_python_binary_path = 'python'
 let g:ycm_auto_start_csharp_server = 1
+let g:ycm_global_ycm_extra_conf = '~/dotfiles/ycm_extra_conf.py'
+
 
 map <leader>g  :YcmCompleter GoToDefinitionElseDeclaration<CR>
 map <leader>G  :YcmCompleter GetDoc<CR>
@@ -96,6 +98,8 @@ Plug 'kchmck/vim-coffee-script'
 " vim-coffee
 let coffee_compiler='/Users/logankopas/work/regiondb/node_modules/coffee-script/bin/coffee'
 let coffee_make_options='--map'
+
+Plug 'pearofducks/ansible-vim'
 
 Plug 'yssl/QFEnter'
 " space-tab to open quickfix in tab
@@ -210,11 +214,11 @@ Plug 'Yggdroot/indentLine'
 
 Plug 'mhinz/vim-startify'
 Plug 'junegunn/limelight.vim'
-" let g:limelight_conceal_ctermfg = 'gray'
-" let g:limelight_conceal_ctermfg = 240
-" 
-" let g:limelight_conceal_guifg = 'DarkGray'
-" let g:limelight_conceal_guifg = '#777777'
+let g:limelight_conceal_ctermfg = 'gray'
+let g:limelight_conceal_ctermfg = 240
+
+let g:limelight_conceal_guifg = 'DarkGray'
+let g:limelight_conceal_guifg = '#777777'
 let g:limelight_default_coefficient = 0.7
 
 nnoremap <leader>l :Limelight!!<CR>
