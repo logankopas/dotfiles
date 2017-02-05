@@ -28,6 +28,8 @@ let g:ycm_use_ultisnips_completer = 1
 let g:ycm_seed_identifiers_with_syntax = 1
 let g:ycm_python_binary_path = 'python'
 let g:ycm_auto_start_csharp_server = 1
+let g:ycm_global_ycm_extra_conf = '~/dotfiles/ycm_extra_conf.py'
+
 
 map <leader>g  :YcmCompleter GoToDefinitionElseDeclaration<CR>
 map <leader>G  :YcmCompleter GetDoc<CR>
@@ -58,10 +60,26 @@ noremap <C-b> :Tags<CR>
 noremap <C-p> :FZF -m<CR>
 set rtp+=~/.fzf
 
-Plug 'scrooloose/syntastic'
-let g:syntastic_python_checkers=['flake8']
-let g:syntastic_flake8_max_line_length='119'
+"Plug 'scrooloose/syntastic'
+"let g:syntastic_python_checkers=['flake8']
+"let g:syntastic_flake8_max_line_length='119'
 " let g:syntastic_filetype_map = { 'htmldjango': 'html' }
+
+" --  new python stuff I'm trying
+"
+Plug 'w0rp/ale'
+"let g:ale_linters = {'python': ['flake8'], 'htmldjango': 'all'}
+"let g:ale_python_flake8_args = '--max-line-length=119'
+" Write this in your vimrc file
+"let g:ale_lint_on_save = 1
+"let g:ale_lint_on_text_changed = 0
+" You can disable this option too
+" if you don't want linters to run on opening a file
+"let g:ale_lint_on_enter = 0
+" TODO check out python-mode for extra syntax 
+" TODO check out google/yapf for autoformatting
+let g:airline#extensions#ale#enabled = 0
+
 
 Plug 'nvie/vim-flake8'
 " F7 to run 
@@ -96,6 +114,8 @@ Plug 'kchmck/vim-coffee-script'
 " vim-coffee
 let coffee_compiler='/Users/logankopas/work/regiondb/node_modules/coffee-script/bin/coffee'
 let coffee_make_options='--map'
+
+Plug 'pearofducks/ansible-vim'
 
 Plug 'yssl/QFEnter'
 " space-tab to open quickfix in tab
@@ -210,11 +230,11 @@ Plug 'Yggdroot/indentLine'
 
 Plug 'mhinz/vim-startify'
 Plug 'junegunn/limelight.vim'
-" let g:limelight_conceal_ctermfg = 'gray'
-" let g:limelight_conceal_ctermfg = 240
-" 
-" let g:limelight_conceal_guifg = 'DarkGray'
-" let g:limelight_conceal_guifg = '#777777'
+let g:limelight_conceal_ctermfg = 'gray'
+let g:limelight_conceal_ctermfg = 240
+
+let g:limelight_conceal_guifg = 'DarkGray'
+let g:limelight_conceal_guifg = '#777777'
 let g:limelight_default_coefficient = 0.7
 
 nnoremap <leader>l :Limelight!!<CR>
@@ -245,6 +265,16 @@ let g:AutoPairsShortcutBackInsert = '∫'  " Alt+B
 let g:AutoPairsShortcutFastWrap = '∑'  " Alt+W
 
 Plug 'morhetz/gruvbox'
+
+let $PATH = $PATH . ':' . expand('~/.local/bin')
+Plug 'Shougo/vimproc.vim', {'do' : 'make'}
+Plug 'eagletmt/ghcmod-vim'
+Plug 'eagletmt/neco-ghc'
+" Disable haskell-vim omnifunc
+let g:haskellmode_completion_ghc = 0
+autocmd FileType haskell setlocal omnifunc=necoghc#omnifunc
+let g:ycm_semantic_triggers = {'haskell' : ['.']}
+
 
 call plug#end()
 "''''''''''''''''''''''''' End plugins
@@ -585,3 +615,5 @@ function! ToggleVerbose()
         set verbosefile=
     endif
 endfunction
+
+tnoremap <Esc> <C-\><C-n>
