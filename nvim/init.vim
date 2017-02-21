@@ -46,6 +46,8 @@ if 'VIRTUAL_ENV' in os.environ:
 EOF
 let python_highlight_all=1
 
+Plug 'dbakker/vim-projectroot'
+let g:rootmarkers = ['manage.py', '.projectroot','.git','.hg','.svn','.bzr','_darcs','build.xml']
 Plug 'tpope/vim-eunuch'
 
 Plug 'vim-scripts/haskell.vim'
@@ -57,7 +59,7 @@ Plug 'junegunn/fzf.vim'
 " fzf mappings
 let $FZF_DEFAULT_COMMAND='ag -l -g ""'
 noremap <C-b> :Tags<CR>
-noremap <C-p> :FZF -m<CR>
+noremap <C-p> :ProjectRootExe FZF -m<CR>
 set rtp+=~/.fzf
 
 "Plug 'scrooloose/syntastic'
@@ -68,8 +70,8 @@ set rtp+=~/.fzf
 " --  new python stuff I'm trying
 "
 Plug 'w0rp/ale'
-"let g:ale_linters = {'python': ['flake8'], 'htmldjango': 'all'}
-"let g:ale_python_flake8_args = '--max-line-length=119'
+let g:ale_linters = {'python': ['flake8'], 'htmldjango': 'all'}
+let g:ale_python_flake8_args = '--max-line-length=119'
 " Write this in your vimrc file
 "let g:ale_lint_on_save = 1
 "let g:ale_lint_on_text_changed = 0
@@ -117,9 +119,6 @@ let coffee_make_options='--map'
 
 Plug 'pearofducks/ansible-vim'
 
-Plug 'yssl/QFEnter'
-" space-tab to open quickfix in tab
-
 Plug 'sjl/gundo.vim'
 " space-z to open gundo tree
 nnoremap <leader>z :GundoToggle<CR>
@@ -127,9 +126,10 @@ nnoremap <leader>z :GundoToggle<CR>
 
 Plug 'rking/ag.vim'
 " :Ag for search
-nnoremap K :Ag! "\b<C-R><C-W>\b"<CR>:cw<CR>
+nnoremap K :ProjectRootExe Ag! "\b<C-R><C-W>\b"<CR>:cw<CR>
+nnoremap <leader>a :ProjectRootExe Ag!
 
-ca Ag Ag!
+
 
 Plug 'tpope/vim-repeat'
 " <.> repeats plugin commands
@@ -146,29 +146,38 @@ Plug 'justinmk/vim-sneak'
 " s{character}{character}
 " like <f> navigation on steriods
 
-Plug 'tpope/vim-dispatch'
+" Plug 'tpope/vim-dispatch'
 " for running things asynchronously
 
 Plug 'janko-m/vim-test'
 " So the dispatch option opens a new tmux split,
 " the make strategy blocks, but uses the quickfix window.
 " I need to figure out how to make the dispatch strategy use the proper make compiler
-let test#strategy = "dispatch"
+"let test#strategy = "neovim"
 let g:test#preserve_screen = 1
 " run tests easily
-nnoremap tt :TestLast<CR>
-nnoremap tn :TestNearest<CR>
-nnoremap tf :TestFile<CR>
+nnoremap tt :let g:test#project_root=ProjectRootGuess()<CR>:TestLast<CR>
+nnoremap tn :let g:test#project_root=ProjectRootGuess()<CR>:TestNearest<CR>
+nnoremap tf :let g:test#project_root=ProjectRootGuess()<CR>:TestFile<CR>
+
 
 " This isn't working, maybe if I tried a little harder I could get it to work
 " Look here for more info https://github.com/janko-m/vim-test/issues/14
 " Looks like I just need to set ther error format and makeprg
-" Plug 'reinh/vim-makegreen'
-" function MakeGreenStrategy(cmd) abort
-"     call MakeGreen(join(split(a:cmd)[1:]))
-" endfunction
-" let g:test#custom_strategies = {'makegreen': function('MakeGreenStrategy')}
-" let g:test#strategy = 'makegreen'
+compiler pyunit
+set makeprg=python\ manage.py\ test
+Plug 'reinh/vim-makegreen'
+Plug 'prabirshrestha/async.vim'
+Plug 'tpope/vim-scriptease'
+"Plug '~/git/vim-makegreen'
+Plug 'prabirshrestha/async.vim'
+function! MakeGreenStrategy(cmd) abort
+    call MakeGreen(join(split(a:cmd)[3:]))
+endfunction
+" TODO makegreen runs 'make' 'args' so what I need to do is to 
+" make a MakeGreenSh function
+let g:test#custom_strategies = {'makegreen': function('MakeGreenStrategy')}
+let g:test#strategy = 'makegreen'
 
 
 Plug 'terryma/vim-multiple-cursors'
@@ -185,12 +194,12 @@ Plug 'tpope/vim-abolish'
 
 Plug 'tpope/vim-sensible'
 
-Plug 'logan-ncc/vim-buffergator'
 " for using buffers instead of tabs
-let g:buffergator_suppress_keymaps=1
 nnoremap gt :bnext<CR>
 nnoremap gT :bprev<CR>
-nnoremap <leader>b :BuffergatorToggle<CR>
+nnoremap gb :blast<CR>
+nnoremap <leader>b :bd<CR>
+
 
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'jceb/vim-orgmode'
@@ -309,6 +318,9 @@ set tags+=~/.mytags
 set relativenumber  " YASSSSSSS
 set wrap
 set linebreak
+set breakindent
+set breakindentopt=shift:2,sbr
+set showbreak=-->
 set nolist
 set breakat=^I!@*-+;:,./?\(\[\{
 " * searching in visual mode
@@ -338,6 +350,8 @@ set undoreload=10000
 
 "''''''''''''''''''''''''' end plugin config
 
+autocmd BufEnter * silent! lcd %:p:h  " autocd
+
 syntax on
 highlight BadWhitespace ctermbg=red guibg=darkred
 
@@ -346,7 +360,8 @@ if has('nvim')
   nmap <BS> <C-W>h
 endif
 
-nnoremap <leader>s :mksession<CR>
+" This doesn't work with autochdir
+" nnoremap <leader>s :mksession<CR>
 map j gj
 map k gk
 " Move a line of text using ALT+[jk] or Comamnd+[jk] on mac
@@ -423,8 +438,35 @@ function! ToggleNumber()
 endfunc
 
 nnoremap <leader>n :call ToggleNumber()<CR>
+function! GetBufferList()
+  redir =>buflist
+  silent! ls!
+  redir END
+  return buflist
+endfunction
 
-nnoremap <leader>c :cclose<CR>
+function! ToggleList(bufname, pfx)
+  let buflist = GetBufferList()
+  for bufnum in map(filter(split(buflist, '\n'), 'v:val =~ "'.a:bufname.'"'), 'str2nr(matchstr(v:val, "\\d\\+"))')
+    if bufwinnr(bufnum) != -1
+      exec(a:pfx.'close')
+      return
+    endif
+  endfor
+  if a:pfx == 'l' && len(getloclist(0)) == 0
+      echohl ErrorMsg
+      echo "Location List is Empty."
+      return
+  endif
+  let winnr = winnr()
+  exec(a:pfx.'open')
+  if winnr() != winnr
+    wincmd p
+  endif
+endfunction
+
+nnoremap <silent> <leader>l :call ToggleList("Location List", 'l')<CR>
+nnoremap <silent> <leader>c :call ToggleList("Quickfix List", 'c')<CR>
 nnoremap <leader>p :pclose<CR>
 
 " Fix my clumsy fingers
@@ -588,6 +630,7 @@ nnoremap bp Oimport pudb; pu.db<C-c>
 
 " Create a mapping (e.g. in your .vimrc) like this:
 nmap bd <Plug>Kwbd
+nmap bb :e #<CR>
 
 inoremap # X<c-h>#
 set cinkeys-=0#

@@ -42,7 +42,6 @@ export PYTHONSTARTUP=~/.pythonrc
 export THEFUCK_ALTER_HISTORY=false
 export GOPATH=~/.go
 export PGDATA=/usr/local/var/postgres
-export AUTOENV_ENV_FILENAME=.lenv
 
 # private stuff, like homebrew github tokens
 [[ -e ~/.tokens ]] && . ~/.tokens
