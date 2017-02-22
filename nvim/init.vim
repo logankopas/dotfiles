@@ -47,7 +47,7 @@ EOF
 let python_highlight_all=1
 
 Plug 'dbakker/vim-projectroot'
-let g:rootmarkers = ['manage.py', '.projectroot','.git','.hg','.svn','.bzr','_darcs','build.xml']
+let g:rootmarkers = ['manage.py', 'start_server.py', '.projectroot','.git','.hg','.svn','.bzr','_darcs','build.xml']
 Plug 'tpope/vim-eunuch'
 
 Plug 'vim-scripts/haskell.vim'
@@ -150,32 +150,22 @@ Plug 'justinmk/vim-sneak'
 " for running things asynchronously
 
 Plug 'janko-m/vim-test'
-" So the dispatch option opens a new tmux split,
-" the make strategy blocks, but uses the quickfix window.
-" I need to figure out how to make the dispatch strategy use the proper make compiler
-"let test#strategy = "neovim"
 let g:test#preserve_screen = 1
 " run tests easily
 nnoremap tt :let g:test#project_root=ProjectRootGuess()<CR>:TestLast<CR>
 nnoremap tn :let g:test#project_root=ProjectRootGuess()<CR>:TestNearest<CR>
 nnoremap tf :let g:test#project_root=ProjectRootGuess()<CR>:TestFile<CR>
 
-
-" This isn't working, maybe if I tried a little harder I could get it to work
-" Look here for more info https://github.com/janko-m/vim-test/issues/14
-" Looks like I just need to set ther error format and makeprg
 compiler pyunit
 set makeprg=python\ manage.py\ test
-Plug 'reinh/vim-makegreen'
-Plug 'prabirshrestha/async.vim'
+set efm+=%-G%.%#lib/python%.%#/site-package%.%#,%C\ %.%#,%A\ \ File\ \"%f\"\\,\ line\ %l%.%#,%Z%[%^\ ]%\\@=%m
+"Plug 'reinh/vim-makegreen'
 Plug 'tpope/vim-scriptease'
-"Plug '~/git/vim-makegreen'
+Plug '~/git/vim-makegreen'
 Plug 'prabirshrestha/async.vim'
 function! MakeGreenStrategy(cmd) abort
     call MakeGreen(join(split(a:cmd)[3:]))
 endfunction
-" TODO makegreen runs 'make' 'args' so what I need to do is to 
-" make a MakeGreenSh function
 let g:test#custom_strategies = {'makegreen': function('MakeGreenStrategy')}
 let g:test#strategy = 'makegreen'
 
