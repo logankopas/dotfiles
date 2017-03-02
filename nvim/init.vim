@@ -59,7 +59,7 @@ Plug 'junegunn/fzf.vim'
 " fzf mappings
 let $FZF_DEFAULT_COMMAND='ag -l -g ""'
 noremap <C-b> :Tags<CR>
-noremap <C-p> :ProjectRootExe FZF -m<CR>
+noremap <C-p> :GFiles<CR>
 set rtp+=~/.fzf
 
 Plug 'kien/rainbow_parentheses.vim'
