@@ -62,6 +62,14 @@ noremap <C-b> :Tags<CR>
 noremap <C-p> :ProjectRootExe FZF -m<CR>
 set rtp+=~/.fzf
 
+Plug 'kien/rainbow_parentheses.vim'
+augroup syntax_commands
+    au VimEnter * RainbowParenthesesToggle
+    au Syntax * RainbowParenthesesLoadRound
+    au Syntax * RainbowParenthesesLoadSquare
+    au Syntax * RainbowParenthesesLoadBraces
+augroup END
+
 "Plug 'scrooloose/syntastic'
 "let g:syntastic_python_checkers=['flake8']
 "let g:syntastic_flake8_max_line_length='119'
@@ -71,7 +79,7 @@ set rtp+=~/.fzf
 "
 Plug 'w0rp/ale'
 let g:ale_linters = {'python': ['flake8'], 'htmldjango': 'all'}
-let g:ale_python_flake8_args = '--max-line-length=119'
+let g:ale_python_flake8_args = '--max-line-length=120'
 " Write this in your vimrc file
 "let g:ale_lint_on_save = 1
 "let g:ale_lint_on_text_changed = 0
@@ -127,7 +135,7 @@ nnoremap <leader>z :GundoToggle<CR>
 Plug 'rking/ag.vim'
 " :Ag for search
 nnoremap K :ProjectRootExe Ag! "\b<C-R><C-W>\b"<CR>:cw<CR>
-nnoremap <leader>a :ProjectRootExe Ag!
+nnoremap <leader>a :ProjectRootExe Ag! 
 
 
 
@@ -163,6 +171,7 @@ set efm+=%-G%.%#lib/python%.%#/site-package%.%#,%C\ %.%#,%A\ \ File\ \"%f\"\\,\ 
 Plug 'tpope/vim-scriptease'
 Plug '~/git/vim-makegreen'
 Plug 'prabirshrestha/async.vim'
+let g:makegreen_stay_on_file = 1
 function! MakeGreenStrategy(cmd) abort
     call MakeGreen(join(split(a:cmd)[3:]))
 endfunction
@@ -219,7 +228,7 @@ Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
 " let's try out snippets for a bit
 let g:UltiSnipsExpandTrigger="<C-y>."
-let g:UltiSnipsJumpForwardTrigger="<C-y>e"
+let g:UltiSnipsJumpForwardTrigger="<C-y><Space>"
 let g:UltiSnipsJumpBackwardTrigger="<C-y>a"
 
 Plug 'sukima/xmledit'

@@ -30,7 +30,7 @@ RED='\e[31m'
 NC='\e[m'
 
 # prompt -> [username]$
-PS1='\[\033[1;31m\][\u]\[\033[1;34m\]\$\[\033[0m\] '
+PS1='\[\e[1;31m\][\u]\[\e[1;34m\]\$\[\e[0m\] '
 
 export NDK_ROOT="${HOME}/android-ndk-r7"
 export ANDROID_SDK_ROOT="${HOME}/android-sdk-mac_x86"

@@ -8,8 +8,8 @@
 
 
 test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"
-export AUTOENV_ENV_FILENAME=.lenv
-source /usr/local/opt/autoenv/activate.sh
+#export AUTOENV_ENV_FILENAME=.lenv
+#source /usr/local/opt/autoenv/activate.sh
 
 # Add GHC 7.10.3 to the PATH, via https://ghcformacosx.github.io/
 export GHC_DOT_APP="/Applications/ghc-7.10.3.app"
