@@ -117,7 +117,6 @@ Plug 'jistr/vim-nerdtree-tabs'
 let NERDTreeQuitOnOpen=1
 let NERDTreeIgnore = file_ignore_regex
 map <C-n> :NERDTreeToggle %<CR>
-map <C-n>. :NERDTree %<CR>
 
 "
 Plug 'kchmck/vim-coffee-script'
@@ -223,6 +222,7 @@ Plug 'chriskempson/vim-tomorrow-theme'
 
 Plug 'ConradIrwin/vim-bracketed-paste'
 " allows you to <c-v> without setting paste
+noremap Y "+y<CR>
 
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
