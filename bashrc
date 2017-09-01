@@ -32,6 +32,9 @@ NC='\e[m'
 # prompt -> [username]$
 PS1='\[\e[1;31m\][\u]\[\e[1;34m\]\$\[\e[0m\] '
 
+export ANDROID_HOME=${HOME}/Library/Android/sdk
+export PATH=${PATH}:${ANDROID_HOME}/tools
+export PATH=${PATH}:${ANDROID_HOME}/platform-tools
 export NDK_ROOT="${HOME}/android-ndk-r7"
 export ANDROID_SDK_ROOT="${HOME}/android-sdk-mac_x86"
 export ANDROID_NDK_ROOT="$NDK_ROOT"
@@ -181,3 +184,19 @@ fi
 if [ -f /Users/logankopas/Downloads/google-cloud-sdk/completion.bash.inc ]; then
   source '/Users/logankopas/Downloads/google-cloud-sdk/completion.bash.inc'
 fi
+
+orig ()
+{
+    # copies a file with a .orig extension
+    if [ -e "$1.orig" ]; then
+        echo "exists";
+        return;
+    fi;
+    if [ -e $1 ]; then
+        cp $1 $1.orig;
+        echo "copied";
+        return;
+    fi;
+    touch $1.orig;
+    echo "created"
+}

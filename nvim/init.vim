@@ -6,14 +6,18 @@ if version < 704
 endif
 filetype off
 
-let file_ignore_regex = ['\.pyc$', '\.min\.js$']  
+autocmd BufEnter * silent! lcd %:p:h  " autocd
+silent! lcd %:p:h
+
+let file_ignore_regex = ['\.pyc$', '\.min\.js$', '\.orig$']  
 let mapleader="\<Space>"
 
 "''''''''''''''''''''''''' Begin plugins
 call plug#begin('~/.local/share/nvim/plugged')
 
 " Plugins
-Plug 'vim-scripts/indentpython.vim'
+"Plug 'vim-scripts/indentpython.vim'
+Plug 'Vimjas/vim-python-pep8-indent'
 " YouCompleteMe
 if version > 703
     Plug 'Valloric/YouCompleteMe'
@@ -57,18 +61,18 @@ Plug 'elixir-lang/vim-elixir'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': 'yes \| ./install' }
 Plug 'junegunn/fzf.vim'
 " fzf mappings
-let $FZF_DEFAULT_COMMAND='ag -l -g ""'
+let $FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*" --glob "!*.js"'
 noremap <C-b> :Tags<CR>
 noremap <C-p> :GFiles<CR>
 set rtp+=~/.fzf
 
-Plug 'kien/rainbow_parentheses.vim'
-augroup syntax_commands
-    au VimEnter * RainbowParenthesesToggle
-    au Syntax * RainbowParenthesesLoadRound
-    au Syntax * RainbowParenthesesLoadSquare
-    au Syntax * RainbowParenthesesLoadBraces
-augroup END
+"Plug 'kien/rainbow_parentheses.vim'
+"augroup syntax_commands
+"    au VimEnter * RainbowParenthesesToggle
+"    au Syntax * RainbowParenthesesLoadRound
+"    au Syntax * RainbowParenthesesLoadSquare
+"    au Syntax * RainbowParenthesesLoadBraces
+"augroup END
 
 "Plug 'scrooloose/syntastic'
 "let g:syntastic_python_checkers=['flake8']
@@ -78,8 +82,8 @@ augroup END
 " --  new python stuff I'm trying
 "
 Plug 'w0rp/ale'
-let g:ale_linters = {'python': ['flake8'], 'htmldjango': 'all'}
-let g:ale_python_flake8_args = '--max-line-length=120'
+let g:ale_linters = {'python': ['flake8'], 'htmldjango': 'all', 'javascript': ['eslint']}
+let g:ale_python_flake8_args = '--max-line-length=120 --ignore=W291'
 " Write this in your vimrc file
 "let g:ale_lint_on_save = 1
 "let g:ale_lint_on_text_changed = 0
@@ -100,14 +104,21 @@ Plug 'vim-airline/vim-airline-themes'
 " Plug 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
 " powerline font stuff
 let g:airline_powerline_fonts=1
-let g:airline#extensions#tabline#enabled=1
+let g:airline#extensions#tabline#enabled=0
+let g:airline#extensions#whitespace#enabled=0
+let g:airline#extensions#highlighter#enabled=0
 let g:airline_theme='bubblegum'
 let g:airline#extensions#branch#enabled = 0
+let g:airline_section_c='%<%F%m %#__accent_red#%{airline#util#wrap(airline#parts#readonly(),0)}%#__restore__#'
 set guifont=Inconsolata\ for\ Powerline:h15
 set encoding=utf-8
 set t_Co=256
 set fillchars+=stl:\ ,stlnc:\
 set termencoding=utf-8
+
+Plug 'ap/vim-buftabline'
+let g:buftabline_indicators = 1
+let g:buftabline_numbers = 1
 
 
 Plug 'scrooloose/nerdtree'
@@ -133,10 +144,13 @@ nnoremap <leader>z :GundoToggle<CR>
 
 Plug 'rking/ag.vim'
 " :Ag for search
+let g:ag_working_path_mode="r"
+let g:ag_prg="rg --vimgrep --glob '!*.js' --glob '!*.dataset'" 
+
 nnoremap K :ProjectRootExe Ag! "\b<C-R><C-W>\b"<CR>:cw<CR>
 nnoremap <leader>a :ProjectRootExe Ag! 
 
-
+set grepprg=rg\ --vimgrep
 
 Plug 'tpope/vim-repeat'
 " <.> repeats plugin commands
@@ -159,9 +173,9 @@ Plug 'justinmk/vim-sneak'
 Plug 'janko-m/vim-test'
 let g:test#preserve_screen = 1
 " run tests easily
-nnoremap tt :let g:test#project_root=ProjectRootGuess()<CR>:TestLast<CR>
-nnoremap tn :let g:test#project_root=ProjectRootGuess()<CR>:TestNearest<CR>
-nnoremap tf :let g:test#project_root=ProjectRootGuess()<CR>:TestFile<CR>
+nnoremap tt :ProjectRootExe TestLast<CR>
+nnoremap tn :ProjectRootExe TestNearest<CR>
+nnoremap tf :ProjectRootExe TestFile<CR>
 
 compiler pyunit
 set makeprg=python\ manage.py\ test
@@ -190,13 +204,17 @@ let g:multi_cursor_quit_key='<Esc>'
 Plug 'tpope/vim-abolish'
 " for comprehensive text substitution
 
-Plug 'tpope/vim-sensible'
+if !has('nvim')
+    Plug 'tpope/vim-sensible'
+endif
+let g:python3_host_prog='/usr/local/bin/python3'
 
 " for using buffers instead of tabs
 nnoremap gt :bnext<CR>
 nnoremap gT :bprev<CR>
 nnoremap gb :blast<CR>
 nnoremap <leader>b :bd<CR>
+nnoremap <leader>t :tabn<CR>
 
 
 Plug 'christoomey/vim-tmux-navigator'
@@ -218,6 +236,10 @@ Plug 'mattn/emmet-vim'
 " html creation
 let g:user_emmet_mode='a'
 
+Plug 'mxw/vim-jsx'
+let g:jsx_ext_required = 0 " Allow JSX in normal JS files
+
+
 Plug 'chriskempson/vim-tomorrow-theme'
 
 Plug 'ConradIrwin/vim-bracketed-paste'
@@ -227,7 +249,7 @@ noremap Y "+y<CR>
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
 " let's try out snippets for a bit
-let g:UltiSnipsExpandTrigger="<C-y>."
+let g:UltiSnipsExpandTrigger="<C-y><C-y>"
 let g:UltiSnipsJumpForwardTrigger="<C-y><Space>"
 let g:UltiSnipsJumpBackwardTrigger="<C-y>a"
 
@@ -246,6 +268,10 @@ let g:limelight_conceal_guifg = '#777777'
 let g:limelight_default_coefficient = 0.7
 
 nnoremap <leader>l :Limelight!!<CR>
+nnoremap <leader>; $a;<Esc>
+nnoremap <leader><leader>; $a:<Esc>
+Plug 'junegunn/goyo.vim'
+let g:goyo_width=120
 
 Plug 'ryanoasis/vim-devicons'
 
@@ -312,15 +338,16 @@ set showmatch
 set mat=2
 set foldenable
 set foldlevelstart=99  " all open by default
-set wildignore+=*.pyc,*/tmp/*,\.git/*,*.zip,*.gz,*.swp
-set tags+=~/.mytags
-set relativenumber  " YASSSSSSS
+set wildignore+=*.pyc,*/tmp/*,\.git/*,*.zip,*.gz,*.swp,*.orig
+"set relativenumber  " YASSSSSSS
 set wrap
 set linebreak
 set breakindent
 set breakindentopt=shift:2,sbr
 set showbreak=-->
 set nolist
+set nostartofline
+
 set breakat=^I!@*-+;:,./?\(\[\{
 " * searching in visual mode
 vnoremap <silent> * :call VisualSelection('f')<CR> 
@@ -349,7 +376,6 @@ set undoreload=10000
 
 "''''''''''''''''''''''''' end plugin config
 
-autocmd BufEnter * silent! lcd %:p:h  " autocd
 
 syntax on
 highlight BadWhitespace ctermbg=red guibg=darkred
@@ -374,10 +400,14 @@ if has("mac") || has("macunix")
   vmap <D-j> <M-j>
   vmap <D-k> <M-k>
 endif
+vmap <leader>y :w !pbcopy<CR><CR>
 
 " edit vimrc and load it
 nnoremap <leader>ev :vsp $HOME/dotfiles/nvim/init.vim<CR> 
 nnoremap <leader>sv :source $HOME/dotfiles/nvim/init.vim<CR>
+
+nnoremap <leader><leader>p :profile start ~/vim.log<CR>:profile func *<CR>:profile file *<CR>
+nnoremap <leader><leader>P :profile pause<CR>
 
 " practice not using arrows
 nnoremap <Right> :vertical resize +5<CR>
@@ -399,7 +429,7 @@ au BufNewFile,BufRead *.py,*.hs
 au BufNewFile,BufRead *.py 
     \ let $DJANGO_SETTINGS_MODULE='deploy_settings.testing'
 " web files
-au BufNewFile,BufRead *.coffee,*.js,*.html,*.css,*.scss,*.rb,*.yml
+au BufNewFile,BufRead,BufEnter *.coffee,*.js,*.jsx,*.html,*.css,*.scss,*.rb,*.yml
     \ set tabstop=2
     \ softtabstop=2
     \ shiftwidth=2
@@ -424,7 +454,7 @@ au BufWritePost,FileWritePost *.tex
     \ Make
 au BufWinEnter '__doc__' setlocal bufhidden=delete
 au BufWinLeave,WinLeave * setlocal nocursorline
-au BufWinEnter,WinEnter * setlocal cursorline
+au BufWinEnter,WinEnter,BufWipeout * setlocal cursorline
 
 " function to toggle relativenumber
 function! ToggleNumber()
@@ -464,7 +494,7 @@ function! ToggleList(bufname, pfx)
   endif
 endfunction
 
-nnoremap <silent> <leader>l :call ToggleList("Location List", 'l')<CR>
+"nnoremap <silent> <leader>l :call ToggleList("Location List", 'l')<CR>
 nnoremap <silent> <leader>c :call ToggleList("Quickfix List", 'c')<CR>
 nnoremap <leader>p :pclose<CR>
 
@@ -541,7 +571,7 @@ function! s:tags()
                 \ 'sink':    function('s:tags_sink')})
 endfunction
 
-command! Tags call s:tags()
+"command! Tags call s:tags()
 command! -nargs=0 -bar Qargs execute 'args' QuickfixFilenames()
 function! QuickfixFilenames()
   " Building a hash ensures we get each buffer only once

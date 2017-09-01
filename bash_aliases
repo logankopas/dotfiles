@@ -16,10 +16,16 @@ alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
 alias gs='git status'
+alias gd='git diff'
+alias ga='git add'
+alias gp='git push'
+alias gc='git commit'
+alias gcm='git commit -m'
 
 alias s='cd ..'
 
 alias cim='vim'
+alias nivm='nvim'
 
 # another cool git alias, gets the name of the current branch, 
 # I use it for ``` git push origin `cb` ```
@@ -42,3 +48,4 @@ alias glog='git log --branches --remotes --graph --pretty=format:"%Cred%h%Creset
 blue)<%an>%Creset" --abbrev-commit --no-min-parents --no-max-parents'
 
 alias ag='ag --path-to-agignore ~/.agignore'
+alias lc='colorls -r'
