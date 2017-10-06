@@ -111,6 +111,8 @@ let g:airline_theme='bubblegum'
 let g:airline#extensions#branch#enabled = 0
 let g:airline_section_c='%<%F%m %#__accent_red#%{airline#util#wrap(airline#parts#readonly(),0)}%#__restore__#'
 set guifont=Inconsolata\ for\ Powerline:h15
+"set macligatures
+"set guifont=Fira\ Code:h12
 set encoding=utf-8
 set t_Co=256
 set fillchars+=stl:\ ,stlnc:\
@@ -134,6 +136,12 @@ Plug 'kchmck/vim-coffee-script'
 " vim-coffee
 let coffee_compiler='/Users/logankopas/work/regiondb/node_modules/coffee-script/bin/coffee'
 let coffee_make_options='--map'
+
+Plug 'fboender/bexec'
+set splitright
+let bexec_splitdir='ver'
+let bexec_rehighlight=1
+nmap <leader><leader>w :w<CR>:Bexec<CR>
 
 Plug 'pearofducks/ansible-vim'
 
@@ -273,7 +281,7 @@ nnoremap <leader><leader>; $a:<Esc>
 Plug 'junegunn/goyo.vim'
 let g:goyo_width=120
 
-Plug 'ryanoasis/vim-devicons'
+"Plug 'ryanoasis/vim-devicons'
 
 Plug 'godlygeek/tabular'
 Plug 'plasticboy/vim-markdown'
@@ -450,6 +458,7 @@ au FileType org
     \ nocindent
     \ nosmartindent
 au FileType gitcommit set tw=120
+au FileType text set tw=80
 au BufWritePost,FileWritePost *.tex
     \ Make
 au BufWinEnter '__doc__' setlocal bufhidden=delete
@@ -689,3 +698,9 @@ function! ToggleVerbose()
 endfunction
 
 tnoremap <Esc> <C-\><C-n>
+autocmd BufWinEnter,WinEnter term://* startinsert
+tnoremap <C-h> <C-\><C-n><C-w>h
+tnoremap <C-j> <C-\><C-n><C-w>j
+tnoremap <C-k> <C-\><C-n><C-w>k
+tnoremap <C-l> <C-\><C-n><C-w>l
+

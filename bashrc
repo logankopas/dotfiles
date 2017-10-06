@@ -32,6 +32,10 @@ NC='\e[m'
 # prompt -> [username]$
 PS1='\[\e[1;31m\][\u]\[\e[1;34m\]\$\[\e[0m\] '
 
+# Fix backspace for neovim and iTerm
+infocmp $TERM | sed 's/kbs=^[hH]/kbs=\\177/' >| $TERM.ti
+tic $TERM.ti
+
 export ANDROID_HOME=${HOME}/Library/Android/sdk
 export PATH=${PATH}:${ANDROID_HOME}/tools
 export PATH=${PATH}:${ANDROID_HOME}/platform-tools
