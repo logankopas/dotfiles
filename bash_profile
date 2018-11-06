@@ -17,3 +17,7 @@ if [ -d "$GHC_DOT_APP" ]; then
   export PATH="${HOME}/.local/bin:${HOME}/.cabal/bin:${GHC_DOT_APP}/Contents/bin:${PATH}"
 fi
 
+if [ -e /Users/logankopas/.nix-profile/etc/profile.d/nix.sh ]; then . /Users/logankopas/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
+
+# added by Anaconda2 5.0.1 installer
+export PATH="/anaconda2/bin:$PATH"

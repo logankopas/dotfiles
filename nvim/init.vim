@@ -186,8 +186,8 @@ nnoremap tn :ProjectRootExe TestNearest<CR>
 nnoremap tf :ProjectRootExe TestFile<CR>
 
 compiler pyunit
-set makeprg=python\ manage.py\ test
-set efm+=%-G%.%#lib/python%.%#/site-package%.%#,%C\ %.%#,%A\ \ File\ \"%f\"\\,\ line\ %l%.%#,%Z%[%^\ ]%\\@=%m
+"set makeprg=python\ manage.py\ test
+"set efm+=%-G%.%#lib/python%.%#/site-package%.%#,%C\ %.%#,%A\ \ File\ \"%f\"\\,\ line\ %l%.%#,%Z%[%^\ ]%\\@=%m
 "Plug 'reinh/vim-makegreen'
 Plug 'tpope/vim-scriptease'
 Plug '~/git/vim-makegreen'
@@ -281,7 +281,7 @@ nnoremap <leader><leader>; $a:<Esc>
 Plug 'junegunn/goyo.vim'
 let g:goyo_width=120
 
-"Plug 'ryanoasis/vim-devicons'
+Plug 'ryanoasis/vim-devicons'
 
 Plug 'godlygeek/tabular'
 Plug 'plasticboy/vim-markdown'
@@ -316,6 +316,8 @@ Plug 'eagletmt/neco-ghc'
 let g:haskellmode_completion_ghc = 0
 autocmd FileType haskell setlocal omnifunc=necoghc#omnifunc
 let g:ycm_semantic_triggers = {'haskell' : ['.']}
+
+Plug 'lervag/vimtex'
 
 
 call plug#end()
@@ -460,7 +462,9 @@ au FileType org
 au FileType gitcommit set tw=120
 au FileType text set tw=80
 au BufWritePost,FileWritePost *.tex
-    \ Make
+    \ make!
+au BufWinEnter *.tex
+    \ set makeprg=pdflatex\ %
 au BufWinEnter '__doc__' setlocal bufhidden=delete
 au BufWinLeave,WinLeave * setlocal nocursorline
 au BufWinEnter,WinEnter,BufWipeout * setlocal cursorline
@@ -668,7 +672,7 @@ nnoremap bp Oimport pudb; pu.db<C-c>
 
 " Create a mapping (e.g. in your .vimrc) like this:
 nmap bd <Plug>Kwbd
-nmap bb :e #<CR>
+nmap <leader>bb :e #<CR>
 
 inoremap # X<c-h>#
 set cinkeys-=0#

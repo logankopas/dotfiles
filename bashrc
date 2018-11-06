@@ -204,3 +204,15 @@ orig ()
     touch $1.orig;
     echo "created"
 }
+rmunzip ()
+{
+    unzip "$1" && rm "$1"
+}
+organize_photos() {
+    for i in `find . -maxdepth 1 -type f`; do DATE=`exiftool -T -d '%Y_%m_%d' -createdate $i`; mkdir -p $DATE; mv $i $DATE; done
+}
+complete -f -X '!*.zip' rmunzip
+export PATH="$PATH:$HOME/.globus-cli-virtualenv/bin"
+export ANSIBLE_NOCOWS=1
+#curl https://bootstrap.pypa.io/get-pip.py | python
+
