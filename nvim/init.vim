@@ -18,6 +18,12 @@ call plug#begin('~/.local/share/nvim/plugged')
 " Plugins
 "Plug 'vim-scripts/indentpython.vim'
 Plug 'Vimjas/vim-python-pep8-indent'
+Plug 'jpalardy/vim-slime'
+let g:slime_target = "neovim"
+
+Plug 'slashmili/alchemist.vim'
+
+Plug 'zxqfl/tabnine-vim'
 " YouCompleteMe
 if version > 703
     Plug 'Valloric/YouCompleteMe'
@@ -315,7 +321,7 @@ Plug 'eagletmt/neco-ghc'
 " Disable haskell-vim omnifunc
 let g:haskellmode_completion_ghc = 0
 autocmd FileType haskell setlocal omnifunc=necoghc#omnifunc
-let g:ycm_semantic_triggers = {'haskell' : ['.']}
+let g:ycm_semantic_triggers = {'haskell,elixir' : ['.']}
 
 Plug 'lervag/vimtex'
 
@@ -465,6 +471,8 @@ au BufWritePost,FileWritePost *.tex
     \ make!
 au BufWinEnter *.tex
     \ set makeprg=pdflatex\ %
+au FileType elixir
+    \ set makeprg=elixir\ %
 au BufWinEnter '__doc__' setlocal bufhidden=delete
 au BufWinLeave,WinLeave * setlocal nocursorline
 au BufWinEnter,WinEnter,BufWipeout * setlocal cursorline
