@@ -3,7 +3,6 @@
 #
 
 # allow non-interactive shells (vim) to use aliases
-shopt -s expand_aliases
 
 # so many ways to use ls
 alias ls='ls -G'
@@ -35,7 +34,7 @@ alias cb='git branch | grep "*" | cut -d" " -f2'
 alias fuck_pycharm='ls .idea/* | xargs -L1 git update-index --assume-unchanged'
 
 # I was having troubles with MacVim
-alias vim="DYLD_FORCE_FLAT_NAMESPACE=1 /Applications/MacVim.app/Contents/MacOS/Vim"
+#alias vim="DYLD_FORCE_FLAT_NAMESPACE=1 /Applications/MacVim.app/Contents/MacOS/Vim"
 alias less="less -r"
 
 # glances is a cool program, like a lightweight htop

@@ -18,36 +18,38 @@ call plug#begin('~/.local/share/nvim/plugged')
 " Plugins
 "Plug 'vim-scripts/indentpython.vim'
 Plug 'Vimjas/vim-python-pep8-indent'
+Plug 'zxqfl/tabnine-vim'
 " YouCompleteMe
-if version > 703
-    Plug 'Valloric/YouCompleteMe'
-endif
-" space-g go to definition
-" space-G open doc
-" space-u tag usages (replaces utags, maybe bring it back?)
-let g:ycm_autoclose_preview_window_after_completion=0
-let g:ycm_autoclose_preview_window_after_insertion=0
-let g:ycm_collect_identifiers_from_tag_files=1
-let g:ycm_use_ultisnips_completer = 1
-let g:ycm_seed_identifiers_with_syntax = 1
-let g:ycm_python_binary_path = 'python'
-let g:ycm_auto_start_csharp_server = 1
-let g:ycm_global_ycm_extra_conf = '~/dotfiles/ycm_extra_conf.py'
+"if version > 703
+"    Plug 'Valloric/YouCompleteMe'
+"endif
+"" space-g go to definition
+"" space-G open doc
+"" space-u tag usages (replaces utags, maybe bring it back?)
+"let g:ycm_path_to_python_interpreter = '/usr/local/bin/python'
+"let g:ycm_autoclose_preview_window_after_completion=0
+"let g:ycm_autoclose_preview_window_after_insertion=0
+"let g:ycm_collect_identifiers_from_tag_files=1
+"let g:ycm_use_ultisnips_completer = 1
+"let g:ycm_seed_identifiers_with_syntax = 1
+"let g:ycm_python_binary_path = 'python3'
+"let g:ycm_auto_start_csharp_server = 1
+"let g:ycm_global_ycm_extra_conf = '~/dotfiles/ycm_extra_conf.py'
 
 
-map <leader>g  :YcmCompleter GoToDefinitionElseDeclaration<CR>
-map <leader>G  :YcmCompleter GetDoc<CR>
-map <leader>u  :YcmCompleter GoToReferences<CR>
+"map <leader>g  :YcmCompleter GoToDefinitionElseDeclaration<CR>
+"map <leader>G  :YcmCompleter GetDoc<CR>
+"map <leader>u  :YcmCompleter GoToReferences<CR>
 " python support for youcompleteme
 " python with virtualenv support
-py << EOF
-import os
-import sys
-if 'VIRTUAL_ENV' in os.environ:
-    project_base_dir = os.environ['VIRTUAL_ENV']
-    activate_this = os.path.join(project_base_dir, 'bin/activate_this.py')
-    execfile(activate_this, dict(__file__=activate_this))
-EOF
+"py << EOF
+"import os
+"import sys
+"if 'VIRTUAL_ENV' in os.environ:
+"    project_base_dir = os.environ['VIRTUAL_ENV']
+"    activate_this = os.path.join(project_base_dir, 'bin/activate_this.py')
+"    execfile(activate_this, dict(__file__=activate_this))
+"EOF
 let python_highlight_all=1
 
 Plug 'dbakker/vim-projectroot'
@@ -56,6 +58,7 @@ Plug 'tpope/vim-eunuch'
 
 Plug 'vim-scripts/haskell.vim'
 Plug 'elixir-lang/vim-elixir'
+Plug 'lervag/vimtex'
 
 " fuzzyfinder
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': 'yes \| ./install' }
@@ -205,7 +208,7 @@ Plug 'tpope/vim-abolish'
 " for comprehensive text substitution
 
 if !has('nvim')
-    Plug 'tpope/vim-sensible'
+Plug 'tpope/vim-sensible'
 endif
 let g:python3_host_prog='/usr/local/bin/python3'
 
@@ -273,7 +276,7 @@ nnoremap <leader><leader>; $a:<Esc>
 Plug 'junegunn/goyo.vim'
 let g:goyo_width=120
 
-Plug 'ryanoasis/vim-devicons'
+"Plug 'ryanoasis/vim-devicons'
 
 Plug 'godlygeek/tabular'
 Plug 'plasticboy/vim-markdown'
@@ -318,6 +321,7 @@ filetype plugin indent on
 
 " defaults
 " set whichwrap+=<,>,h,l,[,]
+set mouse=a
 set hidden  " move off a file without saving
 set nu
 set tabstop=4
@@ -373,6 +377,10 @@ set undodir=$HOME/.vim/undo
 
 set undolevels=1000
 set undoreload=10000
+if !exists('g:ycm_semantic_triggers')
+    let g:ycm_semantic_triggers = {}
+endif
+let g:ycm_semantic_triggers.tex = g:vimtex#re#youcompleteme
 
 "''''''''''''''''''''''''' end plugin config
 
@@ -435,6 +443,7 @@ au BufNewFile,BufRead,BufEnter *.coffee,*.js,*.jsx,*.html,*.css,*.scss,*.rb,*.ym
     \ shiftwidth=2
 " flag bad whitespace as red
 au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
+au BufRead,BufNewFile *.py match BadWhitespace /print\s/
 " compile coffeescript on save
 au BufWritePost,FileWritePost *.coffee 
     \ silent make -o '%:p:h/../js/'
@@ -451,7 +460,9 @@ au FileType org
     \ nosmartindent
 au FileType gitcommit set tw=120
 au BufWritePost,FileWritePost *.tex
-    \ Make
+    \ make!
+au BufWinEnter *.tex
+    \ set makeprg=pdflatex\ %
 au BufWinEnter '__doc__' setlocal bufhidden=delete
 au BufWinLeave,WinLeave * setlocal nocursorline
 au BufWinEnter,WinEnter,BufWipeout * setlocal cursorline
