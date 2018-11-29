@@ -18,6 +18,8 @@ call plug#begin('~/.local/share/nvim/plugged')
 " Plugins
 "Plug 'vim-scripts/indentpython.vim'
 Plug 'Vimjas/vim-python-pep8-indent'
+Plug 'slashmili/alchemist.vim'
+
 Plug 'zxqfl/tabnine-vim'
 " YouCompleteMe
 "if version > 703
@@ -114,6 +116,8 @@ let g:airline_theme='bubblegum'
 let g:airline#extensions#branch#enabled = 0
 let g:airline_section_c='%<%F%m %#__accent_red#%{airline#util#wrap(airline#parts#readonly(),0)}%#__restore__#'
 set guifont=Inconsolata\ for\ Powerline:h15
+"set macligatures
+"set guifont=Fira\ Code:h12
 set encoding=utf-8
 set t_Co=256
 set fillchars+=stl:\ ,stlnc:\
@@ -137,6 +141,12 @@ Plug 'kchmck/vim-coffee-script'
 " vim-coffee
 let coffee_compiler='/Users/logankopas/work/regiondb/node_modules/coffee-script/bin/coffee'
 let coffee_make_options='--map'
+
+Plug 'fboender/bexec'
+set splitright
+let bexec_splitdir='ver'
+let bexec_rehighlight=1
+nmap <leader><leader>w :w<CR>:Bexec<CR>
 
 Plug 'pearofducks/ansible-vim'
 
@@ -181,8 +191,8 @@ nnoremap tn :ProjectRootExe TestNearest<CR>
 nnoremap tf :ProjectRootExe TestFile<CR>
 
 compiler pyunit
-set makeprg=python\ manage.py\ test
-set efm+=%-G%.%#lib/python%.%#/site-package%.%#,%C\ %.%#,%A\ \ File\ \"%f\"\\,\ line\ %l%.%#,%Z%[%^\ ]%\\@=%m
+"set makeprg=python\ manage.py\ test
+"set efm+=%-G%.%#lib/python%.%#/site-package%.%#,%C\ %.%#,%A\ \ File\ \"%f\"\\,\ line\ %l%.%#,%Z%[%^\ ]%\\@=%m
 "Plug 'reinh/vim-makegreen'
 Plug 'tpope/vim-scriptease'
 Plug '~/git/vim-makegreen'
@@ -310,7 +320,9 @@ Plug 'eagletmt/neco-ghc'
 " Disable haskell-vim omnifunc
 let g:haskellmode_completion_ghc = 0
 autocmd FileType haskell setlocal omnifunc=necoghc#omnifunc
-let g:ycm_semantic_triggers = {'haskell' : ['.']}
+let g:ycm_semantic_triggers = {'haskell,elixir' : ['.']}
+
+Plug 'lervag/vimtex'
 
 
 call plug#end()
@@ -459,6 +471,7 @@ au FileType org
     \ nocindent
     \ nosmartindent
 au FileType gitcommit set tw=120
+au FileType text set tw=80
 au BufWritePost,FileWritePost *.tex
     \ make!
 au BufWinEnter *.tex
@@ -670,7 +683,7 @@ nnoremap bp Oimport pudb; pu.db<C-c>
 
 " Create a mapping (e.g. in your .vimrc) like this:
 nmap bd <Plug>Kwbd
-nmap bb :e #<CR>
+nmap <leader>bb :e #<CR>
 
 inoremap # X<c-h>#
 set cinkeys-=0#
@@ -700,3 +713,9 @@ function! ToggleVerbose()
 endfunction
 
 tnoremap <Esc> <C-\><C-n>
+autocmd BufWinEnter,WinEnter term://* startinsert
+tnoremap <C-h> <C-\><C-n><C-w>h
+tnoremap <C-j> <C-\><C-n><C-w>j
+tnoremap <C-k> <C-\><C-n><C-w>k
+tnoremap <C-l> <C-\><C-n><C-w>l
+
