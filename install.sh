@@ -48,9 +48,9 @@ for file in bashrc bash_aliases bash_profile vimrc tmux.conf gitconfig pythonrc 
      fi
 done
 
-echo "Installing Vundle"
-mkdir -p "~/.vim/bundle/"
-git clone https://github.com/gmarik/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+echo "Installing Plugged"
+curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 # Load up new profile
 echo "Loading Profile"

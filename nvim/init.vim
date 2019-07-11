@@ -15,10 +15,13 @@ let mapleader="\<Space>"
 "''''''''''''''''''''''''' Begin plugins
 call plug#begin('~/.local/share/nvim/plugged')
 
+let g:python3_host_prog='/usr/local/bin/python3'
 " Plugins
 "Plug 'vim-scripts/indentpython.vim'
 Plug 'Vimjas/vim-python-pep8-indent'
 Plug 'slashmili/alchemist.vim'
+Plug 'rhysd/vim-grammarous'
+map <leader>g :GrammarousCheck<CR>
 
 Plug 'zxqfl/tabnine-vim'
 " YouCompleteMe
@@ -288,6 +291,10 @@ let g:goyo_width=120
 
 "Plug 'ryanoasis/vim-devicons'
 
+"Plug 'markdown-preview.vim'
+"let g:PluginDir = '/Users/logankopas/.local/share/plugged/markdown-preview.vim'
+
+
 Plug 'godlygeek/tabular'
 Plug 'plasticboy/vim-markdown'
 
@@ -455,7 +462,7 @@ au BufNewFile,BufRead,BufEnter *.coffee,*.js,*.jsx,*.html,*.css,*.scss,*.rb,*.ym
     \ shiftwidth=2
 " flag bad whitespace as red
 au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
-au BufRead,BufNewFile *.py match BadWhitespace /print\s/
+au BufRead,BufNewFile *.py match BadWhitespace /\<print\s/
 " compile coffeescript on save
 au BufWritePost,FileWritePost *.coffee 
     \ silent make -o '%:p:h/../js/'
@@ -475,7 +482,8 @@ au FileType text set tw=80
 au BufWritePost,FileWritePost *.tex
     \ make!
 au BufWinEnter *.tex
-    \ set makeprg=pdflatex\ %
+    \ set makeprg=pdflatex\ % |
+    \ setlocal spell spelllang=en_ca
 au BufWinEnter '__doc__' setlocal bufhidden=delete
 au BufWinLeave,WinLeave * setlocal nocursorline
 au BufWinEnter,WinEnter,BufWipeout * setlocal cursorline

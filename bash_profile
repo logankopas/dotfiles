@@ -18,5 +18,3 @@ if [ -d "$GHC_DOT_APP" ]; then
 fi
 
 
-# added by Anaconda3 5.1.0 installer
-export PATH="/Users/ljk003/anaconda3/bin:$PATH"

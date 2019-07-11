@@ -37,8 +37,6 @@ alias fuck_pycharm='ls .idea/* | xargs -L1 git update-index --assume-unchanged'
 #alias vim="DYLD_FORCE_FLAT_NAMESPACE=1 /Applications/MacVim.app/Contents/MacOS/Vim"
 alias less="less -r"
 
-# glances is a cool program, like a lightweight htop
-alias glances="glances --theme-white"
 
 # rsync is WAAAAAY better than cp or scp
 alias cp="rsync"
