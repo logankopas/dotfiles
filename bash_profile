@@ -18,3 +18,4 @@ if [ -d "$GHC_DOT_APP" ]; then
 fi
 
 
+. "$HOME/.cargo/env"

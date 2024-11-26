@@ -15,7 +15,7 @@ let mapleader="\<Space>"
 "''''''''''''''''''''''''' Begin plugins
 call plug#begin('~/.local/share/nvim/plugged')
 
-let g:python3_host_prog='/usr/local/bin/python3'
+let g:python3_host_prog='/opt/homebrew/bin/python3'
 " Plugins
 "Plug 'vim-scripts/indentpython.vim'
 Plug 'Vimjas/vim-python-pep8-indent'
@@ -23,7 +23,7 @@ Plug 'slashmili/alchemist.vim'
 Plug 'rhysd/vim-grammarous'
 map <leader>g :GrammarousCheck<CR>
 
-Plug 'zxqfl/tabnine-vim'
+" Plug 'zxqfl/tabnine-vim'
 " YouCompleteMe
 "if version > 703
 "    Plug 'Valloric/YouCompleteMe'
@@ -63,7 +63,6 @@ Plug 'tpope/vim-eunuch'
 
 Plug 'vim-scripts/haskell.vim'
 Plug 'elixir-lang/vim-elixir'
-Plug 'lervag/vimtex'
 
 " fuzzyfinder
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': 'yes \| ./install' }
@@ -111,7 +110,7 @@ Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 " Plug 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
 " powerline font stuff
-let g:airline_powerline_fonts=1
+let g:airline_powerline_fonts=0
 let g:airline#extensions#tabline#enabled=0
 let g:airline#extensions#whitespace#enabled=0
 let g:airline#extensions#highlighter#enabled=0
@@ -140,11 +139,6 @@ let NERDTreeIgnore = file_ignore_regex
 map <C-n> :NERDTreeToggle %<CR>
 
 "
-Plug 'kchmck/vim-coffee-script'
-" vim-coffee
-let coffee_compiler='/Users/logankopas/work/regiondb/node_modules/coffee-script/bin/coffee'
-let coffee_make_options='--map'
-
 Plug 'fboender/bexec'
 set splitright
 let bexec_splitdir='ver'
@@ -442,6 +436,8 @@ nnoremap <Left> :vertical resize -5<CR>
 nnoremap <Up> :resize +5<CR>
 nnoremap <Down> :resize -5<CR>
 
+au BufNewFile,BufRead,BufEnter *.pl
+    \ set ft=prolog
 " python files
 au BufNewFile,BufRead *.py,*.hs
     \ set tabstop=4
@@ -690,7 +686,7 @@ nnoremap <silent> <Plug>Kwbd :<C-u>Kwbd<CR>
 nnoremap bp Oimport pudb; pu.db<C-c>
 
 " Create a mapping (e.g. in your .vimrc) like this:
-nmap bd <Plug>Kwbd
+nmap bd <Plug>Kwbd<C-c>
 nmap <leader>bb :e #<CR>
 
 inoremap # X<c-h>#

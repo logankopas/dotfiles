@@ -7,7 +7,7 @@
 
 # log every command to ~/.logs
 # this isn't working :(
-export PROMPT_COMMAND='if [ "$(id -u)" -ne 0 ]; then echo "$(date "+%Y-%m-%d.%H:%M:%S") $(pwd) $(history 1)" >> ~/.logs/bash-history-$(date "+%Y-%m-%d").log; fi'
+#export PROMPT_COMMAND='if [ "$(id -u)" -ne 0 ]; then echo "$(date "+%Y-%m-%d.%H:%M:%S") $(pwd) $(history 1)" >> ~/.logs/bash-history-$(date "+%Y-%m-%d").log; fi'
 
 
 # from github mrzool/bash-sensible
@@ -69,3 +69,4 @@ export EDITOR="vi"
 [[ -e ~/.fun.sh ]] && . ~/.fun.sh
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 complete -f -X '*.zip' rmzip
+. "$HOME/.cargo/env"
