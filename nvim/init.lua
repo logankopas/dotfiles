@@ -161,6 +161,11 @@ vim.keymap.set("v", "<M-k>", ":m'<-2<CR>`>my`<mzgv`yo`z",
 vim.keymap.set("n", "<leader>p", ":pclose<CR>",
     { desc =  "Close any open preview window."})
 
+-- Diagnostics
+vim.keymap.set("n", "<leader>ee", vim.diagnostic.open_float,
+    { desc = "Open diagnostic window." })
+
+
 -- Terminal
 vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
 
@@ -287,7 +292,36 @@ local plugins = {
                 desc = "Buffer Local Keymaps (which-key)",
             },
         },
-    }
+    },
+
+    -- LSP stuff
+    {
+        "VonHeikemen/lsp-zero.nvim",
+        branch = "v4.x",
+        dependencies = {
+            -- LSP Support
+            { "neovim/nvim-lspconfig" },
+            {
+                "williamboman/mason.nvim",
+                build = function()
+                    pcall(vim.cmd, "MasonUpdate")
+                end,
+            },
+            { "williamboman/mason-lspconfig.nvim" },
+
+            -- Autocompletion
+            { "hrsh7th/nvim-cmp" },
+            { "hrsh7th/cmp-nvim-lsp" },
+            { "hrsh7th/cmp-path" },
+            { "L3MON4D3/LuaSnip" },
+            { "hrsh7th/cmp-buffer" },
+            { "hrsh7th/cmp-nvim-lsp-signature-help" },
+        },
+    },
+
+    -- None-LS
+    { "nvimtools/none-ls.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
+    { "jay-babu/mason-null-ls.nvim" },
 
 }
 
@@ -465,4 +499,152 @@ vim.keymap.set("n", "<leader>ft", builtin.treesitter,
     { desc = "Telescope treesitter" })
 vim.keymap.set("n", "<leader>fp", builtin.planets, 
     { desc = "Telescope planets" })
+vim.keymap.set("n", "<leader>fq", builtin.quickfix, 
+    { desc = "Telescope quickfix" })
+vim.keymap.set("n", "<leader>fl", builtin.loclist, 
+    { desc = "Telescope loclist" })
+vim.keymap.set("n", "<leader>fd", builtin.diagnostics, 
+    { desc = "Telescope diagnostics" })
 
+
+-- ####################
+-- LSP Section
+-- ####################
+
+-- Copied and modified from carderne/dotfiles
+local cmp = require("cmp")
+local cmp_format = require("lsp-zero").cmp_format()
+cmp.setup({
+    formatting = cmp_format,
+    snippet = {
+        expand = function(args)
+            require("luasnip").lsp_expand(args.body)
+        end,
+    },
+    sources = cmp.config.sources({
+        { name = "nvim_lsp" },
+        { name = "luasnip" },
+        { name = "nvim_lsp_signature_help" },
+        { name = "path", max_item_count = 6 },
+    }, {
+        { name = "buffer" },
+    }),
+    preselect = "item",
+    completion = {
+        completeopt = "menu,menuone,noinsert",
+    },
+    mapping = cmp.mapping.preset.insert({
+        ["<C-e>"] = cmp.mapping.abort(),
+        ["<CR>"] = cmp.mapping.confirm({ select = false }),
+        ["<Tab>"] = cmp.mapping.confirm({select = true}),
+        ["<C-k>"] = cmp.mapping.select_prev_item({ behavior = "insert" }),
+        ["<C-j>"] = cmp.mapping.select_next_item({ behavior = "insert" }), -- or select
+    }),
+})
+
+local lsp_zero = require("lsp-zero")
+local lsp_attach = function(client, bufnr)
+    local opts = { buffer = bufnr }
+    lsp_zero.default_keymaps(opts)
+    vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+    -- nnoremap <silent> ca <cmd>lua vim.lsp.buf.code_action()<CR>
+    vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+    vim.keymap.set("n", "gd", builtin.lsp_definitions, opts)
+    vim.keymap.set("n", "gr", builtin.lsp_references, opts)
+
+    -- Disable semantic highlights
+    client.server_capabilities.semanticTokensProvider = nil
+end
+lsp_zero.extend_lspconfig({
+    capabilities = require("cmp_nvim_lsp").default_capabilities(),
+    lsp_attach = lsp_attach,
+    float_border = "rounded",
+    sign_text = true,
+})
+
+require("mason").setup({})
+require("mason-lspconfig").setup({
+    -- https://github.com/williamboman/mason-lspconfig.nvim#available-lsp-servers
+    ensure_installed = {
+        -- "tsserver",
+        -- "ts_ls",
+        -- "basedpyright",
+        -- "pyright",
+        "ruff",
+        -- "eslint",
+        -- "bashls",
+        -- "beancount",
+        -- "cssls",
+        -- "dockerls",
+        -- "docker_compose_language_service",
+        -- "gopls",
+        -- "html",
+        -- "jsonls",
+        -- "lua_ls",
+        "rust_analyzer@2024-10-14",
+        -- "sqlls",
+        -- "terraformls",
+        -- "yamlls",
+        -- "pest_ls",
+    },
+    handlers = {
+        lsp_zero.default_setup,
+    },
+})
+-- require("mason-lspconfig").setup_handlers({
+--     function(server_name) -- default handler (optional)
+--         -- https://github.com/neovim/nvim-lspconfig/pull/3232
+--         server_name = server_name == 'tsserver' and 'ts_ls' or server_name
+--         local capabilities = require("cmp_nvim_lsp").default_capabilities()
+--         require("lspconfig")[server_name].setup({
+--             capabilities = capabilities,
+--         })
+--     end,
+-- })
+
+require("lspconfig").rust_analyzer.setup({
+    settings = {
+        ["rust-analyzer"] = {
+            cargo = {
+                allFeatures = true,
+            },
+            diagnostic = {
+                enabled = false
+            }
+        },
+    },
+})
+
+lsp_zero.format_mapping("<leader>fo", {
+    format_opts = {
+        async = true,
+        timeout_ms = 10000,
+    },
+    servers = {
+        -- ["null-ls"] = { "javascript", "typescript", "lua", "go", "json", "typescriptreact" },
+        ["rust_analyzer"] = { "rust" },
+        ["ruff"] = { "python" },
+    },
+})
+
+local null_ls = require("null-ls")
+null_ls.setup({
+    sources = {
+        null_ls.builtins.formatting.prettier,
+        null_ls.builtins.formatting.stylua,
+        -- null_ls.builtins.formatting.jq,
+        null_ls.builtins.formatting.gofmt,
+        -- null_ls.builtins.formatting.ruff,
+    },
+})
+require("mason-null-ls").setup({
+    ensure_installed = nil,
+    automatic_installation = true,
+})
+
+vim.diagnostic.config({
+    virtual_text = false,
+    signs = true,
+    update_in_insert = false,
+    underline = true,
+})
