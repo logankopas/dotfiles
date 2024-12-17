@@ -49,10 +49,6 @@ for file in bashrc bash_aliases bash_profile vimrc tmux.conf gitconfig pythonrc 
      fi
 done
 
-echo "Installing Plugged"
-curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
-    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-
 # Load up new profile
 echo "Loading Profile"
 source ~/.bash_profile

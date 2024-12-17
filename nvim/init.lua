@@ -172,6 +172,22 @@ vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
 -- Easy paste
 -- Searching in visual mode
 -- Toggle quickfix
+--
+-- These plugins were lost when my init file was lost. Maybe add them back
+--  cmp-nvim-lsp
+--  mason-lspconfig.nvim
+--  mason-null-ls.nvim
+--  mason.nvim
+--  none-ls.nvim
+--  nvim-cmp
+--  nvim-lspconfig
+--  nvim-surround
+--  nvim-ts-autotag
+--  trouble.nvim
+--  ultimate-autopair.nvim
+--  vim-emacs-bindings
+--  vim-python-pep8-indent
+--  which-key.nvim
 
 
 -- ####################
@@ -218,11 +234,59 @@ local plugins = {
     
     -- Better vim-sneak
     { "ggandor/leap.nvim" },
+    
+    -- Another motion plugin
+    { "ChrisPenner/vim-emacs-bindings" },
 
     -- Telescope
     {
         "nvim-telescope/telescope.nvim", tag = "0.1.8",
         dependencies = { "nvim-lua/plenary.nvim" }
+    },
+
+    -- Surround things (brackets, quotes, tags, etc)
+    {
+        "kylechui/nvim-surround",
+        version = "*",
+        event = "VeryLazy",
+        config = function()
+            require("nvim-surround").setup({})
+        end
+    },
+    {
+        "windwp/nvim-ts-autotag",
+        config = function()
+            require("nvim-ts-autotag").setup({})
+    	end
+    },
+    {
+        'altermo/ultimate-autopair.nvim',
+        event={'InsertEnter','CmdlineEnter'},
+        branch='v0.6',
+        config = function()
+            require("ultimate-autopair").setup({})
+        end
+
+    },
+
+    -- Help me remember my keys!
+    {
+        "folke/which-key.nvim",
+        event = "VeryLazy",
+        opts = {
+            -- your configuration comes here
+            -- or leave it empty to use the default settings
+            -- refer to the configuration section below
+        },
+        keys = {
+            {
+                "<leader>?",
+                function()
+                    require("which-key").show({ global = false })
+                end,
+                desc = "Buffer Local Keymaps (which-key)",
+            },
+        },
     }
 
 }
@@ -401,3 +465,4 @@ vim.keymap.set("n", "<leader>ft", builtin.treesitter,
     { desc = "Telescope treesitter" })
 vim.keymap.set("n", "<leader>fp", builtin.planets, 
     { desc = "Telescope planets" })
+
