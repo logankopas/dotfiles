@@ -69,6 +69,9 @@ vim.opt.wildignore:append({ "*.pyc", "*/tmp/*", ".git/*", "*.zip", "*.gz", "*.sw
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
+-- Buffer settings
+vim.opt.hidden = true
+
 -- Trial Settings (to see if I like them)
 
 -- System Clipboard
@@ -160,6 +163,30 @@ vim.keymap.set("v", "<M-k>", ":m'<-2<CR>`>my`<mzgv`yo`z",
 -- Sub windows 
 vim.keymap.set("n", "<leader>p", ":pclose<CR>",
     { desc =  "Close any open preview window."})
+-- Terminals
+vim.keymap.set("n", "<leader>t", ":1ToggleTerm direction=float name=scratch-shell<CR>",
+    { desc = "Toggle main terminal." })
+vim.keymap.set("n", "<leader>T", ":2ToggleTerm direction=float name=background<CR>",
+    { desc = "Toggle terminal for background processes." })
+vim.keymap.set("v", "<leader>t", function()
+    require("toggleterm").send_lines_to_terminal("visual_lines", false, { args = 1 })
+end, { desc = "Send lines to main terminal" })
+vim.keymap.set("v", "<leader>T", function()
+    require("toggleterm").send_lines_to_terminal("visual_lines", false, { args = 2 })
+end, { desc = "Send lines to background terminal" })
+-- This one only happens in the terminal buffers
+function _G.set_terminal_keymaps()
+    vim.keymap.set("n", "<esc>", ":ToggleTerm<CR>",
+    { desc = "Hide the current terminal." })
+end
+vim.api.nvim_create_autocmd("TermOpen", {
+    pattern = { "term://*toggleterm#*" },
+    callback = function()
+        vim.keymap.set("n", "<esc>", ":ToggleTerm<CR>",
+            { buffer = 0, desc = "Hide the current terminal." })
+    end
+})
+
 
 -- Diagnostics
 vim.keymap.set("n", "<leader>ee", vim.diagnostic.open_float,
@@ -274,6 +301,11 @@ local plugins = {
 
     },
 
+    -- Terminal
+    {
+        'akinsho/toggleterm.nvim', version = "*", config = true
+    },
+
     -- Help me remember my keys!
     {
         "folke/which-key.nvim",
@@ -380,9 +412,10 @@ require("nvim-treesitter.configs").setup({
     sync_install = false,
     auto_install = true,
     highlight = {
-        enable = true
+        enable = true,
     }
 })
+vim.api.nvim_set_hl(0, "DiagnosticUnnecessary", { link = "WarningText" })
 
 -- Indentation
 require("ibl").setup({
@@ -485,6 +518,14 @@ require("lualine").setup({
 -- Leap
 require("leap").add_default_mappings()
 
+-- Terminal
+require("toggleterm").setup({
+    direction = float,
+    float_opts = {
+        border = 'curved'
+    }
+})
+
 -- Telescope
 local builtin = require("telescope.builtin")
 vim.keymap.set("n", "<leader>ff", builtin.find_files, 
@@ -536,7 +577,7 @@ cmp.setup({
     mapping = cmp.mapping.preset.insert({
         ["<C-e>"] = cmp.mapping.abort(),
         ["<CR>"] = cmp.mapping.confirm({ select = false }),
-        ["<Tab>"] = cmp.mapping.confirm({select = true}),
+        ["<Tab>"] = cmp.mapping.confirm({ select = true }),
         ["<C-k>"] = cmp.mapping.select_prev_item({ behavior = "insert" }),
         ["<C-j>"] = cmp.mapping.select_next_item({ behavior = "insert" }), -- or select
     }),
@@ -568,9 +609,9 @@ require("mason-lspconfig").setup({
     ensure_installed = {
         -- "tsserver",
         -- "ts_ls",
-        -- "basedpyright",
+        "basedpyright",
         -- "pyright",
-        "ruff",
+        -- "ruff",
         -- "eslint",
         -- "bashls",
         -- "beancount",
@@ -603,14 +644,29 @@ require("mason-lspconfig").setup({
 -- })
 
 require("lspconfig").rust_analyzer.setup({
+    on_attach = lsp_attach,
     settings = {
         ["rust-analyzer"] = {
             cargo = {
                 allFeatures = true,
             },
-            diagnostic = {
-                enabled = false
+            diagnostics = {
+                enabled = true
             }
+        },
+    },
+})
+
+require("lspconfig").basedpyright.setup({
+    on_attach = lsp_attach,
+    settings = {
+        ["basedpyright"] = {
+            analysis = {
+                typeCheckingMode = "standard",
+                diagnosticSeverityOverrides = {
+                    reportOptionalMemberAccess = "warning"
+                }
+            },
         },
     },
 })
@@ -623,7 +679,7 @@ lsp_zero.format_mapping("<leader>fo", {
     servers = {
         -- ["null-ls"] = { "javascript", "typescript", "lua", "go", "json", "typescriptreact" },
         ["rust_analyzer"] = { "rust" },
-        ["ruff"] = { "python" },
+        ["basedpyright"] = { "python" },
     },
 })
 
