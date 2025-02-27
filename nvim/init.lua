@@ -3,7 +3,7 @@
 -- ####################
 
 -- Basic Settings
-vim.opt.mouse = "a"
+vim.opt.mouse = "n"
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.spelllang = "en_gb"
@@ -75,7 +75,7 @@ vim.opt.hidden = true
 -- Trial Settings (to see if I like them)
 
 -- System Clipboard
-vim.opt.clipboard:append({ "unnamed", "unnamedplus" })
+vim.opt.clipboard:append({ "unnamed" })
 
 -- Title
 vim.opt.title = true -- set the title of window to the value of the titlestring
@@ -103,15 +103,41 @@ vim.keymap.set("n", "<leader>ev", ":vsp ~/dotfiles/nvim/init.lua<CR>",
 vim.keymap.set("n", "<leader>sv", ":source ~/dotfiles/nvim/init.lua<CR>", 
     { desc = "Reload configuration file." })
 
+-- Turn off mouse
+vim.keymap.set("n", "<LeftMouse>", "")
+vim.keymap.set("n", "<LeftDrag>", "")
+vim.keymap.set("n", "<LeftRelease>", "")
+vim.keymap.set("t", "<LeftMouse>", "")
+vim.keymap.set("t", "<LeftDrag>", "")
+vim.keymap.set("t", "<LeftRelease>", "")
+
 -- Tab/Window Keys
 vim.keymap.set("n", "gt", ":bnext<CR>", 
     { desc = "Goto next buffer." })
 vim.keymap.set("n", "gT", ":bprev<CR>", 
     { desc = "Goto previous buffer" })
-vim.keymap.set("n", "gb", ":e #<CR>", 
-    { desc = "Goto last buffer." })
-vim.keymap.set("n", "<leader>b", ":bd<CR>", 
+vim.keymap.set("n", "g1", ":b1<CR>", 
+    { desc = "Goto 1st buffer" })
+vim.keymap.set("n", "g2", ":b2<CR>", 
+    { desc = "Goto 2nd buffer" })
+vim.keymap.set("n", "g3", ":b3<CR>", 
+    { desc = "Goto 3rd buffer" })
+vim.keymap.set("n", "g4", ":b4<CR>", 
+    { desc = "Goto 4th buffer" })
+vim.keymap.set("n", "g5", ":b5<CR>", 
+    { desc = "Goto 5th buffer" })
+vim.keymap.set("n", "g6", ":b6<CR>", 
+    { desc = "Goto 6th buffer" })
+vim.keymap.set("n", "g7", ":b7<CR>", 
+    { desc = "Goto 7th buffer" })
+vim.keymap.set("n", "g8", ":b8<CR>", 
+    { desc = "Goto 8th buffer" })
+vim.keymap.set("n", "g9", ":b9<CR>", 
+    { desc = "Goto 9th buffer" })
+vim.keymap.set("n", "bd", ":bd<CR>", 
     { desc = "Close and delete current buffer." })
+vim.keymap.set("n", "gG", ":b #<CR>", 
+    { desc = "Goto last buffer." })
 vim.keymap.set("n", "<C-k>", ":wincmd k<CR>", 
     { silent = true, desc = "Goto next split window above." })
 vim.keymap.set("n", "<C-j>", ":wincmd j<CR>", 
@@ -139,9 +165,14 @@ vim.keymap.set("n", "<leader>;", "$a;<Esc>",
 vim.keymap.set("n", "<leader><leader>;", "$a:<Esc>", 
     { desc = "Add a colon to EOL." })
 
--- Pasting in visual mode
+-- Pasting
 vim.keymap.set("x", "p", "pgvy", 
     { desc = "Paste in visual mode without overwriting clipboard." })
+vim.keymap.set("n", "c", "\"_c",
+    { desc = "c command remapped to keep register" })
+vim.keymap.set("n", "C", "\"_C",
+    { desc = "C command remapped to keep register" })
+
 
 -- Navigating with wrap
 vim.keymap.set("", "j", "gj",
@@ -164,10 +195,14 @@ vim.keymap.set("v", "<M-k>", ":m'<-2<CR>`>my`<mzgv`yo`z",
 vim.keymap.set("n", "<leader>p", ":pclose<CR>",
     { desc =  "Close any open preview window."})
 -- Terminals
-vim.keymap.set("n", "<leader>t", ":1ToggleTerm direction=float name=scratch-shell<CR>",
+vim.keymap.set("n", "<leader>t", ":1ToggleTerm direction=float name=main-shell<CR>",
     { desc = "Toggle main terminal." })
+vim.keymap.set("n", "<leader><leader>t", ":1ToggleTerm direction=vertical name=main-shell<CR>",
+    { desc = "Toggle main terminal in vertical mode." })
 vim.keymap.set("n", "<leader>T", ":2ToggleTerm direction=float name=background<CR>",
     { desc = "Toggle terminal for background processes." })
+vim.keymap.set("n", "<leader><leader>T", ":2ToggleTerm direction=vertical name=background<CR>",
+    { desc = "Toggle terminal for background jobs in vertical mode." })
 vim.keymap.set("v", "<leader>t", function()
     require("toggleterm").send_lines_to_terminal("visual_lines", false, { args = 1 })
 end, { desc = "Send lines to main terminal" })
@@ -175,10 +210,6 @@ vim.keymap.set("v", "<leader>T", function()
     require("toggleterm").send_lines_to_terminal("visual_lines", false, { args = 2 })
 end, { desc = "Send lines to background terminal" })
 -- This one only happens in the terminal buffers
-function _G.set_terminal_keymaps()
-    vim.keymap.set("n", "<esc>", ":ToggleTerm<CR>",
-    { desc = "Hide the current terminal." })
-end
 vim.api.nvim_create_autocmd("TermOpen", {
     pattern = { "term://*toggleterm#*" },
     callback = function()
@@ -242,6 +273,9 @@ local plugins = {
 
     -- Nice indentation
     { "lukas-reineke/indent-blankline.nvim", main = "ibl" },
+
+    -- Whitespace Highlighting
+    { "ntpeters/vim-better-whitespace" },
 
     -- Commenting
     { 
@@ -413,7 +447,10 @@ require("nvim-treesitter.configs").setup({
     auto_install = true,
     highlight = {
         enable = true,
-    }
+    },
+    indent = {
+        enable = true,
+    },
 })
 vim.api.nvim_set_hl(0, "DiagnosticUnnecessary", { link = "WarningText" })
 
@@ -523,17 +560,39 @@ require("toggleterm").setup({
     direction = float,
     float_opts = {
         border = 'curved'
-    }
+    },
+    persist_mode = false
 })
 
 -- Telescope
+require('telescope').setup({
+    defaults = {
+        mappings = {
+            n = {
+                ["<c-d>"] = "delete_buffer"
+            },
+            i = {
+                ["<c-d>"] = "delete_buffer"
+            }
+        }
+    }
+
+})
 local builtin = require("telescope.builtin")
 vim.keymap.set("n", "<leader>ff", builtin.find_files, 
     { desc = "Telescope find files" })
 vim.keymap.set("n", "<leader>fg", builtin.live_grep, 
     { desc = "Telescope live grep" })
+vim.keymap.set("n", "<leader>fk", builtin.grep_string, 
+    { desc = "Telescope grep for string under cursor" })
 vim.keymap.set("n", "<leader>fb", builtin.buffers, 
     { desc = "Telescope buffers" })
+vim.keymap.set("n", "<leader>fc", builtin.command_history, 
+    { desc = "Telescope command history" })
+vim.keymap.set("n", "<leader>fs", builtin.search_history, 
+    { desc = "Telescope search history" })
+vim.keymap.set("n", "<leader>fr", builtin.registers, 
+    { desc = "Telescope registers" })
 vim.keymap.set("n", "<leader>fh", builtin.help_tags, 
     { desc = "Telescope help tags" })
 vim.keymap.set("n", "<leader>ft", builtin.treesitter, 
@@ -546,6 +605,8 @@ vim.keymap.set("n", "<leader>fl", builtin.loclist,
     { desc = "Telescope loclist" })
 vim.keymap.set("n", "<leader>fd", builtin.diagnostics, 
     { desc = "Telescope diagnostics" })
+vim.keymap.set("n", "<leader><leader>f", builtin.resume, 
+    { desc = "Telescope resume" })
 
 
 -- ####################
@@ -576,7 +637,6 @@ cmp.setup({
     },
     mapping = cmp.mapping.preset.insert({
         ["<C-e>"] = cmp.mapping.abort(),
-        ["<CR>"] = cmp.mapping.confirm({ select = false }),
         ["<Tab>"] = cmp.mapping.confirm({ select = true }),
         ["<C-k>"] = cmp.mapping.select_prev_item({ behavior = "insert" }),
         ["<C-j>"] = cmp.mapping.select_next_item({ behavior = "insert" }), -- or select
@@ -652,7 +712,12 @@ require("lspconfig").rust_analyzer.setup({
             },
             diagnostics = {
                 enabled = true
-            }
+            },
+            completion = {
+                autoimport = {
+                    enabled = false,
+                }
+            },
         },
     },
 })
@@ -665,7 +730,8 @@ require("lspconfig").basedpyright.setup({
                 typeCheckingMode = "standard",
                 diagnosticSeverityOverrides = {
                     reportOptionalMemberAccess = "warning"
-                }
+                },
+                autoImportCompletions = false
             },
         },
     },
@@ -679,7 +745,7 @@ lsp_zero.format_mapping("<leader>fo", {
     servers = {
         -- ["null-ls"] = { "javascript", "typescript", "lua", "go", "json", "typescriptreact" },
         ["rust_analyzer"] = { "rust" },
-        ["basedpyright"] = { "python" },
+        ["ruff"] = { "python" },
     },
 })
 
