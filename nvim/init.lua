@@ -42,6 +42,7 @@ vim.opt.showbreak = "-->"
 -- Display Settings
 vim.opt.termguicolors = true
 vim.opt.background = "dark"
+vim.opt.fillchars = "vert: "
 
 -- Persist undo
 vim.opt.undodir = vim.fn.stdpath("cache") .. "/undo"
@@ -213,8 +214,12 @@ end, { desc = "Send lines to background terminal" })
 vim.api.nvim_create_autocmd("TermOpen", {
     pattern = { "term://*toggleterm#*" },
     callback = function()
-        vim.keymap.set("n", "<esc>", ":ToggleTerm<CR>",
+        vim.keymap.set("n", "<C-c>", ":ToggleTerm<CR>",
             { buffer = 0, desc = "Hide the current terminal." })
+        vim.keymap.set("t", "<C-h>", "<C-\\><C-n>:wincmd h<CR>", 
+            { silent = true, buffer=0, desc = "Goto next split window left." })
+        vim.keymap.set("t", "<C-u>", "<C-\\><C-n><C-u>", 
+            { silent = true, buffer=0, desc = "Scroll up" })
     end
 })
 
@@ -491,13 +496,16 @@ vim.keymap.set("n", "<C-n>",
 -- Lualine
 -- bubbles theme
 local colors = {
-    blue   = '#458588',
-    aqua   = '#8ec07c',
-    black  = '#282828',
-    white  = '#ebdbb2',
-    red    = '#cc241d',
-    violet = '#b16286',
-    grey   = '#928374',
+    blue         = '#458588',
+    aqua         = '#8ec07c',
+    black        = '#282828',
+    white        = '#ebdbb2',
+    red          = '#cc241d',
+    violet       = '#b16286',
+    grey         = '#928374',
+    main_bg      = '#1d2021',
+    secondary_bg = '#282828',
+    dark_red     = '#7b2c2f'
 }
 
 local bubbles_theme = {
@@ -510,20 +518,26 @@ local bubbles_theme = {
     insert = { a = { fg = colors.black, bg = colors.blue } },
     visual = { a = { fg = colors.black, bg = colors.aqua } },
     replace = { a = { fg = colors.black, bg = colors.red } },
+    terminal = { a = { fg = colors.black, bg = colors.blue } },
 
     inactive = {
         a = { fg = colors.white, bg = colors.black },
         b = { fg = colors.white, bg = colors.black },
-        c = { fg = colors.white },
+        c = { fg = colors.white, bg = "#7b2c2f" },
     },
 }
 
 require("lualine").setup({
-    options = { 
+    options = {
         theme = bubbles_theme,
         component_separators = "",
-        section_separators = { left = "", right = "" }
-        
+        section_separators = { left = "", right = "" },
+        always_show_tabline = true,
+        disabled_filetypes = {
+            'mason',
+            'lazy',
+            'TelescopePrompt'
+        }
 
     },
     sections = {
@@ -547,7 +561,16 @@ require("lualine").setup({
         lualine_z = { "location" },
     },
     tabline = {
-        lualine_a = { "buffers" }
+        lualine_a = {
+            {
+                "buffers",
+                mode = 4,
+                use_mode_colors = true
+
+            }
+
+        },
+        lualine_z = { "tabs" }
     },
     extensions = {},
 })
@@ -561,7 +584,12 @@ require("toggleterm").setup({
     float_opts = {
         border = 'curved'
     },
-    persist_mode = false
+    highlights = {
+        Normal = { guibg = colors.main_bg },
+        NormalFloat = { link = "Normal" },
+        NormalNC = { guibg = colors.secondary_bg }
+    },
+    persist_mode = true
 })
 
 -- Telescope
@@ -770,3 +798,13 @@ vim.diagnostic.config({
     update_in_insert = false,
     underline = true,
 })
+
+-- ##########################
+-- Highlighting active window
+-- ##########################
+
+vim.api.nvim_set_hl(0, 'Normal', { bg=colors.main_bg })
+vim.api.nvim_set_hl(0, 'NormalNC', { bg=colors.secondary_bg })
+vim.api.nvim_set_hl(0, 'WinSeparator', { bg=colors.dark_red })
+vim.api.nvim_set_hl(0, 'StatusLine', { bg=colors.dark_red })
+-- vim.api.nvim_set_hl(0, '', {})
