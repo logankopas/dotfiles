@@ -210,12 +210,28 @@ end, { desc = "Send lines to main terminal" })
 vim.keymap.set("v", "<leader>T", function()
     require("toggleterm").send_lines_to_terminal("visual_lines", false, { args = 2 })
 end, { desc = "Send lines to background terminal" })
+vim.keymap.set("n", "<C-;>", function()
+    -- find terminal channel
+    local bufnr = vim.api.nvim_exec2('echo filter(map(getbufinfo(), "v:val.bufnr"), "getbufvar(v:val, \\"toggle_number\\") is# 1")[0]', { output = true }).output
+    local channel = vim.bo[tonumber(bufnr)].channel
+
+    -- send <C-c><Up>
+    vim.api.nvim_chan_send(channel, "\x03\x1b\x4f\x41")
+
+end, { desc = "End command in terminal and queue last command" })
+vim.keymap.set("n", "<C-'>", function()
+    -- find terminal channel
+    local bufnr = vim.api.nvim_exec2('echo filter(map(getbufinfo(), "v:val.bufnr"), "getbufvar(v:val, \\"toggle_number\\") is# 1")[0]', { output = true }).output
+    local channel = vim.bo[tonumber(bufnr)].channel
+
+    -- send <C-c><Up>
+    vim.api.nvim_chan_send(channel, "\r")
+
+end, { desc = "Send Enter key to terminal" })
 -- This one only happens in the terminal buffers
 vim.api.nvim_create_autocmd("TermOpen", {
     pattern = { "term://*toggleterm#*" },
     callback = function()
-        vim.keymap.set("n", "<C-c>", ":ToggleTerm<CR>",
-            { buffer = 0, desc = "Hide the current terminal." })
         vim.keymap.set("t", "<C-h>", "<C-\\><C-n>:wincmd h<CR>", 
             { silent = true, buffer=0, desc = "Goto next split window left." })
         vim.keymap.set("t", "<C-u>", "<C-\\><C-n><C-u>", 
@@ -580,6 +596,12 @@ require("leap").add_default_mappings()
 
 -- Terminal
 require("toggleterm").setup({
+    size = function (term)
+        if term.direction == 'vertical' then
+            return vim.o.columns * 0.4
+        end
+        return 20
+    end,
     direction = float,
     float_opts = {
         border = 'curved'
@@ -589,7 +611,9 @@ require("toggleterm").setup({
         NormalFloat = { link = "Normal" },
         NormalNC = { guibg = colors.secondary_bg }
     },
-    persist_mode = true
+    persist_mode = true,
+    persist_size = true,
+    auto_scroll = false
 })
 
 -- Telescope
