@@ -135,7 +135,7 @@ vim.keymap.set("n", "g8", ":b8<CR>",
     { desc = "Goto 8th buffer" })
 vim.keymap.set("n", "g9", ":b9<CR>", 
     { desc = "Goto 9th buffer" })
-vim.keymap.set("n", "bd", ":bd<CR>", 
+vim.keymap.set("n", "bd", ":bp|bd #<CR>", 
     { desc = "Close and delete current buffer." })
 vim.keymap.set("n", "gG", ":b #<CR>", 
     { desc = "Goto last buffer." })
@@ -248,6 +248,11 @@ vim.keymap.set("n", "<leader>ee", vim.diagnostic.open_float,
 -- Terminal
 vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
 
+-- Git
+vim.keymap.set("n", "<leader>gb", ":GitBlameToggle<CR>",
+    { desc = "Git Blame Toggle" })
+vim.keymap.set("n", "<leader>gu", ":GitBlameOpenCommitURL<CR>",
+    { desc = "Git Blame Toggle" })
 
 -- ####################
 -- TODO section
@@ -331,6 +336,12 @@ local plugins = {
         dependencies = { "nvim-lua/plenary.nvim" }
     },
 
+    -- Syntax
+    {
+        "Glench/Vim-Jinja2-Syntax"
+    },
+
+
     -- Surround things (brackets, quotes, tags, etc)
     {
         "kylechui/nvim-surround",
@@ -359,6 +370,15 @@ local plugins = {
     -- Terminal
     {
         'akinsho/toggleterm.nvim', version = "*", config = true
+    },
+
+    -- Git
+    {
+        'f-person/git-blame.nvim',
+        event='VeryLazy',
+        opts = {
+            enabled = false
+        }
     },
 
     -- Help me remember my keys!
@@ -398,7 +418,7 @@ local plugins = {
 
             -- Autocompletion
             { "hrsh7th/nvim-cmp" },
-            { "hrsh7th/cmp-nvim-lsp" },
+            { "hrsh7th/cmp-nvim-lsp", commit = "99290b3ec1322070bcfb9e846450a46f6efa50f0" },
             { "hrsh7th/cmp-path" },
             { "L3MON4D3/LuaSnip" },
             { "hrsh7th/cmp-buffer" },
@@ -447,6 +467,7 @@ require("nvim-treesitter.configs").setup({
         "dockerfile",
         "eex",
         "elixir",
+        "heex",
         "html",
         "javascript",
         "jq",
@@ -495,7 +516,19 @@ require("nvim-tree").setup({
     actions = {
         change_dir = { enable = true },
 
-        open_file = { quit_on_open = true }
+        open_file = { 
+            quit_on_open = true,
+            window_picker = { enable = false }
+        }
+    },
+    view = {
+        float = { 
+            enable = true,
+            open_win_config = {
+                height = 50
+            }
+        },
+        preserve_window_proportions = true 
     }
 })
 
@@ -520,7 +553,7 @@ local colors = {
     violet       = '#b16286',
     grey         = '#928374',
     main_bg      = '#1d2021',
-    secondary_bg = '#282828',
+    secondary_bg = '#4d4040',
     dark_red     = '#7b2c2f'
 }
 
@@ -655,11 +688,43 @@ vim.keymap.set("n", "<leader>fq", builtin.quickfix,
     { desc = "Telescope quickfix" })
 vim.keymap.set("n", "<leader>fl", builtin.loclist, 
     { desc = "Telescope loclist" })
-vim.keymap.set("n", "<leader>fd", builtin.diagnostics, 
-    { desc = "Telescope diagnostics" })
+vim.keymap.set("n", "<leader>fj", builtin.jumplist, 
+    { desc = "Telescope jumplist" })
+vim.keymap.set("n", "<leader>fm", builtin.keymaps, 
+    { desc = "Telescope keymaps" })
 vim.keymap.set("n", "<leader><leader>f", builtin.resume, 
     { desc = "Telescope resume" })
-
+-- git
+vim.keymap.set("n", "<leader>gr", builtin.git_branches, 
+    { desc = "Telescope git branches" })
+vim.keymap.set("n", "<leader>gs", builtin.git_status, 
+    { desc = "Telescope git status" })
+vim.keymap.set("n", "<leader>gt", builtin.git_stash, 
+    { desc = "Telescope git stash" })
+-- lsp
+vim.keymap.set("n", "<leader>lr", builtin.lsp_references, 
+    { desc = "Telescope LSP references" })
+vim.keymap.set("n", "<leader>lic", builtin.lsp_incoming_calls, 
+    { desc = "Telescope LSP incoming calls" })
+vim.keymap.set("n", "<leader>loc", builtin.lsp_outgoing_calls, 
+    { desc = "Telescope LSP outgoing calls" })
+vim.keymap.set("n", "<leader>ls", 
+    function()
+        return builtin.lsp_document_symbols({ ignore_symbols = 'variable' })
+    end, 
+    { desc = "Telescope LSP symbols (document)" })
+vim.keymap.set("n", "<leader>lws", builtin.lsp_workspace_symbols,
+    { desc = "Telescope LSP workspace symbols" })
+vim.keymap.set("n", "<leader>lwd", builtin.lsp_dynamic_workspace_symbols, 
+    { desc = "Telescope LSP workspace symbols (dynamic)" })
+vim.keymap.set("n", "<leader>fd", builtin.diagnostics, 
+    { desc = "Telescope diagnostics" })
+vim.keymap.set("n", "<leader>li", builtin.lsp_implementations, 
+    { desc = "Telescope LSP implementations" })
+vim.keymap.set("n", "<leader>ld", builtin.lsp_definitions, 
+    { desc = "Telescope LSP definitions" })
+vim.keymap.set("n", "<leader>lt", builtin.lsp_type_definitions, 
+    { desc = "Telescope LSP type definitions" })
 
 -- ####################
 -- LSP Section
@@ -717,13 +782,14 @@ lsp_zero.extend_lspconfig({
 
 require("mason").setup({})
 require("mason-lspconfig").setup({
-    -- https://github.com/williamboman/mason-lspconfig.nvim#available-lsp-servers
+    -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md
     ensure_installed = {
         -- "tsserver",
         -- "ts_ls",
         "basedpyright",
         -- "pyright",
-        -- "ruff",
+        "expert",
+        "ruff@0.6.8",
         -- "eslint",
         -- "bashls",
         -- "beancount",
@@ -735,25 +801,17 @@ require("mason-lspconfig").setup({
         -- "jsonls",
         -- "lua_ls",
         "rust_analyzer@2024-10-14",
+        "tailwindcss",
         -- "sqlls",
         -- "terraformls",
         -- "yamlls",
         -- "pest_ls",
     },
+    automatic_enable = false,
     handlers = {
         lsp_zero.default_setup,
     },
 })
--- require("mason-lspconfig").setup_handlers({
---     function(server_name) -- default handler (optional)
---         -- https://github.com/neovim/nvim-lspconfig/pull/3232
---         server_name = server_name == 'tsserver' and 'ts_ls' or server_name
---         local capabilities = require("cmp_nvim_lsp").default_capabilities()
---         require("lspconfig")[server_name].setup({
---             capabilities = capabilities,
---         })
---     end,
--- })
 
 require("lspconfig").rust_analyzer.setup({
     on_attach = lsp_attach,
@@ -778,13 +836,50 @@ require("lspconfig").basedpyright.setup({
     on_attach = lsp_attach,
     settings = {
         ["basedpyright"] = {
+            disableOrganizeImports = true,
             analysis = {
-                typeCheckingMode = "standard",
-                diagnosticSeverityOverrides = {
-                    reportOptionalMemberAccess = "warning"
-                },
+                ignore = { '*' },
+                -- typeCheckingMode = "standard",
+                -- diagnosticSeverityOverrides = {
+                --     reportOptionalMemberAccess = "warning"
+                -- },
                 autoImportCompletions = false
             },
+        },
+    },
+})
+
+require("lspconfig").lexical.setup({
+    on_attach = lsp_attach,
+    cmd = { 'expert' },
+    filetypes = { "elixir", "eelixir", "heex" }
+})
+
+require("lspconfig").tailwindcss.setup({
+    on_attach = lsp_attach,
+    init_options = {
+    userLanguages = {
+      elixir = "html-eex",
+      eelixir = "html-eex",
+      heex = "html-eex",
+    },
+  },
+})
+
+require("lspconfig").ruff.setup({
+    on_attach = lsp_attach,
+    settings = {
+        ["ruff"] = {
+            init_options = {
+                settings = {
+                    lint = {
+                        -- preview = true
+                    },
+                    format = {
+                        -- preview = true
+                    }
+                }
+            }
         },
     },
 })
@@ -831,4 +926,5 @@ vim.api.nvim_set_hl(0, 'Normal', { bg=colors.main_bg })
 vim.api.nvim_set_hl(0, 'NormalNC', { bg=colors.secondary_bg })
 vim.api.nvim_set_hl(0, 'WinSeparator', { bg=colors.dark_red })
 vim.api.nvim_set_hl(0, 'StatusLine', { bg=colors.dark_red })
+vim.api.nvim_set_hl(0, 'TelescopeNormal', { bg=colors.main_bg })
 -- vim.api.nvim_set_hl(0, '', {})
