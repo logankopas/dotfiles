@@ -8,6 +8,7 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.spelllang = "en_gb"
 vim.opt.fileformat = "unix"
+vim.opt.signcolumn = 'yes'
 
 -- Whitespace Settings
 vim.opt.tabstop = 4
@@ -43,6 +44,7 @@ vim.opt.showbreak = "-->"
 vim.opt.termguicolors = true
 vim.opt.background = "dark"
 vim.opt.fillchars = "vert: "
+vim.opt.winborder = 'rounded'
 
 -- Persist undo
 vim.opt.undodir = vim.fn.stdpath("cache") .. "/undo"
@@ -180,6 +182,10 @@ vim.keymap.set("", "j", "gj",
     { silent = true })
 vim.keymap.set("", "k", "gk",
     { silent = true })
+vim.keymap.set("", "H", "80h",
+    { silent = true })
+vim.keymap.set("", "L", "80l",
+    { silent = true })
 
 -- Move text with Command+[jk]
 -- TODO these don't work, probably because iterm, I'll figure this out when I switch to Ghostty :)
@@ -263,12 +269,10 @@ vim.keymap.set("n", "<leader>gu", ":GitBlameOpenCommitURL<CR>",
 -- Toggle quickfix
 --
 -- These plugins were lost when my init file was lost. Maybe add them back
---  cmp-nvim-lsp
 --  mason-lspconfig.nvim
 --  mason-null-ls.nvim
 --  mason.nvim
 --  none-ls.nvim
---  nvim-cmp
 --  nvim-lspconfig
 --  nvim-surround
 --  nvim-ts-autotag
@@ -327,12 +331,9 @@ local plugins = {
     -- Better vim-sneak
     { "ggandor/leap.nvim" },
     
-    -- Another motion plugin
-    { "ChrisPenner/vim-emacs-bindings" },
-
     -- Telescope
     {
-        "nvim-telescope/telescope.nvim", tag = "0.1.8",
+        "nvim-telescope/telescope.nvim",
         dependencies = { "nvim-lua/plenary.nvim" }
     },
 
@@ -403,28 +404,19 @@ local plugins = {
 
     -- LSP stuff
     {
-        "VonHeikemen/lsp-zero.nvim",
-        branch = "v4.x",
-        dependencies = {
-            -- LSP Support
-            { "neovim/nvim-lspconfig" },
-            {
-                "williamboman/mason.nvim",
-                build = function()
-                    pcall(vim.cmd, "MasonUpdate")
-                end,
-            },
-            { "williamboman/mason-lspconfig.nvim" },
-
-            -- Autocompletion
-            { "hrsh7th/nvim-cmp" },
-            { "hrsh7th/cmp-nvim-lsp", commit = "99290b3ec1322070bcfb9e846450a46f6efa50f0" },
-            { "hrsh7th/cmp-path" },
-            { "L3MON4D3/LuaSnip" },
-            { "hrsh7th/cmp-buffer" },
-            { "hrsh7th/cmp-nvim-lsp-signature-help" },
-        },
+        'saghen/blink.cmp',
+        dependencies = { 'rafamadriz/friendly-snippets' },
+        version = '1.*',
     },
+    { "L3MON4D3/LuaSnip" },
+    { "neovim/nvim-lspconfig" },
+    {
+        "williamboman/mason.nvim",
+        build = function()
+            pcall(vim.cmd, "MasonUpdate")
+        end,
+    },
+    { "williamboman/mason-lspconfig.nvim" },
 
     -- None-LS
     { "nvimtools/none-ls.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
@@ -660,6 +652,11 @@ require('telescope').setup({
                 ["<c-d>"] = "delete_buffer"
             }
         }
+    },
+    pickers = {
+        find_files = {
+            find_command = { "rg", "--files", "--hidden", "--glob", "!**/.git/*", "--glob", "!**/custom_dash_components/*" },
+        }
     }
 
 })
@@ -730,55 +727,52 @@ vim.keymap.set("n", "<leader>lt", builtin.lsp_type_definitions,
 -- LSP Section
 -- ####################
 
--- Copied and modified from carderne/dotfiles
-local cmp = require("cmp")
-local cmp_format = require("lsp-zero").cmp_format()
-cmp.setup({
-    formatting = cmp_format,
-    snippet = {
-        expand = function(args)
-            require("luasnip").lsp_expand(args.body)
-        end,
+vim.keymap.set({"n", "v"}, "<leader>fo", vim.lsp.buf.format,
+    { desc = "Format using LSP" })
+
+require("blink.cmp").setup({
+    keymap = { 
+        preset = 'none',
+        ['<C-n>'] = { 'show', 'select_and_accept', 'fallback' },
+        ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
+        ['<C-e>'] = { 'hide', 'fallback' },
+        ['<C-y>'] = { 'select_and_accept', 'fallback' },
+
+        ['<C-j>'] = { 'select_next', 'fallback' },
+        ['<C-k>'] = { 'select_prev', 'fallback' },
+        ['<Up>'] = { 'select_prev', 'fallback' },
+        ['<Down>'] = { 'select_next', 'fallback' },
+
+        ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
+        ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+
+        ['<Tab>'] = { 'snippet_forward', 'fallback' },
+        ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+
+        ['<C-p>'] = { 'show_signature', 'hide_signature', 'fallback' },
+
     },
-    sources = cmp.config.sources({
-        { name = "nvim_lsp" },
-        { name = "luasnip" },
-        { name = "nvim_lsp_signature_help" },
-        { name = "path", max_item_count = 6 },
-    }, {
-        { name = "buffer" },
-    }),
-    preselect = "item",
+
     completion = {
-        completeopt = "menu,menuone,noinsert",
+        trigger = { show_on_keyword = true },
+        menu = { border = 'rounded' },
+        documentation = { window = { border = 'rounded' } }
     },
-    mapping = cmp.mapping.preset.insert({
-        ["<C-e>"] = cmp.mapping.abort(),
-        ["<Tab>"] = cmp.mapping.confirm({ select = true }),
-        ["<C-k>"] = cmp.mapping.select_prev_item({ behavior = "insert" }),
-        ["<C-j>"] = cmp.mapping.select_next_item({ behavior = "insert" }), -- or select
-    }),
+    signature = { window = { border = 'rounded' } },
+    sources = {
+        default = { 'lsp', 'path', 'snippets', 'buffer' }
+    },
+    fuzzy = { implementation = 'prefer_rust_with_warning' },
+    cmdline = {
+        keymap = { preset = 'inherit' },
+        completion = { menu = { auto_show = true } },
+    },
+    term = {
+        enabled = true,
+        keymap = { preset = 'inherit' }
+    }
 })
 
-local lsp_zero = require("lsp-zero")
-local lsp_attach = function(client, bufnr)
-    local opts = { buffer = bufnr }
-    lsp_zero.default_keymaps(opts)
-    vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
-    -- nnoremap <silent> ca <cmd>lua vim.lsp.buf.code_action()<CR>
-    vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
-    vim.keymap.set("n", "gd", builtin.lsp_definitions, opts)
-    vim.keymap.set("n", "gr", builtin.lsp_references, opts)
-
-    -- Disable semantic highlights
-    client.server_capabilities.semanticTokensProvider = nil
-end
-lsp_zero.extend_lspconfig({
-    capabilities = require("cmp_nvim_lsp").default_capabilities(),
-    lsp_attach = lsp_attach,
-    float_border = "rounded",
-    sign_text = true,
-})
 
 require("mason").setup({})
 require("mason-lspconfig").setup({
@@ -802,15 +796,12 @@ require("mason-lspconfig").setup({
         -- "lua_ls",
         "rust_analyzer@2024-10-14",
         "tailwindcss",
-        -- "sqlls",
+        "sqlfluff",
         -- "terraformls",
         -- "yamlls",
         -- "pest_ls",
     },
     automatic_enable = false,
-    handlers = {
-        lsp_zero.default_setup,
-    },
 })
 
 require("lspconfig").rust_analyzer.setup({
@@ -852,7 +843,10 @@ require("lspconfig").basedpyright.setup({
 require("lspconfig").lexical.setup({
     on_attach = lsp_attach,
     cmd = { 'expert' },
-    filetypes = { "elixir", "eelixir", "heex" }
+    filetypes = { "elixir", "eelixir", "heex" },
+    flags = {
+        allow_incremental_sync = false
+    }
 })
 
 require("lspconfig").tailwindcss.setup({
@@ -884,26 +878,34 @@ require("lspconfig").ruff.setup({
     },
 })
 
-lsp_zero.format_mapping("<leader>fo", {
-    format_opts = {
-        async = true,
-        timeout_ms = 10000,
-    },
-    servers = {
-        -- ["null-ls"] = { "javascript", "typescript", "lua", "go", "json", "typescriptreact" },
-        ["rust_analyzer"] = { "rust" },
-        ["ruff"] = { "python" },
-    },
+require("lspconfig").sqlfluff.setup({
+    on_attach = lsp_attach,
 })
 
+-- lsp_zero.format_mapping("<leader>fo", {
+--     format_opts = {
+--         async = true,
+--         timeout_ms = 10000,
+--     },
+--     servers = {
+--         -- ["null-ls"] = { "javascript", "typescript", "lua", "go", "json", "typescriptreact" },
+--         ["rust_analyzer"] = { "rust" },
+--         ["ruff"] = { "python" },
+--     },
+-- })
+
 local null_ls = require("null-ls")
+null_ls.builtins.formatting.sqlfluff.with({
+  extra_args = {"--dialect", "bigquery"}
+})
 null_ls.setup({
     sources = {
         null_ls.builtins.formatting.prettier,
         null_ls.builtins.formatting.stylua,
         -- null_ls.builtins.formatting.jq,
         null_ls.builtins.formatting.gofmt,
-        -- null_ls.builtins.formatting.ruff,
+        null_ls.builtins.formatting.sqlfluff,
+        null_ls.builtins.diagnostics.sqlfluff,
     },
 })
 require("mason-null-ls").setup({
