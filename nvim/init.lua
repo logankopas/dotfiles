@@ -176,6 +176,10 @@ vim.keymap.set("n", "c", "\"_c",
 vim.keymap.set("n", "C", "\"_C",
     { desc = "C command remapped to keep register" })
 
+vim.keymap.set("n", "yf", ":let @+ = expand('%')<CR>",
+    { desc = "Yank the filename (relative path)" })
+vim.keymap.set("n", "yF", ":let @+ = expand('%:p')<CR>",
+    { desc = "Yank the filename (full path)" })
 
 -- Navigating with wrap
 vim.keymap.set("", "j", "gj",
@@ -199,7 +203,7 @@ vim.keymap.set("v", "<M-k>", ":m'<-2<CR>`>my`<mzgv`yo`z",
     { desc = "Move the current line of text up." })
 
 -- Sub windows 
-vim.keymap.set("n", "<leader>p", ":pclose<CR>",
+vim.keymap.set("n", "<leader>pq", ":pclose<CR>",
     { desc =  "Close any open preview window."})
 -- Terminals
 vim.keymap.set("n", "<leader>t", ":1ToggleTerm direction=float name=main-shell<CR>",
@@ -244,6 +248,11 @@ vim.api.nvim_create_autocmd("TermOpen", {
             { silent = true, buffer=0, desc = "Scroll up" })
     end
 })
+
+vim.keymap.set('t', '<C-/><Esc>', '<Esc>',
+    { desc = "Send Esc to terminal" }
+)
+
 
 
 -- Diagnostics
@@ -329,13 +338,15 @@ local plugins = {
     { "nvim-tree/nvim-tree.lua" },
     
     -- Better vim-sneak
-    { "ggandor/leap.nvim" },
+    { url = "https://codeberg.org/andyg/leap.nvim" },
+
     
     -- Telescope
     {
         "nvim-telescope/telescope.nvim",
         dependencies = { "nvim-lua/plenary.nvim" }
     },
+    { "nvim-lua/plenary.nvim", branch = "master" },
 
     -- Syntax
     {
@@ -422,6 +433,119 @@ local plugins = {
     { "nvimtools/none-ls.nvim", dependencies = { "nvim-lua/plenary.nvim" } },
     { "jay-babu/mason-null-ls.nvim" },
 
+    -- AI tools
+    {
+        "olimorris/codecompanion.nvim",
+        version = "^19.0.0",
+        opts = {
+            adapters = {
+                acp = {
+                    claude_code = function()
+                        return require("codecompanion.adapters").extend("claude_code", {
+                            env = {
+                                -- claude-agent-acp bundles its own unsigned `claude` binary
+                                -- which macOS refuses to spawn (EBADEXEC). Use the signed,
+                                -- notarized CLI from the Homebrew cask instead.
+                                CLAUDE_CODE_EXECUTABLE = "/opt/homebrew/bin/claude",
+                            },
+                        })
+                    end,
+
+                    -- Same adapter, pinned to a specific model. Switch between these
+                    -- mid-chat with `ga`, or pick one directly with
+                    -- `:CodeCompanionChat <name>`.
+                    claude_code_opus = function()
+                        return require("codecompanion.adapters").extend("claude_code", {
+                            env = {
+                                CLAUDE_CODE_EXECUTABLE = "/opt/homebrew/bin/claude",
+                            },
+                            defaults = { model = "opus" },
+                        })
+                    end,
+                    claude_code_sonnet = function()
+                        return require("codecompanion.adapters").extend("claude_code", {
+                            env = {
+                                CLAUDE_CODE_EXECUTABLE = "/opt/homebrew/bin/claude",
+                            },
+                            defaults = { model = "sonnet" },
+                        })
+                    end,
+                    claude_code_haiku = function()
+                        return require("codecompanion.adapters").extend("claude_code", {
+                            env = {
+                                CLAUDE_CODE_EXECUTABLE = "/opt/homebrew/bin/claude",
+                            },
+                            defaults = { model = "haiku" },
+                        })
+                    end,
+                    claude_code_fable = function()
+                        return require("codecompanion.adapters").extend("claude_code", {
+                            env = {
+                                CLAUDE_CODE_EXECUTABLE = "/opt/homebrew/bin/claude",
+                            },
+                            defaults = { model = "fable" },
+                        })
+                    end,
+                }
+            },
+            interactions = {
+                chat = {
+                    -- You can specify an adapter by name and model (both ACP and HTTP)
+                    adapter = "claude_code"
+                },
+                -- Or, just specify the adapter by name
+                inline = {
+                    adapter = "claude_code",
+                },
+                cmd = {
+                    adapter = "claude_code",
+                },
+                background = {
+                    adapter = "claude_code",
+                },
+                cli = {
+                    agent = "claude_agent",
+                    agents = {
+                        claude_agent = {
+                            cmd = "claude",
+                            args = {},
+                            description = "Claude Code CLI",
+                            provider = "terminal",
+                        },
+                    },
+                },
+            },
+            -- NOTE: The log_level is in `opts.opts`
+            opts = {
+                log_level = "DEBUG",
+            },
+        },
+        dependencies = {
+            "nvim-lua/plenary.nvim",
+            "nvim-treesitter/nvim-treesitter",
+        },
+    },
+    {
+        "MeanderingProgrammer/render-markdown.nvim",
+        ft = { "markdown", "codecompanion" }
+    },
+    {
+        "HakonHarnes/img-clip.nvim",
+        event = "VeryLazy",
+        keys = {
+            -- suggested keymap
+            { "<leader>p", "<cmd>PasteImage<cr>", desc = "Paste image from system clipboard" },
+        },
+        opts = {
+            filetypes = {
+                codecompanion = {
+                    prompt_for_file_name = false,
+                    template = "[Image]($FILE_PATH)",
+                    use_absolute_path = true,
+                },
+            },
+        },
+    },
 }
 
 
@@ -456,7 +580,6 @@ require("nvim-treesitter.configs").setup({
         "c",
         "css",
         "diff",
-        "dockerfile",
         "eex",
         "elixir",
         "heex",
@@ -475,7 +598,6 @@ require("nvim-treesitter.configs").setup({
         "terraform",
         "vim",
         "vimdoc",
-        "yaml",
     },
     sync_install = false,
     auto_install = true,
@@ -485,6 +607,10 @@ require("nvim-treesitter.configs").setup({
     indent = {
         enable = true,
     },
+    disable = {
+        "dockerfile",
+        "yaml"
+    }
 })
 vim.api.nvim_set_hl(0, "DiagnosticUnnecessary", { link = "WarningText" })
 
@@ -638,7 +764,7 @@ require("toggleterm").setup({
     },
     persist_mode = true,
     persist_size = true,
-    auto_scroll = false
+    auto_scroll = true
 })
 
 -- Telescope
@@ -723,9 +849,57 @@ vim.keymap.set("n", "<leader>ld", builtin.lsp_definitions,
 vim.keymap.set("n", "<leader>lt", builtin.lsp_type_definitions, 
     { desc = "Telescope LSP type definitions" })
 
+
+-- AI tools
+
+vim.keymap.set({ "n", "v" }, "<Leader>ca", "<cmd>CodeCompanionActions<cr>", { noremap = true, silent = true })
+vim.keymap.set({ "n", "v" }, "<Leader>cm", "<cmd>CodeCompanionChat Toggle<cr>", { noremap = true, silent = true })
+vim.keymap.set({ "n", "v" }, "<Leader>cc", "<cmd>CodeCompanionCLI<cr>", { noremap = true, silent = true })
+vim.keymap.set("v", "ga", "<cmd>CodeCompanionChat Add<cr>", { noremap = true, silent = true })
+
+-- Expand 'cc' into 'CodeCompanion' in the command line
+vim.cmd([[cab cc CodeCompanion]])
+vim.cmd([[cab ccm CodeCompanionChat]])
+vim.cmd([[cab ccc CodeCompanionCLI]])
+
+require('render-markdown').setup({
+    completions = { lsp = { enabled = true } },
+    render_modes = { 'n', 'c' },
+})
+
 -- ####################
 -- LSP Section
 -- ####################
+
+require("mason").setup({})
+require("mason-lspconfig").setup({
+    -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md
+    ensure_installed = {
+        -- "tsserver",
+        -- "ts_ls",
+        "basedpyright",
+        -- "pyright",
+        "expert",
+        "ruff@0.12.10",
+        -- "eslint",
+        -- "bashls",
+        -- "beancount",
+        -- "cssls",
+        -- "dockerls",
+        -- "docker_compose_language_service",
+        -- "gopls",
+        -- "html",
+        -- "jsonls",
+        -- "lua_ls",
+        "rust_analyzer@2024-10-14",
+        "tailwindcss",
+        "sqlfluff",
+        -- "terraformls",
+        -- "yamlls",
+        -- "pest_ls",
+    },
+    automatic_enable = true,
+})
 
 vim.keymap.set({"n", "v"}, "<leader>fo", vim.lsp.buf.format,
     { desc = "Format using LSP" })
@@ -760,7 +934,10 @@ require("blink.cmp").setup({
     },
     signature = { window = { border = 'rounded' } },
     sources = {
-        default = { 'lsp', 'path', 'snippets', 'buffer' }
+        default = { 'lsp', 'path', 'snippets', 'buffer' },
+        per_filetype = {
+            codecompanion = { "codecompanion" },
+        }
     },
     fuzzy = { implementation = 'prefer_rust_with_warning' },
     cmdline = {
@@ -768,43 +945,13 @@ require("blink.cmp").setup({
         completion = { menu = { auto_show = true } },
     },
     term = {
-        enabled = true,
+        enabled = false,
         keymap = { preset = 'inherit' }
     }
 })
 
 
-require("mason").setup({})
-require("mason-lspconfig").setup({
-    -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md
-    ensure_installed = {
-        -- "tsserver",
-        -- "ts_ls",
-        "basedpyright",
-        -- "pyright",
-        "expert",
-        "ruff@0.6.8",
-        -- "eslint",
-        -- "bashls",
-        -- "beancount",
-        -- "cssls",
-        -- "dockerls",
-        -- "docker_compose_language_service",
-        -- "gopls",
-        -- "html",
-        -- "jsonls",
-        -- "lua_ls",
-        "rust_analyzer@2024-10-14",
-        "tailwindcss",
-        "sqlfluff",
-        -- "terraformls",
-        -- "yamlls",
-        -- "pest_ls",
-    },
-    automatic_enable = false,
-})
-
-require("lspconfig").rust_analyzer.setup({
+vim.lsp.config.rust_analyzer = {
     on_attach = lsp_attach,
     settings = {
         ["rust-analyzer"] = {
@@ -821,9 +968,9 @@ require("lspconfig").rust_analyzer.setup({
             },
         },
     },
-})
+}
 
-require("lspconfig").basedpyright.setup({
+vim.lsp.config.basedpyright = {
     on_attach = lsp_attach,
     settings = {
         ["basedpyright"] = {
@@ -838,18 +985,18 @@ require("lspconfig").basedpyright.setup({
             },
         },
     },
-})
+}
 
-require("lspconfig").lexical.setup({
+vim.lsp.config.lexical = {
     on_attach = lsp_attach,
     cmd = { 'expert' },
     filetypes = { "elixir", "eelixir", "heex" },
     flags = {
         allow_incremental_sync = false
     }
-})
+}
 
-require("lspconfig").tailwindcss.setup({
+vim.lsp.config.tailwindcss = {
     on_attach = lsp_attach,
     init_options = {
     userLanguages = {
@@ -858,9 +1005,9 @@ require("lspconfig").tailwindcss.setup({
       heex = "html-eex",
     },
   },
-})
+}
 
-require("lspconfig").ruff.setup({
+vim.lsp.config.ruff = {
     on_attach = lsp_attach,
     settings = {
         ["ruff"] = {
@@ -876,11 +1023,11 @@ require("lspconfig").ruff.setup({
             }
         },
     },
-})
+}
 
-require("lspconfig").sqlfluff.setup({
+vim.lsp.config.sqlfluff = {
     on_attach = lsp_attach,
-})
+}
 
 -- lsp_zero.format_mapping("<leader>fo", {
 --     format_opts = {

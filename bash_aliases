@@ -46,3 +46,4 @@ blue)<%an>%Creset" --abbrev-commit --no-min-parents --no-max-parents'
 
 alias ag='ag --path-to-agignore ~/.agignore'
 alias lc='colorls -r'
+

@@ -107,3 +107,4 @@ if [ -f '/Users/ljk003/google-cloud-sdk/completion.zsh.inc' ]; then source '/Use
 
 #source /opt/anaconda3/etc/profile.d/conda.sh
 [[ -z $TMUX ]] || conda deactivate; conda activate base
+
