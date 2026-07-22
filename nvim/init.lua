@@ -515,6 +515,25 @@ local plugins = {
                     },
                 },
             },
+            prompt_library = {
+                markdown = {
+                    dirs = {
+                        vim.fn.stdpath("config") .. "/prompts",
+                    },
+                },
+            },
+            display = {
+                action_palette = {
+                    opts = {
+                        -- Built-in prompts (Commit message, Explain code, Fix
+                        -- code, Explain LSP diagnostics, Unit tests) are kept
+                        -- as copies in `prompts/` instead. This drops the
+                        -- ones we don't want (Code workflow, Inline prompt,
+                        -- Upgrade Tools) without losing the rest.
+                        show_preset_prompts = false,
+                    },
+                },
+            },
             -- NOTE: The log_level is in `opts.opts`
             opts = {
                 log_level = "DEBUG",
@@ -861,6 +880,7 @@ vim.keymap.set("v", "ga", "<cmd>CodeCompanionChat Add<cr>", { noremap = true, si
 vim.cmd([[cab cc CodeCompanion]])
 vim.cmd([[cab ccm CodeCompanionChat]])
 vim.cmd([[cab ccc CodeCompanionCLI]])
+vim.cmd([[cab cca CodeCompanionActions]])
 
 require('render-markdown').setup({
     completions = { lsp = { enabled = true } },
