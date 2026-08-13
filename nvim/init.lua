@@ -296,6 +296,14 @@ vim.keymap.set("n", "<leader>gu", ":GitBlameOpenCommitURL<CR>",
 -- Plugin List
 -- ####################
 
+-- claude-agent-acp bundles its own unsigned `claude` binary, which macOS refuses to spawn
+-- (EBADEXEC) — use the signed, notarized Homebrew CLI instead. That signing problem is
+-- macOS-only (e.g. inside a Linux devcontainer the bundled binary runs fine), so only
+-- override on Darwin.
+local claude_code_env = (vim.uv.os_uname().sysname == "Darwin")
+    and { CLAUDE_CODE_EXECUTABLE = "/opt/homebrew/bin/claude" }
+    or {}
+
 local plugins = {
     -- Gruvbox with Treesitter support
     { "ellisonleao/gruvbox.nvim" },
@@ -442,12 +450,7 @@ local plugins = {
                 acp = {
                     claude_code = function()
                         return require("codecompanion.adapters").extend("claude_code", {
-                            env = {
-                                -- claude-agent-acp bundles its own unsigned `claude` binary
-                                -- which macOS refuses to spawn (EBADEXEC). Use the signed,
-                                -- notarized CLI from the Homebrew cask instead.
-                                CLAUDE_CODE_EXECUTABLE = "/opt/homebrew/bin/claude",
-                            },
+                            env = claude_code_env,
                         })
                     end,
 
@@ -456,33 +459,25 @@ local plugins = {
                     -- `:CodeCompanionChat <name>`.
                     claude_code_opus = function()
                         return require("codecompanion.adapters").extend("claude_code", {
-                            env = {
-                                CLAUDE_CODE_EXECUTABLE = "/opt/homebrew/bin/claude",
-                            },
+                            env = claude_code_env,
                             defaults = { model = "opus" },
                         })
                     end,
                     claude_code_sonnet = function()
                         return require("codecompanion.adapters").extend("claude_code", {
-                            env = {
-                                CLAUDE_CODE_EXECUTABLE = "/opt/homebrew/bin/claude",
-                            },
+                            env = claude_code_env,
                             defaults = { model = "sonnet" },
                         })
                     end,
                     claude_code_haiku = function()
                         return require("codecompanion.adapters").extend("claude_code", {
-                            env = {
-                                CLAUDE_CODE_EXECUTABLE = "/opt/homebrew/bin/claude",
-                            },
+                            env = claude_code_env,
                             defaults = { model = "haiku" },
                         })
                     end,
                     claude_code_fable = function()
                         return require("codecompanion.adapters").extend("claude_code", {
-                            env = {
-                                CLAUDE_CODE_EXECUTABLE = "/opt/homebrew/bin/claude",
-                            },
+                            env = claude_code_env,
                             defaults = { model = "fable" },
                         })
                     end,
