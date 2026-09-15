@@ -345,10 +345,6 @@ local plugins = {
     -- File browser
     { "nvim-tree/nvim-tree.lua" },
     
-    -- Better vim-sneak
-    { url = "https://codeberg.org/andyg/leap.nvim" },
-
-    
     -- Telescope
     {
         "nvim-telescope/telescope.nvim",
@@ -606,7 +602,7 @@ require("nvim-treesitter.configs").setup({
         "javascript",
         "jq",
         "json",
-        "latex",
+        -- "latex",
         "lua",
         "make",
         "markdown",
@@ -810,9 +806,6 @@ require("lualine").setup({
     extensions = {},
 })
 
--- Leap
-require("leap").add_default_mappings()
-
 -- Terminal
 require("toggleterm").setup({
     size = function (term)
@@ -963,7 +956,7 @@ require("mason-lspconfig").setup({
         -- "lua_ls",
         "rust_analyzer@2024-10-14",
         "tailwindcss",
-        "sqlfluff",
+        -- "sqlfluff",  -- dropped in the 2026-09-15 merge resolution
         -- "terraformls",
         -- "yamlls",
         -- "pest_ls",
@@ -1095,9 +1088,9 @@ vim.lsp.config.ruff = {
     },
 }
 
-vim.lsp.config.sqlfluff = {
-    on_attach = lsp_attach,
-}
+-- vim.lsp.config.sqlfluff = {
+--     on_attach = lsp_attach,
+-- }
 
 -- lsp_zero.format_mapping("<leader>fo", {
 --     format_opts = {
@@ -1112,17 +1105,17 @@ vim.lsp.config.sqlfluff = {
 -- })
 
 local null_ls = require("null-ls")
-null_ls.builtins.formatting.sqlfluff.with({
-  extra_args = {"--dialect", "bigquery"}
-})
+-- null_ls.builtins.formatting.sqlfluff.with({
+--   extra_args = {"--dialect", "bigquery"}
+-- })
 null_ls.setup({
     sources = {
         null_ls.builtins.formatting.prettier,
         null_ls.builtins.formatting.stylua,
         -- null_ls.builtins.formatting.jq,
         null_ls.builtins.formatting.gofmt,
-        null_ls.builtins.formatting.sqlfluff,
-        null_ls.builtins.diagnostics.sqlfluff,
+        -- null_ls.builtins.formatting.sqlfluff,
+        -- null_ls.builtins.diagnostics.sqlfluff,
     },
 })
 require("mason-null-ls").setup({

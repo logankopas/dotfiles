@@ -2,7 +2,7 @@
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-export ZSH=/Users/logankopas/.oh-my-zsh
+export ZSH=/home/logan/.oh-my-zsh
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-zsh is loaded.
@@ -58,8 +58,10 @@ ZSH_THEME="bira"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
+
 plugins=(
   git
+  zsh-autosuggestions
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -105,6 +107,14 @@ if [ -f '/Users/ljk003/google-cloud-sdk/path.zsh.inc' ]; then source '/Users/ljk
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/ljk003/google-cloud-sdk/completion.zsh.inc' ]; then source '/Users/ljk003/google-cloud-sdk/completion.zsh.inc'; fi
 
-#source /opt/anaconda3/etc/profile.d/conda.sh
-[[ -z $TMUX ]] || conda deactivate; conda activate base
 
+. "$HOME/.local/share/../bin/env"
+
+export NVM_DIR="$HOME/.config/nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+. "/usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+
+# kimi-code
+export PATH="/home/logan/.kimi-code/bin:$PATH"

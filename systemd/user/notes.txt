@@ -1,0 +1,11 @@
+Manual steps 
+ - make group selfhosted
+ - add user
+ - add user to group
+ - add group permissions for docker and folder
+ - also add to docker group
+ - link to /var/selfhosted
+ - move it all to a different folder
+
+
+Follow this : https://www.redhat.com/en/blog/container-systemd-persist-reboot

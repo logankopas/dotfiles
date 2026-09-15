@@ -1,0 +1,6 @@
+[Unit]
+Description=Backup files locally
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bash /var/selfhosted/backups/backup.sh

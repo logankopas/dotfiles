@@ -1,0 +1,18 @@
+[Unit]
+Description=Agent Sandbox Service
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/var/selfhosted/agent
+Environment=
+ExecStart=/usr/bin/docker compose up
+ExecStop=/usr/bin/docker compose down
+Restart=always
+RestartSec=10s
+User=agent
+Group=agent
+
+[Install]
+WantedBy=multi-user.target

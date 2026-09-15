@@ -5,7 +5,6 @@
 # allow non-interactive shells (vim) to use aliases
 
 # so many ways to use ls
-alias ls='ls -G'
 alias ll='ls -alhF'
 alias la='ls -A'
 alias l='ls -CF'

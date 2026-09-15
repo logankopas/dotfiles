@@ -15,7 +15,7 @@
 	default = matching
 [core]
 	excludesfile = /Users/logankopas/.gitignore_global
-	editor = /usr/bin/vim
+	editor = /snap/bin/nvim
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
 	path = 

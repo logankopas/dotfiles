@@ -1,0 +1,18 @@
+[Unit]
+Description=Nginx proxy manager service
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/var/selfhosted/nginxproxy
+Environment=
+ExecStart=/usr/bin/docker compose up
+ExecStop=/usr/bin/docker compose down
+Restart=always
+RestartSec=10s
+User=immich
+Group=selfhosted
+
+[Install]
+WantedBy=multi-user.target
