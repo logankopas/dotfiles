@@ -537,6 +537,10 @@ setup_permissions() {
 # 9. BUILD DOCKER IMAGES
 # ============================================================================
 build_images() {
+    if [[ "$SKIP_DOCKER" == "true" ]]; then
+        log_info "Skipping Docker installation (--skip-docker)"
+        return
+    fi
     log_info "Building docker images..."
     # Skip if docker is not available
     if ! command -v docker &>/dev/null; then
