@@ -9,6 +9,16 @@ echo "$TZ" > /etc/timezone
 chown agent:agent /home/agent/.ssh/authorized_keys
 chmod 644 /home/agent/.ssh/authorized_keys
 
+# Install the GitHub deploy key from the read-only secrets mount.
+# ~/.ssh is ephemeral, and ssh requires the private key to be 0600 and owned by
+# the using user, so it cannot be used in place from ~/secrets (600, owner 1000).
+if [ -f /home/agent/secrets/id_ed25519 ]; then
+    install -m 600 -o agent -g agent /home/agent/secrets/id_ed25519 /home/agent/.ssh/id_ed25519
+    if [ -f /home/agent/secrets/id_ed25519.pub ]; then
+        install -m 644 -o agent -g agent /home/agent/secrets/id_ed25519.pub /home/agent/.ssh/id_ed25519.pub
+    fi
+fi
+
 # Boot wiring: QWEN.md symlink (ephemeral home dir, persistent workspace)
 # Run as agent so the symlink is owned by the right user
 su -s /bin/bash agent -c "ln -sf workspace/QWEN.md /home/agent/QWEN.md"

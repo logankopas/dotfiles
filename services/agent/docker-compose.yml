@@ -5,8 +5,6 @@ services:
     restart: unless-stopped
     volumes:
       - /home/logan/agent-workspace:/home/agent/workspace
-      - /home/logan/dotfiles:/home/agent/mnt/dotfiles
-      - /var/selfhosted:/home/agent/mnt/selfhosted
       - /home/logan/secrets:/home/agent/secrets:ro
       - /var/run/docker.sock:/var/run/docker.sock
     group_add:
