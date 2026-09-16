@@ -81,12 +81,14 @@ ENV NVM_DIR=/home/agent/.nvm
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 ENV BASH_ENV="$NVM_DIR/nvm.sh"
 SHELL ["/bin/bash", "-c"]
-RUN nvm install --lts
+ENV NODE_VERSION=24.21.0
+RUN nvm install $NODE_VERSION
 ENV PATH="$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH"
+ENV PATH="$PATH:/home/agent/.local/bin"
 
-RUN curl -fsSL https://code.kimi.com/kimi-code/install.sh | bash
-RUN npm install -g @kilocode/cli
 RUN npm install -g @qwen-code/qwen-code@latest
+RUN curl -fsSL https://omp.sh/install | sh
+RUN curl -fsSL https://raw.githubusercontent.com/gastownhall/beads/main/scripts/install.sh | bash
 
 USER root
 

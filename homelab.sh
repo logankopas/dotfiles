@@ -182,8 +182,6 @@ setup_docker() {
 # ============================================================================
 # 4. SECRETS MANAGEMENT (pass-cli + Proton Pass)
 # ============================================================================
-# 4. SECRETS MANAGEMENT (pass-cli + Proton Pass)
-# ============================================================================
 setup_secrets() {
     log_info "Setting up secrets management..."
 
@@ -298,9 +296,6 @@ setup_services() {
             fi
 
             # Skip if already a correct symlink
-            if [[ -L "$link_target" ]] && [[ "$(readlink "$link_target")" == "$file" ]]; then
-                continue
-            fi
 
             # Remove existing file/symlink if present
             if [[ -e "$link_target" ]] || [[ -L "$link_target" ]]; then
@@ -308,7 +303,7 @@ setup_services() {
             fi
 
             # Create symlink
-            ln -s "$file" "$link_target"
+            ln  "$file" "$link_target"
             log_info "Linked $link_target -> $file"
         done
 
