@@ -37,9 +37,9 @@ RUN install -m 0755 -d /etc/apt/keyrings \
 # This group will be used for shared directories between host and container
 RUN groupadd -g 1005 homelab
 
-# SSHD setup
-# Generate RSA host key only if missing
-RUN [ -f /etc/ssh/ssh_host_rsa_key ] || ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N '' -q
+# SSHD host keys are NOT generated here. The entrypoint installs stable host keys
+# from ~/secrets at boot so known_hosts survives rebuilds; the build-time keys
+# openssh-server generates are overwritten there.
 
 # Create group with gid 1004 and user with uid 1003 to match host bind-mount ownership
 # Also add agent to homelab (shared access) and docker (socket access) groups

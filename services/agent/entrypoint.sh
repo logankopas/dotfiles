@@ -30,20 +30,12 @@ su -s /bin/bash agent -c "python3 -c \"
 import json, os
 settings_path = os.path.expanduser('~/.qwen/settings.json')
 hooks_path = '/home/agent/workspace/hooks/settings-hooks.json'
-api_key_path = '/home/agent/secrets/qwen-api-key'
 try:
     with open(settings_path) as f:
         settings = json.load(f)
     with open(hooks_path) as f:
         hooks = json.load(f)
     settings['hooks'] = hooks['hooks']
-    # Inject Qwen API key from mounted secrets
-    if os.path.exists(api_key_path):
-        with open(api_key_path) as f:
-            api_key = f.read().strip()
-        if 'env' not in settings:
-            settings['env'] = {}
-        settings['env']['BAILIAN_TOKEN_PLAN_API_KEY'] = api_key
     with open(settings_path, 'w') as f:
         json.dump(settings, f, indent=2)
 except Exception as e:
@@ -64,6 +56,19 @@ BASHRC_LINE='source /home/agent/workspace/hooks/bash-functions.sh'
 if ! grep -qF 'bash-functions.sh' /home/agent/.bashrc 2>/dev/null; then
     echo "$BASHRC_LINE" >> /home/agent/.bashrc
 fi
+
+# Install stable sshd host keys from the read-only secrets mount, before sshd
+# starts. Keys baked at image build change on every rebuild, which forces the
+# known_hosts entry for [localhost]:2222 to be re-accepted each time; a stable
+# key here keeps it constant. Runs as root. Any key type present is installed.
+for keytype in ed25519 rsa ecdsa; do
+    if [ -f "/home/agent/secrets/ssh_host_${keytype}_key" ]; then
+        install -m 600 -o root -g root "/home/agent/secrets/ssh_host_${keytype}_key" "/etc/ssh/ssh_host_${keytype}_key"
+        if [ -f "/home/agent/secrets/ssh_host_${keytype}_key.pub" ]; then
+            install -m 644 -o root -g root "/home/agent/secrets/ssh_host_${keytype}_key.pub" "/etc/ssh/ssh_host_${keytype}_key.pub"
+        fi
+    fi
+done
 
 # Start SSH daemon
 /usr/sbin/sshd
