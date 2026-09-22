@@ -35,6 +35,7 @@ RUN git clone https://github.com/asdf-vm/asdf.git /opt/asdf --branch v0.14.1 && 
 
 # Install Erlang and Elixir via asdf (global, all users)
 # Note: Erlang builds from source (~2 min with pre-cached deps), Elixir is precompiled
+ENV ASDF_DIR=/opt/asdf/
 RUN . /opt/asdf/asdf.sh && \
     asdf plugin add erlang https://github.com/asdf-vm/asdf-erlang.git && \
     asdf plugin add elixir https://github.com/asdf-vm/asdf-elixir.git && \
