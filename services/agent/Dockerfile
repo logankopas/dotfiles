@@ -74,7 +74,9 @@ RUN echo '# Enable extended keys so tmux can recognize modified inputs like Ctrl
     echo 'set -s extended-keys on' >> /home/agent/.tmux.conf && \
     echo '' >> /home/agent/.tmux.conf && \
     echo '# Tell tmux to enable extended keys if you are using an xterm-based terminal' >> /home/agent/.tmux.conf && \
-    echo "set -as terminal-features 'xterm*:extkeys'" >> /home/agent/.tmux.conf
+    echo "set -as terminal-features 'xterm*:extkeys'" >> /home/agent/.tmux.conf && \
+    echo '# Use the mouse' >> /home/agent/.tmux.conf && \
+    echo "set -g mouse on" >> /home/agent/.tmux.conf
 
 # NVM install
 ENV NVM_DIR=/home/agent/.nvm
