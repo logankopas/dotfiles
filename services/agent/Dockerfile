@@ -21,7 +21,30 @@ RUN apt-get update && apt-get install -y \
     jq \
     ca-certificates \
     gnupg \
+    unzip \
+    autoconf \
+    libncurses-dev \
+    libssl-dev \
     && rm -rf /var/lib/apt/lists/*
+
+# Install just (command runner) - available to all users
+RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
+# Install asdf (version manager) - available to all users
+RUN git clone https://github.com/asdf-vm/asdf.git /opt/asdf --branch v0.14.1 && \
+    ln -s /opt/asdf/bin/asdf /usr/local/bin/asdf
+
+# Install Erlang and Elixir via asdf (global, all users)
+# Note: Erlang builds from source (~2 min with pre-cached deps), Elixir is precompiled
+RUN . /opt/asdf/asdf.sh && \
+    asdf plugin add erlang https://github.com/asdf-vm/asdf-erlang.git && \
+    asdf plugin add elixir https://github.com/asdf-vm/asdf-elixir.git && \
+    asdf install erlang 26.2.5 && \
+    asdf install elixir 1.17.3 && \
+    asdf global erlang 26.2.5 && \
+    asdf global elixir 1.17.3 && \
+    ln -s /opt/asdf/shims/elixir /usr/local/bin/elixir && \
+    ln -s /opt/asdf/shims/mix /usr/local/bin/mix && \
+    ln -s /opt/asdf/shims/iex /usr/local/bin/iex
 
 # Docker CLI + compose plugin (for Docker-out-of-Docker: socket mounted from host)
 # Pre-create docker group with host's GID (985) so docker-ce-cli adopts it

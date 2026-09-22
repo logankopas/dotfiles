@@ -70,10 +70,25 @@ for keytype in ed25519 rsa ecdsa; do
     fi
 done
 
-# Start SSH daemon
-/usr/sbin/sshd
+# Boot wiring: persist omp config across rebuilds
+# ~/.omp/agent/config.yml is ephemeral; ~/workspace/.omp-config/ is persistent.
+# Restore if ephemeral missing, then always backup ephemeral → persistent so the
+# persistent copy stays current (one session behind is better than forever stale).
+su -s /bin/bash agent -c "
+mkdir -p /home/agent/.omp/agent /home/agent/workspace/.omp-config/agent
+if [ ! -f /home/agent/.omp/agent/config.yml ] && [ -f /home/agent/workspace/.omp-config/agent/config.yml ]; then
+    cp /home/agent/workspace/.omp-config/agent/config.yml /home/agent/.omp/agent/config.yml
+fi
+if [ -f /home/agent/.omp/agent/config.yml ]; then
+    cp /home/agent/.omp/agent/config.yml /home/agent/workspace/.omp-config/agent/config.yml
+fi
+"
 
-# Start tmux session for interactive access
+# Start Slack bridge supervisor (manages both Logan and Megan assistants)
+su -s /bin/bash agent -c "export PATH=\"/home/agent/.local/bin:\$PATH\" && export PROTON_PASS_KEY_PROVIDER=fs && nohup /home/agent/workspace/seats/shared/slack-supervisor.mjs > /home/agent/workspace/seats/shared/supervisor.log 2>&1 &"
+
+ # Start SSH daemon
+ /usr/sbin/sshd
 su -s /bin/bash agent -c "tmux new-session -d -s agent"
 
 # Keep container running
