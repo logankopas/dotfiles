@@ -114,6 +114,8 @@ ENV PATH="$PATH:/home/agent/.local/bin"
 
 RUN npm install -g @qwen-code/qwen-code@latest
 RUN curl -fsSL https://omp.sh/install | sh
+# Claude Code (native installer → /home/agent/.local/bin/claude, already on PATH)
+RUN curl -fsSL https://claude.ai/install.sh | bash
 RUN curl -fsSL https://raw.githubusercontent.com/gastownhall/beads/main/scripts/install.sh | bash
 
 USER root
