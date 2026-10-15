@@ -29,23 +29,33 @@ RUN apt-get update && apt-get install -y \
 
 # Install just (command runner) - available to all users
 RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
-# Install asdf (version manager) - available to all users
-RUN git clone https://github.com/asdf-vm/asdf.git /opt/asdf --branch v0.14.1 && \
-    ln -s /opt/asdf/bin/asdf /usr/local/bin/asdf
+# Install asdf — used ONLY as the installer for Erlang/Elixir at build time. It is not on PATH
+# at runtime: its bin/asdf resolves ../lib relative to the symlink (so /usr/local/bin/asdf broke),
+# and its shims need a per-user .tool-versions + ASDF_DATA_DIR that the agent user never had.
+RUN git clone https://github.com/asdf-vm/asdf.git /opt/asdf --branch v0.14.1
 
-# Install Erlang and Elixir via asdf (global, all users)
+# Install Erlang and Elixir (shared, all users). ASDF_DATA_DIR is what decides where installs go;
+# without it they land in the build user's $HOME/.asdf (/root, mode 700) — which is exactly what
+# the Sep-22 image did, leaving /opt/asdf/installs empty and every shim symlink dangling.
 # Note: Erlang builds from source (~2 min with pre-cached deps), Elixir is precompiled
-ENV ASDF_DIR=/opt/asdf/
+ARG ERLANG_VERSION=26.2.5
+ARG ELIXIR_VERSION=1.17.3
+ENV ASDF_DIR=/opt/asdf
+ENV ASDF_DATA_DIR=/opt/asdf
 RUN . /opt/asdf/asdf.sh && \
     asdf plugin add erlang https://github.com/asdf-vm/asdf-erlang.git && \
     asdf plugin add elixir https://github.com/asdf-vm/asdf-elixir.git && \
-    asdf install erlang 26.2.5 && \
-    asdf install elixir 1.17.3 && \
-    asdf global erlang 26.2.5 && \
-    asdf global elixir 1.17.3 && \
-    ln -s /opt/asdf/shims/elixir /usr/local/bin/elixir && \
-    ln -s /opt/asdf/shims/mix /usr/local/bin/mix && \
-    ln -s /opt/asdf/shims/iex /usr/local/bin/iex
+    asdf install erlang ${ERLANG_VERSION} && \
+    asdf install elixir ${ELIXIR_VERSION} && \
+    chmod -R a+rX /opt/asdf && \
+    test -x /opt/asdf/installs/erlang/${ERLANG_VERSION}/bin/erl && \
+    test -x /opt/asdf/installs/elixir/${ELIXIR_VERSION}/bin/elixir
+# Real bin dirs on PATH: no shims, no asdf at runtime, same toolchain for every user and for
+# non-interactive processes (claude's Bash tool, gardenOS System.cmd children, hooks).
+ENV PATH="/opt/asdf/installs/elixir/${ELIXIR_VERSION}/bin:/opt/asdf/installs/erlang/${ERLANG_VERSION}/bin:$PATH"
+# Elixir expects a UTF-8 locale; without it the VM runs latin1 filename encoding and warns on every call.
+ENV LANG=C.UTF-8
+ENV ELIXIR_ERL_OPTIONS="+fnu"
 
 # Docker CLI + compose plugin (for Docker-out-of-Docker: socket mounted from host)
 # Pre-create docker group with host's GID (985) so docker-ce-cli adopts it
