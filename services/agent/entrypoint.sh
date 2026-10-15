@@ -19,6 +19,20 @@ if [ -f /home/agent/secrets/id_ed25519 ]; then
     fi
 fi
 
+# Pin GitHub's SSH host keys so non-interactive git push/pull works on first use.
+# ~/.ssh/known_hosts is ephemeral; without this, the first `git push` after a
+# rebuild dies with "Host key verification failed". Keys are GitHub's published
+# set (https://api.github.com/meta, ssh_keys) as of 2026-10-15; they rotate
+# rarely and a mismatch fails closed rather than trusting a new key.
+install -d -m 700 -o agent -g agent /home/agent/.ssh
+cat > /home/agent/.ssh/known_hosts <<'EOF'
+github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
+github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
+github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+EOF
+chown agent:agent /home/agent/.ssh/known_hosts
+chmod 644 /home/agent/.ssh/known_hosts
+
 # Boot wiring: QWEN.md symlink (ephemeral home dir, persistent workspace)
 # Run as agent so the symlink is owned by the right user
 su -s /bin/bash agent -c "ln -sf workspace/QWEN.md /home/agent/QWEN.md"
