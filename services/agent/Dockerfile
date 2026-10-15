@@ -116,6 +116,9 @@ RUN npm install -g @qwen-code/qwen-code@latest
 RUN curl -fsSL https://omp.sh/install | sh
 # Claude Code (native installer → /home/agent/.local/bin/claude, already on PATH)
 RUN curl -fsSL https://claude.ai/install.sh | bash
+# claude-statusbar (`cs`): status line for every session, wired by managed settings in entrypoint.sh.
+# CS_SKIP_SETUP: its own --setup writes ~/.claude/settings.json, which ignores CLAUDE_CONFIG_DIR.
+RUN CS_SKIP_SETUP=1 bash -c "curl -fsSL https://raw.githubusercontent.com/leeguooooo/claude-code-usage-bar/main/install.sh | bash"
 RUN curl -fsSL https://raw.githubusercontent.com/gastownhall/beads/main/scripts/install.sh | bash
 
 USER root

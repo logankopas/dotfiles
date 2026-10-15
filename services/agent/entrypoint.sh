@@ -33,6 +33,23 @@ EOF
 chown agent:agent /home/agent/.ssh/known_hosts
 chmod 644 /home/agent/.ssh/known_hosts
 
+# Claude Code managed settings: apply to every claude session on this box,
+# whatever CLAUDE_CONFIG_DIR a seat uses (highest-precedence settings source).
+# Status line = claude-statusbar (`cs`, installed in the Dockerfile). Verified
+# 2026-10-15: `claude -p` never runs the statusLine, so fleet workers pay nothing.
+# CLAUDE_STATUSBAR_NO_UPDATE also disables cs's self-upgrade; the Dockerfile owns its version.
+install -d -m 755 /etc/claude-code
+cat > /etc/claude-code/managed-settings.json <<'EOF'
+{
+  "statusLine": {
+    "type": "command",
+    "command": "CLAUDE_STATUSBAR_NO_UPDATE=1 /home/agent/.local/bin/cs render",
+    "refreshInterval": 1
+  }
+}
+EOF
+chmod 644 /etc/claude-code/managed-settings.json
+
 # Boot wiring: QWEN.md symlink (ephemeral home dir, persistent workspace)
 # Run as agent so the symlink is owned by the right user
 su -s /bin/bash agent -c "ln -sf workspace/QWEN.md /home/agent/QWEN.md"
