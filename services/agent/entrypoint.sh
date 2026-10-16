@@ -50,28 +50,9 @@ cat > /etc/claude-code/managed-settings.json <<'EOF'
 EOF
 chmod 644 /etc/claude-code/managed-settings.json
 
-# Boot wiring: QWEN.md symlink (ephemeral home dir, persistent workspace)
-# Run as agent so the symlink is owned by the right user
-su -s /bin/bash agent -c "ln -sf workspace/QWEN.md /home/agent/QWEN.md"
-
-# Boot wiring: merge hooks into ephemeral settings.json
-# The hooks config lives in the persistent workspace; settings.json dies on rebuild.
-# This runs as agent so it writes to the right settings location.
-su -s /bin/bash agent -c "python3 -c \"
-import json, os
-settings_path = os.path.expanduser('~/.qwen/settings.json')
-hooks_path = '/home/agent/workspace/hooks/settings-hooks.json'
-try:
-    with open(settings_path) as f:
-        settings = json.load(f)
-    with open(hooks_path) as f:
-        hooks = json.load(f)
-    settings['hooks'] = hooks['hooks']
-    with open(settings_path, 'w') as f:
-        json.dump(settings, f, indent=2)
-except Exception as e:
-    print(f'Boot wiring error: {e}')
-\""
+# Boot wiring for seats is gone (2026-10-16): every seat, Cairn included, boots from
+# ~/workspace/seats/<seat>/ via `just seat` / seats/seat.sh; hooks register in the
+# seat's persistent .claude/settings.json. Nothing here to merge or symlink.
 
 # Boot wiring: login to Proton Pass for secrets management
 # PAT is mounted from host at ~/secrets (read-only)
