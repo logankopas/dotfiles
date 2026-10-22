@@ -56,6 +56,11 @@ ENV PATH="/opt/asdf/installs/elixir/${ELIXIR_VERSION}/bin:/opt/asdf/installs/erl
 # Elixir expects a UTF-8 locale; without it the VM runs latin1 filename encoding and warns on every call.
 ENV LANG=C.UTF-8
 ENV ELIXIR_ERL_OPTIONS="+fnu"
+# Build-time proof that the toolchain resolves through PATH alone (no shim, no asdf, no rc file):
+# the Sep-22 image passed every file test above and still had a dangling `mix`.
+RUN test "$(command -v mix)" = "/opt/asdf/installs/elixir/${ELIXIR_VERSION}/bin/mix" && \
+    mix --version 2>&1 | tee /dev/stderr | grep -q "Mix ${ELIXIR_VERSION}" && \
+    ! command -v asdf
 
 # Docker CLI + compose plugin (for Docker-out-of-Docker: socket mounted from host)
 # Pre-create docker group with host's GID (985) so docker-ce-cli adopts it
