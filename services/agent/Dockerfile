@@ -37,29 +37,37 @@ RUN git clone https://github.com/asdf-vm/asdf.git /opt/asdf --branch v0.14.1
 # Install Erlang and Elixir (shared, all users). ASDF_DATA_DIR is what decides where installs go;
 # without it they land in the build user's $HOME/.asdf (/root, mode 700) — which is exactly what
 # the Sep-22 image did, leaving /opt/asdf/installs empty and every shim symlink dangling.
+# ASDF_* is set for this RUN only, and the shims are deleted: the 10-22 image exported both as ENV,
+# so `. /opt/asdf/asdf.sh` looked like the way in, and its shims point MIX_ARCHIVES into the
+# root-owned install (`mix local.hex` → permission denied).
 # Note: Erlang builds from source (~2 min with pre-cached deps), Elixir is precompiled
 ARG ERLANG_VERSION=26.2.5
 ARG ELIXIR_VERSION=1.17.3
-ENV ASDF_DIR=/opt/asdf
-ENV ASDF_DATA_DIR=/opt/asdf
-RUN . /opt/asdf/asdf.sh && \
+RUN export ASDF_DIR=/opt/asdf ASDF_DATA_DIR=/opt/asdf && \
+    . /opt/asdf/asdf.sh && \
     asdf plugin add erlang https://github.com/asdf-vm/asdf-erlang.git && \
     asdf plugin add elixir https://github.com/asdf-vm/asdf-elixir.git && \
     asdf install erlang ${ERLANG_VERSION} && \
     asdf install elixir ${ELIXIR_VERSION} && \
+    rm -rf /opt/asdf/shims && \
     chmod -R a+rX /opt/asdf && \
     test -x /opt/asdf/installs/erlang/${ERLANG_VERSION}/bin/erl && \
     test -x /opt/asdf/installs/elixir/${ELIXIR_VERSION}/bin/elixir
-# Real bin dirs on PATH: no shims, no asdf at runtime, same toolchain for every user and for
-# non-interactive processes (claude's Bash tool, gardenOS System.cmd children, hooks).
-ENV PATH="/opt/asdf/installs/elixir/${ELIXIR_VERSION}/bin:/opt/asdf/installs/erlang/${ERLANG_VERSION}/bin:$PATH"
+# Link the real binaries into /usr/local/bin, which every PATH here contains: Docker's, the
+# /etc/environment one that PAM installs for ssh and `su` (entrypoint starts tmux via `su`), and
+# systemd's default. An `ENV PATH=` entry reaches none of the PAM paths — the 10-22 image had one,
+# and `mix` was missing in every tmux shell. Symlinks to real files are safe; elixir and erl resolve
+# their own location through the link.
+RUN for f in /opt/asdf/installs/elixir/${ELIXIR_VERSION}/bin/* /opt/asdf/installs/erlang/${ERLANG_VERSION}/bin/*; do \
+        ln -sf "$f" /usr/local/bin/; \
+    done
 # Elixir expects a UTF-8 locale; without it the VM runs latin1 filename encoding and warns on every call.
 ENV LANG=C.UTF-8
 ENV ELIXIR_ERL_OPTIONS="+fnu"
-# Build-time proof that the toolchain resolves through PATH alone (no shim, no asdf, no rc file):
-# the Sep-22 image passed every file test above and still had a dangling `mix`.
-RUN test "$(command -v mix)" = "/opt/asdf/installs/elixir/${ELIXIR_VERSION}/bin/mix" && \
-    mix --version 2>&1 | tee /dev/stderr | grep -q "Mix ${ELIXIR_VERSION}" && \
+# Build-time proof that the toolchain resolves through a minimal PATH (no shim, no asdf, no rc file):
+# the Sep-22 image passed every file test above and still had a dangling `mix`. The PAM-path proof
+# (`su agent`) runs after the user exists, below.
+RUN env -i HOME=/root PATH=/usr/local/bin:/usr/bin:/bin mix --version 2>&1 | tee /dev/stderr | grep -q "Mix ${ELIXIR_VERSION}" && \
     ! command -v asdf
 
 # Docker CLI + compose plugin (for Docker-out-of-Docker: socket mounted from host)
@@ -95,6 +103,9 @@ COPY ./authorized_keys /home/agent/.ssh/authorized_keys
 
 RUN chown agent:agent /home/agent/.ssh/authorized_keys && \
     chmod 644 /home/agent/.ssh/authorized_keys
+
+# The shell Logan works in: tmux started through `su`, which resets PATH from /etc/environment.
+RUN su -s /bin/bash agent -c 'mix --version' | grep -q "Mix ${ELIXIR_VERSION}"
 
 RUN sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config \
     && sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config \
@@ -135,6 +146,9 @@ RUN curl -fsSL https://claude.ai/install.sh | bash
 # CS_SKIP_SETUP: its own --setup writes ~/.claude/settings.json, which ignores CLAUDE_CONFIG_DIR.
 RUN CS_SKIP_SETUP=1 bash -c "curl -fsSL https://raw.githubusercontent.com/leeguooooo/claude-code-usage-bar/main/install.sh | bash"
 RUN curl -fsSL https://raw.githubusercontent.com/gastownhall/beads/main/scripts/install.sh | bash
+# Hex and rebar in ~/.mix: without Hex, mix cannot load gardenOS at all ("Could not find an SCM for
+# dependency :ecto_sql"), even with deps/ already fetched on the volume.
+RUN mix local.hex --force && mix local.rebar --force
 
 USER root
 
