@@ -96,8 +96,6 @@ if [ -f /home/agent/.omp/agent/config.yml ]; then
 fi
 "
 
-# Start Slack bridge supervisor (manages both Logan and Megan assistants)
-su -s /bin/bash agent -c "export PATH=\"/home/agent/.local/bin:\$PATH\" && export PROTON_PASS_KEY_PROVIDER=fs && nohup /home/agent/workspace/seats/shared/slack-supervisor.mjs > /home/agent/workspace/seats/shared/supervisor.log 2>&1 &"
 
  # Start SSH daemon
  /usr/sbin/sshd
