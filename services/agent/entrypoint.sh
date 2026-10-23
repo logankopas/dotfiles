@@ -103,5 +103,10 @@ su -s /bin/bash agent -c "export PATH=\"/home/agent/.local/bin:\$PATH\" && expor
  /usr/sbin/sshd
 su -s /bin/bash agent -c "tmux new-session -d -s agent"
 
-# Keep container running
-tail -f /dev/null
+# gardenOS's home (GARDENOS_HOME default): its supervisord program logs here, and
+# supervisord opens that log before the program runs. Home is ephemeral, so every boot.
+install -d -o agent -g agent /home/agent/.gardenos
+
+# PID 1 from here on: reaps orphans, runs the programs the [include] globs find, and on
+# `docker stop` stops each one within its stopwaitsecs (compose stop_grace_period covers it).
+exec /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf

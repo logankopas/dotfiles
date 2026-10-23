@@ -3,6 +3,9 @@ services:
     build: .
     container_name: agent_sandbox
     restart: unless-stopped
+    # docker stop waits this long before SIGKILL. It must cover the longest supervisord
+    # stopwaitsecs (gardenOS: its 120 s stop budget plus margin).
+    stop_grace_period: 180s
     volumes:
       - /home/logan/agent-workspace:/home/agent/workspace
       - /home/logan/secrets:/home/agent/secrets:ro

@@ -25,6 +25,7 @@ RUN apt-get update && apt-get install -y \
     autoconf \
     libncurses-dev \
     libssl-dev \
+    supervisor \
     && rm -rf /var/lib/apt/lists/*
 
 # Install just (command runner) - available to all users
@@ -152,5 +153,7 @@ RUN mix local.hex --force && mix local.rebar --force
 
 USER root
 
+# supervisord is PID 1 (entrypoint.sh execs it); its config replaces the package default.
+COPY supervisord.conf /etc/supervisor/supervisord.conf
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
