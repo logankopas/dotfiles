@@ -30,6 +30,15 @@ RUN apt-get update && apt-get install -y \
 
 # Install just (command runner) - available to all users
 RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
+# Install dolt (pinned): the beads tracker runs in Dolt server mode (alm-cywx), where `bd` starts
+# `dolt sql-server` on demand. Measured 2026-10-19 with this version; embedded mode serialises
+# concurrent bd calls and was the cause of the 60 s bd timeouts.
+ARG DOLT_VERSION=2.5.0
+RUN curl -fsSL "https://github.com/dolthub/dolt/releases/download/v${DOLT_VERSION}/dolt-linux-$(dpkg --print-architecture).tar.gz" \
+    | tar -xz -C /tmp \
+    && install -m 0755 "/tmp/dolt-linux-$(dpkg --print-architecture)/bin/dolt" /usr/local/bin/dolt \
+    && rm -rf /tmp/dolt-linux-* \
+    && dolt version | grep -q "${DOLT_VERSION}"
 # Install asdf — used ONLY as the installer for Erlang/Elixir at build time. It is not on PATH
 # at runtime: its bin/asdf resolves ../lib relative to the symlink (so /usr/local/bin/asdf broke),
 # and its shims need a per-user .tool-versions + ASDF_DATA_DIR that the agent user never had.
@@ -150,6 +159,9 @@ RUN curl -fsSL https://raw.githubusercontent.com/gastownhall/beads/main/scripts/
 # Hex and rebar in ~/.mix: without Hex, mix cannot load gardenOS at all ("Could not find an SCM for
 # dependency :ecto_sql"), even with deps/ already fetched on the volume.
 RUN mix local.hex --force && mix local.rebar --force
+# dolt checks for a newer release on every CLI call and prints a warning; that is a network call
+# per bd invocation and noise in bd's output.
+RUN dolt config --global --add versioncheck.disabled true
 
 USER root
 
