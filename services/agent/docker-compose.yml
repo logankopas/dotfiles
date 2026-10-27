@@ -19,3 +19,4 @@ services:
       - .env
     ports:
       - "2222:22"
+      - "4000:4000"   # doc-editor Phoenix dev server (mix phx.server), 2026-10-27
