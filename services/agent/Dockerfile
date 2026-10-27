@@ -148,8 +148,6 @@ RUN nvm install $NODE_VERSION
 ENV PATH="$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH"
 ENV PATH="$PATH:/home/agent/.local/bin"
 
-RUN npm install -g @qwen-code/qwen-code@latest
-RUN curl -fsSL https://omp.sh/install | sh
 # Claude Code (native installer → /home/agent/.local/bin/claude, already on PATH)
 RUN curl -fsSL https://claude.ai/install.sh | bash
 # claude-statusbar (`cs`): status line for every session, wired by managed settings in entrypoint.sh.

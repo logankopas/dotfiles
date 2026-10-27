@@ -2,7 +2,7 @@
 set -e
 
 # Fix timezone (tzdata is now installed in the Dockerfile)
-ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
+ln -snf "/usr/share/zoneinfo/$TZ" /etc/localtime
 echo "$TZ" > /etc/timezone
 
 # SSH key permissions
@@ -51,7 +51,7 @@ EOF
 chmod 644 /etc/claude-code/managed-settings.json
 
 # Boot wiring for seats is gone (2026-10-16): every seat, Cairn included, boots from
-# ~/workspace/seats/<seat>/ via `just seat` / seats/seat.sh; hooks register in the
+# ~/workspace/seats/<seat>/ via `just seat` (gardenOS launcher); hooks register in the
 # seat's persistent .claude/settings.json. Nothing here to merge or symlink.
 
 # Boot wiring: login to Proton Pass for secrets management
@@ -82,23 +82,8 @@ for keytype in ed25519 rsa ecdsa; do
     fi
 done
 
-# Boot wiring: persist omp config across rebuilds
-# ~/.omp/agent/config.yml is ephemeral; ~/workspace/.omp-config/ is persistent.
-# Restore if ephemeral missing, then always backup ephemeral → persistent so the
-# persistent copy stays current (one session behind is better than forever stale).
-su -s /bin/bash agent -c "
-mkdir -p /home/agent/.omp/agent /home/agent/workspace/.omp-config/agent
-if [ ! -f /home/agent/.omp/agent/config.yml ] && [ -f /home/agent/workspace/.omp-config/agent/config.yml ]; then
-    cp /home/agent/workspace/.omp-config/agent/config.yml /home/agent/.omp/agent/config.yml
-fi
-if [ -f /home/agent/.omp/agent/config.yml ]; then
-    cp /home/agent/.omp/agent/config.yml /home/agent/workspace/.omp-config/agent/config.yml
-fi
-"
-
-
- # Start SSH daemon
- /usr/sbin/sshd
+# Start SSH daemon
+/usr/sbin/sshd
 su -s /bin/bash agent -c "tmux new-session -d -s agent"
 
 # gardenOS's home (GARDENOS_HOME default): its supervisord program logs here, and

@@ -15,7 +15,6 @@ services:
     environment:
       - TZ=America/Edmonton
       - TERM=xterm-256color
-      - BAILIAN_TOKEN_PLAN_API_KEY
     env_file:
       - .env
     ports:
