@@ -1,10 +1,13 @@
 # Borg exclude patterns for job "full" (borg 1.2 fnmatch, paths relative to / without leading slash).
+# NO inline comments: borg treats the whole line as the pattern. Comments go on their own line.
 # A pattern without trailing slash excludes the directory and everything in it.
 # Preview what these drop with:   sudo borg-backup dry-run full
 
 # --- never back up these -------------------------------------------------------
-var/local/backups                 # the old NVMe borg repo (a repo must never contain itself)
-var/lib/docker                    # images/containers/overlay2; the only named volume is immich model-cache (re-downloaded)
+# the old NVMe borg repo (a repo must never contain itself)
+var/local/backups
+# images/containers/overlay2; the only named volume is immich model-cache (re-downloaded)
+var/lib/docker
 var/cache
 var/tmp
 var/crash
@@ -25,8 +28,10 @@ home/*/.cargo/registry
 home/*/.cargo/git
 home/*/.npm
 home/*/go/pkg
-var/lib/flatpak                   # apps reinstall; user data lives in ~/.var (kept)
-var/lib/snapd                     # snaps reinstall
+# apps reinstall; user data lives in ~/.var (kept)
+var/lib/flatpak
+# snaps reinstall
+var/lib/snapd
 
 # --- build artefacts inside project dirs (approved; the projects themselves are kept) ---
 re:^home/[^/]+/(projects|agent-workspace)/.*/(node_modules|target|_build|deps|\.venv|__pycache__|\.mypy_cache|\.pytest_cache)(/|$)
