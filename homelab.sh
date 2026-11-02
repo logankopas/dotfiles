@@ -2,7 +2,7 @@
 # Homelab provisioning script — idempotent, safe to run multiple times
 # Target: Zorin OS 18+ / Ubuntu 24.04+
 #
-# Usage: sudo ./homelab.sh [--skip-docker] [--skip-services]
+# Usage: sudo ./homelab.sh [--skip-docker] [--skip-services] [--skip-secrets]
 #
 # This script provisions a fresh homelab:
 # - System users and groups (selfhosted group)
@@ -12,7 +12,8 @@
 # - Service permissions (proper ownership for container UIDs)
 # - Systemd services (link, daemon-reload, enable)
 # - Docker image builds
-# - Borg backup setup
+# - Borg backup setup (borg/ -> /etc/borg, /usr/local/sbin/borg-backup; see docs/backup-restore-drill.md)
+# - Login message (motd/ -> /etc/update-motd.d, noisy Ubuntu scripts disabled)
 #
 # SERVICE PATTERN:
 # ----------------
@@ -64,10 +65,12 @@ source "$DOTFILES_DIR/lib/secrets.sh"
 # Parse arguments
 SKIP_DOCKER=false
 SKIP_SERVICES=false
+SKIP_SECRETS=false
 for arg in "$@"; do
     case $arg in
         --skip-docker) SKIP_DOCKER=true ;;
         --skip-services) SKIP_SERVICES=true ;;
+        --skip-secrets) SKIP_SECRETS=true ;;
         *) log_warn "Unknown argument: $arg" ;;
     esac
 done
@@ -183,6 +186,10 @@ setup_docker() {
 # 4. SECRETS MANAGEMENT (pass-cli + Proton Pass)
 # ============================================================================
 setup_secrets() {
+    if [[ "$SKIP_SECRETS" == "true" ]]; then
+        log_info "Skipping secrets setup (--skip-secrets)"
+        return
+    fi
     log_info "Setting up secrets management..."
 
     # Ensure ~/.local/bin is in PATH for pass-cli
@@ -364,10 +371,11 @@ setup_services() {
 # ============================================================================
 # 6. BORG BACKUP SETUP
 # ============================================================================
+# Files are COPIED (install) into root-owned system paths, never symlinked: root must not
+# execute or source a file that is writable by the logan user.
 setup_borg() {
     log_info "Setting up borg backup..."
 
-    # Install borg if not present
     if ! command -v borg &>/dev/null; then
         apt-get update -qq
         apt-get install -y -qq borgbackup
@@ -376,47 +384,73 @@ setup_borg() {
         log_info "Borg already installed: $(borg --version)"
     fi
 
-    # Create backup scripts directory
-    local backup_dir="/var/selfhosted/backups"
-    mkdir -p "$backup_dir"
-    chown logan:selfhosted "$backup_dir"
-    chmod 770 "$backup_dir"
+    install -d -m 0750 -o root -g root /etc/borg /etc/borg/jobs /etc/borg/hooks
+    install -d -m 0750 -o root -g root /var/log/borg
+    install -d -m 0755 -o root -g root /var/lib/borg
 
-    # Generate backup.sh from template
-    local template_file="$DOTFILES_DIR/systemd/backup.sh.template"
-    local backup_script="$backup_dir/backup.sh"
+    install -m 0755 -o root -g root "$DOTFILES_DIR/borg/borg-backup.sh" /usr/local/sbin/borg-backup
+    local f
+    for f in "$DOTFILES_DIR"/borg/jobs/*.conf; do
+        install -m 0640 -o root -g root "$f" "/etc/borg/jobs/$(basename "$f")"
+    done
+    for f in "$DOTFILES_DIR"/borg/excludes-*; do
+        install -m 0644 -o root -g root "$f" "/etc/borg/$(basename "$f")"
+    done
+    for f in "$DOTFILES_DIR"/borg/hooks/*; do
+        [[ -f "$f" ]] && install -m 0755 -o root -g root "$f" "/etc/borg/hooks/$(basename "$f")"
+    done
+    log_info "Installed borg-backup, jobs, excludes and hooks"
 
-    if [[ -f "$template_file" ]]; then
-        # Check if backup.sh already exists
-        if [[ -f "$backup_script" ]]; then
-            log_info "Backup script already exists (skipping generation)"
-            log_info "To regenerate: rm $backup_script && re-run this script"
-        else
-            log_info "Generating backup.sh from template..."
-            
-            # Get the passphrase from Proton Pass
-            local passphrase=$(get_secret "homelab" "BORG_PASSPHRASE" "password" 2>/dev/null || echo "")
-            
-            if [[ -n "$passphrase" ]]; then
-                # Replace placeholder with actual value
-                local script_content=$(cat "$template_file")
-                script_content="${script_content//\$\{BORG_PASSPHRASE\}/$passphrase}"
-                
-                # Write the script
-                echo "$script_content" > "$backup_script"
-                chown logan:selfhosted "$backup_script"
-                chmod 750 "$backup_script"
-                log_info "Generated $backup_script"
-            else
-                log_warn "Could not retrieve BORG_PASSPHRASE from Proton Pass"
-                log_warn "Add it to Proton Pass vault 'homelab', then re-run this script"
-            fi
+    # Passphrase: root-only file read via BORG_PASSCOMMAND. Never substituted into scripts.
+    # The value is Proton Pass vault "homelab", item BORG_PASSPHRASE.
+    local pf=/etc/borg/passphrase
+    if [[ ! -s "$pf" ]]; then
+        local passphrase=""
+        if command -v pass-cli &>/dev/null; then
+            passphrase=$(get_secret "homelab" "BORG_PASSPHRASE" "password" 2>/dev/null || echo "")
         fi
-    else
-        log_warn "Template not found: $template_file"
+        if [[ -z "$passphrase" && -t 0 ]]; then
+            log_warn "$pf not found. Paste the borg passphrase from Proton Pass (homelab/BORG_PASSPHRASE):"
+            read -r -s passphrase; echo
+        fi
+        if [[ -n "$passphrase" ]]; then
+            (umask 077; printf '%s\n' "$passphrase" > "$pf")
+            log_info "Wrote $pf"
+        else
+            log_warn "No passphrase available; create $pf by hand (0600 root:root) before any backup runs"
+        fi
+    fi
+    if [[ -f "$pf" ]]; then
+        chown root:root "$pf"
+        chmod 0600 "$pf"
+    fi
+
+    # Remove the legacy generated script (it contained a passphrase and was group-readable)
+    if [[ -f /var/selfhosted/backups/backup.sh ]]; then
+        shred -u /var/selfhosted/backups/backup.sh && log_info "Removed legacy /var/selfhosted/backups/backup.sh"
+        rmdir /var/selfhosted/backups 2>/dev/null || true
     fi
 
     log_info "Borg setup complete"
+}
+
+# ============================================================================
+# 6b. LOGIN MESSAGE (MOTD)
+# ============================================================================
+setup_motd() {
+    log_info "Setting up login message..."
+
+    install -m 0755 -o root -g root "$DOTFILES_DIR/motd/40-backup-status" /etc/update-motd.d/40-backup-status
+
+    # Silence the noise. Re-applied every run because package upgrades can restore +x.
+    local f
+    for f in 10-help-text 50-motd-news 85-fwupd 91-release-upgrade 95-hwe-eol; do
+        [[ -f "/etc/update-motd.d/$f" ]] && chmod -x "/etc/update-motd.d/$f"
+    done
+    printf 'ENABLED=0\n' > /etc/default/motd-news
+    systemctl disable --now motd-news.timer 2>/dev/null || true
+
+    log_info "Login message setup complete"
 }
 
 # ============================================================================
@@ -436,6 +470,17 @@ setup_systemd() {
         log_warn "No systemd directory found at $systemd_source"
         return
     fi
+
+    # Remove links that point into dotfiles but whose source no longer exists (renamed/removed units)
+    local link
+    for link in "$systemd_target"/*; do
+        if [[ -L "$link" ]] && [[ "$(readlink "$link")" == "$systemd_source"/* ]] && [[ ! -e "$link" ]]; then
+            local stale=$(basename "$link")
+            systemctl disable --now "$stale" 2>/dev/null || true
+            rm -f "$link"
+            log_info "Removed stale unit link $stale"
+        fi
+    done
 
     # Link service files
     for file in "$systemd_source"/*.service "$systemd_source"/*.timer; do
@@ -472,6 +517,7 @@ setup_systemd() {
         fi
 
         local service_name=$(basename "$file")
+        [[ "$service_name" == *@.service ]] && continue   # templates are activated by their timers
         systemctl enable "$service_name" 2>/dev/null || true
         log_info "Enabled $service_name"
     done
@@ -579,13 +625,16 @@ main() {
     setup_permissions
     echo ""
 
+    setup_borg
+    echo ""
+
+    setup_motd
+    echo ""
+
     setup_systemd
     echo ""
 
     build_images
-    echo ""
-
-    setup_borg
     echo ""
 
     log_info "=========================================="

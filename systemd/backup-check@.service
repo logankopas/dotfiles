@@ -1,0 +1,12 @@
+[Unit]
+Description=Borg weekly check + restore test, job %i
+After=network-online.target
+OnFailure=backup-failed@%n.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/borg-backup check quick %i
+Nice=19
+IOSchedulingClass=idle
+TimeoutStartSec=24h
+PrivateTmp=yes

@@ -1,0 +1,10 @@
+[Unit]
+Description=Monthly borg verify-data, job full (first Sunday)
+
+[Timer]
+Unit=backup-verify@full.service
+OnCalendar=Sun *-*-01..07 01:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

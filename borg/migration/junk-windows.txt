@@ -1,0 +1,9 @@
+$RECYCLE.BIN
+System Volume Information
+pagefile.sys
+hiberfil.sys
+swapfile.sys
+DumpStack.log.tmp
+.Trash-*
+desktop.ini
+Thumbs.db

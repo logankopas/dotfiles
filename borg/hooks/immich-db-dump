@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Pre-backup hook: consistent dump of the Immich Postgres DB, per Immich's backup guidance
+# (the live data dir under /var/selfhosted/immich/postgres is only crash-consistent).
+# Output: /var/selfhosted/immich/db-dumps/immich-<ts>.sql.gz (kept 14 days). Exit 0 if Immich is down.
+set -euo pipefail
+ENV=/var/selfhosted/immich/.env
+OUT=/var/selfhosted/immich/db-dumps
+CONTAINER=immich_postgres
+
+[[ -r $ENV ]] || { echo "immich-db-dump: no $ENV, skipping"; exit 0; }
+user=$(sed -n 's/^DB_USERNAME=//p' "$ENV"); user=${user:-postgres}
+if ! docker inspect -f '{{.State.Running}}' "$CONTAINER" 2>/dev/null | grep -q true; then
+    echo "immich-db-dump: $CONTAINER not running, skipping dump"; exit 0
+fi
+install -d -m 0700 "$OUT"
+tmp="$OUT/.immich-$(date +%Y%m%d-%H%M%S).sql.gz.part"
+docker exec "$CONTAINER" pg_dumpall --clean --if-exists --username="$user" | gzip > "$tmp"
+mv -f "$tmp" "${tmp%.part}"
+find "$OUT" -name 'immich-*.sql.gz' -mtime +14 -delete
+echo "immich-db-dump: wrote ${tmp%.part} ($(du -h "${tmp%.part}" | cut -f1))"

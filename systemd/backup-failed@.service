@@ -1,0 +1,6 @@
+[Unit]
+Description=Record failure of %i in /var/lib/borg/status
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/borg-backup mark-failed %i

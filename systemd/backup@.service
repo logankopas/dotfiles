@@ -1,0 +1,14 @@
+[Unit]
+Description=Borg backup job %i (create/prune/compact)
+After=network-online.target docker.service
+Wants=network-online.target
+OnFailure=backup-failed@%n.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/borg-backup backup %i
+Nice=15
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+TimeoutStartSec=18h
+PrivateTmp=yes

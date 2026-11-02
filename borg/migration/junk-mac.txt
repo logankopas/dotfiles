@@ -1,0 +1,11 @@
+.Spotlight-V100
+.fseventsd
+.DocumentRevisions-V100
+.Trashes
+.TemporaryItems
+.HFS+ Private Directory Data
+.journal
+.journal_info_block
+.DS_Store
+._*
+.com.apple.timemachine.donotpresent

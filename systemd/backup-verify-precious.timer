@@ -1,0 +1,10 @@
+[Unit]
+Description=Monthly borg verify-data, job precious (first Sunday)
+
+[Timer]
+Unit=backup-verify@precious.service
+OnCalendar=Sun *-*-01..07 00:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

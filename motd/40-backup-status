@@ -1,0 +1,43 @@
+#!/bin/sh
+# 40-backup-status -- borg backup status in the login banner. Reads /var/lib/borg/status
+# (written by /usr/local/sbin/borg-backup). One block per job that has ever run.
+S=/var/lib/borg/status
+if [ ! -r "$S" ]; then printf '\n  Backup:   UNKNOWN (no %s yet)\n' "$S"; exit 0; fi
+
+get()   { sed -n "s/^$1=//p" "$S" | tail -n 1; }
+now=$(date +%s)
+age_h() { if [ -n "$1" ]; then echo $(( (now - $1) / 3600 )); else echo 999999; fi; }
+when()  { if [ -n "$1" ]; then date -d "@$1" '+%Y-%m-%d %H:%M'; else echo never; fi; }
+word()  { case "$1" in ok) echo OK;; warning) echo "WARN (rc 1)";; running) echo RUNNING;; failed) echo FAILED;; "") echo never;; *) echo UNKNOWN;; esac; }
+
+jobs=$(sed -n 's/^\([a-z0-9-]*\)_backup_state=.*/\1/p' "$S" | sort -u)
+[ -n "$jobs" ] || { printf '\n  Backup:   no job has run yet\n'; exit 0; }
+
+echo
+for j in $jobs; do
+    bs=$(get "${j}_backup_state"); be=$(get "${j}_backup_last_epoch"); ba=$(age_h "$be"); b=$(word "$bs")
+    [ -n "$be" ] && [ "$ba" -gt 30 ] && [ "$bs" != running ] && b="OVERDUE ${ba}h (last: $b)"
+    printf '  Backup %-9s %-26s %s  %s\n' "$j:" "$b" "$(when "$be")" "$(get "${j}_archive")"
+    case "$bs" in failed|warning) printf '                   log: %s\n' "$(get "${j}_backup_log")";; esac
+
+    cs=$(get "${j}_check_state"); ce=$(get "${j}_check_last_epoch"); ca=$(age_h "$ce"); c=$(word "$cs")
+    [ -n "$ce" ] && [ "$ca" -gt 216 ] && [ "$cs" != running ] && c="OVERDUE $((ca / 24))d (last: $c)"
+    printf '  Check  %-9s %-26s %s  %s\n' "$j:" "$c" "$(when "$ce")" "$(get "${j}_check_mode")"
+
+    rs=$(get "${j}_restore_state"); re=$(get "${j}_restore_last_epoch"); r=$(word "$rs")
+    if [ -n "$re" ]; then
+        printf '  Restore %-8s %-26s %s  %s/%s files verified\n' "$j:" "$r" "$(when "$re")" "$(get "${j}_restore_ok")" "$(get "${j}_restore_total")"
+    else
+        printf '  Restore %-8s %-26s never\n' "$j:" "$r"
+    fi
+    [ -f "/etc/borg/key-exported-$j" ] || printf '  !! borg key for %s NOT exported -- see dotfiles/docs/backup-restore-drill.md\n' "$j"
+done
+
+uf=$(get unit_failed); ue=$(get unit_failed_epoch)
+if [ -n "$uf" ]; then
+    j=${uf#*@}; j=${j%.service}; be=$(get "${j}_backup_last_epoch")
+    if [ "${ue:-0}" -gt "${be:-0}" ]; then
+        printf '  !! %s failed at %s -- journalctl -u %s\n' "$uf" "$(when "$ue")" "$uf"
+    fi
+fi
+exit 0
