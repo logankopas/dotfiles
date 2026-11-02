@@ -38,3 +38,5 @@
 	required = true
 [safe]
 	directory = /home/logan/agent-workspace/dotfiles
+	directory = /home/logan/agent-workspace/the-almanac
+	directory = /home/logan/agent-workspace/projects/gardenos

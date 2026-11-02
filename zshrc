@@ -118,3 +118,5 @@ export NVM_DIR="$HOME/.config/nvm"
 
 # kimi-code
 export PATH="/home/logan/.kimi-code/bin:$PATH"
+
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"

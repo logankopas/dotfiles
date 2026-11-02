@@ -311,6 +311,8 @@ local plugins = {
     -- The aforementioned Treesitter
     {
         "nvim-treesitter/nvim-treesitter",
+        branch = "main",
+        main = 'nvim-treesitter.config',
         priority = 1000,
         lazy = false,
         build = ":TSUpdate"
@@ -587,7 +589,7 @@ require("lazy").setup(plugins)
 vim.cmd("colorscheme gruvbox")
 
 -- Treesitter
-require("nvim-treesitter.configs").setup({
+require("nvim-treesitter.config").setup({
     ensure_installed = {
         "arduino",
         "awk",
