@@ -69,7 +69,7 @@ verify)
     src=${3:?src-mount}; junk=${4:?junk.txt}
     mapfile -t ex < <(rsync_excludes "$W/junk.txt")
     echo "== 1/2 rsync --checksum dry-run (must print nothing below this line)"
-    out=$(rsync -aH --checksum --dry-run --itemize-changes --chown="$OWNER" "${ex[@]}" "$src/" "$DEST/" | grep -v '^\.d' || true)
+    out=$(rsync -aH --checksum --dry-run --itemize-changes --chown="$OWNER" "${ex[@]}" "$src/" "$DEST/" | grep -vE '^\.d|^\.L\.{3}p\.{5} ' || true)   # ignore dirs and symlink perm-only diffs (HFS+ stores link perms, ext4 cannot)
     if [[ -n $out ]]; then echo "$out"; echo "VERIFY FAILED (rsync differences)"; exit 1; fi
     echo "   ok"
     echo "== 2/2 sha256 manifest check against the copy (must report nothing below this line)"
