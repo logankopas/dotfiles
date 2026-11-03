@@ -9,4 +9,6 @@ ExecStart=/usr/local/sbin/borg-backup check full %i
 Nice=19
 IOSchedulingClass=idle
 TimeoutStartSec=36h
+# borg rc 1 = warning (e.g. a file changed while being read): record it, do not trigger OnFailure
+SuccessExitStatus=1
 PrivateTmp=yes

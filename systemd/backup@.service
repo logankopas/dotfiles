@@ -11,4 +11,6 @@ Nice=15
 IOSchedulingClass=best-effort
 IOSchedulingPriority=7
 TimeoutStartSec=18h
+# borg rc 1 = warning (e.g. a file changed while being read): record it, do not trigger OnFailure
+SuccessExitStatus=1
 PrivateTmp=yes
