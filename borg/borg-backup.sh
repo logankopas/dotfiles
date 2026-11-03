@@ -35,8 +35,31 @@ CMD=${1:-}; [[ $# -gt 0 ]] && shift
 TS=$(date +%Y%m%d-%H%M%S)
 now()   { date -Is; }
 epoch() { date +%s; }
-max()   { (( $1 > $2 )) && echo "$1" || echo "$2"; }
-state_for_rc() { case $1 in 0) echo ok;; 1) echo warning;; *) echo failed;; esac; }
+# borg return codes (docs: usage/general, "Return codes"):
+#   0      success
+#   1      warning  -- the operation reached its normal end but logged warnings (check the log)
+#   2      error    -- the operation did not reach its normal end
+#   128+N  killed by signal N (137 = kill -9)
+# borg >= 1.4 can also emit "modern" codes: 3..99 specific errors, 100..127 specific warnings.
+# Everything is collapsed to a severity: 0 ok / 1 warning / 2 error. The script's own exit code is
+# the severity, so the units only need SuccessExitStatus=1 to keep warnings from tripping OnFailure.
+rc_severity() {
+    local rc=$1
+    if   (( rc == 0 )); then echo 0
+    elif (( rc == 1 || (rc >= 100 && rc <= 127) )); then echo 1
+    else echo 2; fi
+}
+rc_describe() {
+    local rc=$1
+    if   (( rc == 0 ));   then echo "rc 0 (success)"
+    elif (( rc == 1 ));   then echo "rc 1 (warning: completed, but check the log)"
+    elif (( rc == 2 ));   then echo "rc 2 (error: did not complete)"
+    elif (( rc >= 128 )); then echo "rc $rc (killed by signal $((rc - 128)))"
+    elif (( rc >= 100 )); then echo "rc $rc (warning)"
+    else                       echo "rc $rc (error)"; fi
+}
+worst() { local w=0 x; for x in "$@"; do x=$(rc_severity "$x"); (( x > w )) && w=$x; done; echo "$w"; }
+state_for_rc() { case $(rc_severity "$1") in 0) echo ok;; 1) echo warning;; *) echo failed;; esac; }
 
 install -d -m 0755 "$STATUS_DIR"
 install -d -m 0750 "$LOG_DIR"
@@ -158,14 +181,17 @@ do_backup() {
     local c p k rc archive
     log "borg create -> $REPO"
     run borg create "${args[@]}" "$REPO::{hostname}-$JOB-{now}" "${SOURCES[@]}"; c=$?
+    log "borg create: $(rc_describe "$c")"
     grep -E '^(Duration|Number of files|This archive|All archives):' "$LOG" | tail -4 | while IFS= read -r l; do log "  $l"; done
     log "borg prune"
     run borg prune --list --show-rc --glob-archives "$ARCHIVE_GLOB" \
         --keep-daily "$KEEP_DAILY" --keep-weekly "$KEEP_WEEKLY" --keep-monthly "$KEEP_MONTHLY" "$REPO"; p=$?
+    log "borg prune: $(rc_describe "$p")"
     log "borg compact"
     run borg compact --show-rc "$REPO"; k=$?
+    log "borg compact: $(rc_describe "$k")"
     run_hooks post
-    rc=$(max "$c" "$p"); rc=$(max "$rc" "$k")
+    rc=$(worst "$c" "$p" "$k")      # severity 0/1/2; the raw borg rcs are kept in *_create_rc etc.
     archive=$(latest_archive || echo unknown)
     status_set "${JOB}_create_rc" "$c" "${JOB}_prune_rc" "$p" "${JOB}_compact_rc" "$k" \
                "${JOB}_backup_rc" "$rc" "${JOB}_archive" "$archive" \
@@ -188,20 +214,21 @@ do_check() {   # $1 = quick|full
         return 2
     fi
     log "borg check $mode -> $REPO"
-    run borg check --show-rc --glob-archives "$ARCHIVE_GLOB" "${extra[@]}" "$REPO"; rc=$?
-    status_set "${JOB}_check_state" "$(state_for_rc "$rc")" "${JOB}_check_rc" "$rc" \
+    run borg check --show-rc --glob-archives "$ARCHIVE_GLOB" "${extra[@]}" "$REPO"; local raw=$?
+    rc=$(rc_severity "$raw")
+    status_set "${JOB}_check_state" "$(state_for_rc "$raw")" "${JOB}_check_rc" "$rc" "${JOB}_check_borg_rc" "$raw" \
                "${JOB}_check_last_end" "$(now)" "${JOB}_check_last_epoch" "$(epoch)"
     [[ $mode == full ]] && status_set "${JOB}_verify_last_epoch" "$(epoch)" "${JOB}_verify_rc" "$rc"
-    log "check finished: $(state_for_rc "$rc") (rc $rc) log=$LOG"
+    log "check finished: $(state_for_rc "$raw") -- borg check $(rc_describe "$raw") log=$LOG"
     do_restore_test; local r=$?
-    return "$(max "$rc" "$r")"
+    return "$(worst "$rc" "$r")"
 }
 
 # ---------------------------------------------------------------------------
 # restore test: sample files that ARE in the latest archive, extract, compare
 # ---------------------------------------------------------------------------
 do_restore_test() {
-    local archive start tmp d total=0 ok=0 bad=0 missing=0 skipped=0 p rc
+    local archive start tmp d total=0 ok=0 bad=0 missing=0 skipped=0 p rc xrc=0
     status_set "${JOB}_restore_state" running "${JOB}_restore_log" "$LOG"
     restore_fail() { log "restore-test FAILED: $*"; status_set "${JOB}_restore_state" failed "${JOB}_restore_rc" 2 "${JOB}_restore_last_epoch" "$(epoch)"; return 2; }
     archive=$(latest_archive)
@@ -221,7 +248,8 @@ do_restore_test() {
     log "restore-test: extracting $total sample files from $archive (started $start)"
     if (( total > 0 )); then
         mkdir "$tmp/out"
-        ( cd "$tmp/out" && xargs -d '\n' -a "$tmp/sample" borg extract --show-rc "$REPO::$archive" ) >> "$LOG" 2>&1
+        ( cd "$tmp/out" && xargs -d '\n' -a "$tmp/sample" borg extract --show-rc "$REPO::$archive" ) >> "$LOG" 2>&1; xrc=$?
+        log "borg extract: $(rc_describe "$xrc")"
         while IFS= read -r p; do
             [[ -n $p ]] || continue
             if [[ ! -f $tmp/out/$p ]]; then missing=$((missing+1)); logf "MISSING $p"; continue; fi
@@ -232,11 +260,11 @@ do_restore_test() {
         done < "$tmp/sample"
     fi
     rm -rf "$tmp"
-    rc=0; (( bad > 0 || missing > 0 || total == 0 )) && rc=2
+    rc=$(rc_severity "$xrc"); (( bad > 0 || missing > 0 || total == 0 )) && rc=2
     status_set "${JOB}_restore_state" "$(state_for_rc "$rc")" "${JOB}_restore_rc" "$rc" "${JOB}_restore_archive" "$archive" \
                "${JOB}_restore_ok" "$ok" "${JOB}_restore_total" "$total" "${JOB}_restore_bad" "$bad" \
                "${JOB}_restore_missing" "$missing" "${JOB}_restore_skipped" "$skipped" "${JOB}_restore_last_epoch" "$(epoch)"
-    log "restore-test finished: ok=$ok bad=$bad missing=$missing skipped=$skipped of $total -> $(state_for_rc "$rc")"
+    log "restore-test finished: ok=$ok bad=$bad missing=$missing skipped=$skipped of $total, extract $(rc_describe "$xrc") -> $(state_for_rc "$rc")"
     return "$rc"
 }
 
