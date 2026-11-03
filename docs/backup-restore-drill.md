@@ -14,6 +14,8 @@
 | Units | `backup@<job>` / `backup-check@<job>` / `backup-verify@<job>`; timers `backup-full.timer` 04:00, `backup-precious.timer` 03:00, checks Saturday night, verify-data first Sunday |
 
 Deploy changes: edit in `~/dotfiles`, then `sudo ./homelab.sh --skip-docker --skip-secrets`.
+Day-to-day operation is in `docs/operators-manual.md`; the no-prior-knowledge restore guide is
+`borg/README-blue-disk.md` (installed on the disk as `/mnt/borg/README.md`).
 
 Every borg command below needs the passphrase. Use:
 
@@ -31,7 +33,7 @@ anything at all. Export it and keep it with the passphrase, off this machine:
 ```sh
 borg key export /mnt/borg/repos/full /root/borg-key-full.txt
 borg key export --paper /mnt/borg/repos/full /root/borg-key-full-paper.txt
-# store both files' contents in Proton Pass (secure note "borg key full"); print the paper one
+# store both files' contents in Proton Pass (vault homelab, item BORG_KEY_<job>, e.g. BORG_KEY_full); print the paper one
 shred -u /root/borg-key-full*.txt
 touch /etc/borg/key-exported-full         # clears the MOTD warning
 ```

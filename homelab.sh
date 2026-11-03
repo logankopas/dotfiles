@@ -12,7 +12,7 @@
 # - Service permissions (proper ownership for container UIDs)
 # - Systemd services (link, daemon-reload, enable)
 # - Docker image builds
-# - Borg backup setup (borg/ -> /etc/borg, /usr/local/sbin/borg-backup; see docs/backup-restore-drill.md)
+# - Borg backup setup (borg/ -> /etc/borg, /usr/local/sbin/borg-backup, README onto /mnt/borg; see docs/operators-manual.md)
 # - Login message (motd/ -> /etc/update-motd.d, noisy Ubuntu scripts disabled)
 #
 # SERVICE PATTERN:
@@ -400,6 +400,15 @@ setup_borg() {
         [[ -f "$f" ]] && install -m 0755 -o root -g root "$f" "/etc/borg/hooks/$(basename "$f")"
     done
     log_info "Installed borg-backup, jobs, excludes and hooks"
+
+    # The recovery README lives on the backup disk itself, next to the repos, for whoever
+    # has to read the disk without this machine.
+    if mountpoint -q /mnt/borg; then
+        install -m 0644 -o root -g root "$DOTFILES_DIR/borg/README-blue-disk.md" /mnt/borg/README.md
+        log_info "Installed /mnt/borg/README.md"
+    else
+        log_warn "/mnt/borg not mounted; README-blue-disk.md not copied to the backup disk"
+    fi
 
     # Passphrase: root-only file read via BORG_PASSCOMMAND. Never substituted into scripts.
     # The value is Proton Pass vault "homelab", item BORG_PASSPHRASE.
