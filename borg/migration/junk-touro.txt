@@ -1,0 +1,21 @@
+# TOURO (sda): skip re-downloadable media (it stays on TOURO itself) and Windows/Linux junk.
+# Names match at any depth; [ ] are escaped so find -name and rsync treat them literally.
+$RECYCLE.BIN
+System Volume Information
+pagefile.sys
+hiberfil.sys
+swapfile.sys
+DumpStack.log.tmp
+desktop.ini
+Thumbs.db
+.Trash-7745539
+.Trash-1000
+Videos
+Game Of Thrones Season 5 Mp4 1080p
+Fallout.New.Vegas.Ultimate.Edition-KaOs
+Django Unchained 2012 DVDSCR X264 AAC-P2P
+Elysium (2013)
+Iron Sky {2012} DVDRIP. Jaybob
+Big Hero 6 (2014)
+X-Men.Trilogy.Box.Set\[2006\]DvDrip-aXXo
+The Great Gatsby (2013) \[1080p\]

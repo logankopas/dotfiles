@@ -1,0 +1,12 @@
+# Photos disk (sdd2, HFS+): mac junk, but KEEP .Trashes (holds photo event folders), skip the anime.
+.Spotlight-V100
+.fseventsd
+.DocumentRevisions-V100
+.TemporaryItems
+.HFS+ Private Directory Data
+.journal
+.journal_info_block
+.DS_Store
+._*
+.com.apple.timemachine.donotpresent
+\[DigiMaza\] My Hero Academia S1 (Eng)
