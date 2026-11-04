@@ -51,7 +51,7 @@ RUN git clone https://github.com/asdf-vm/asdf.git /opt/asdf --branch v0.14.1
 # so `. /opt/asdf/asdf.sh` looked like the way in, and its shims point MIX_ARCHIVES into the
 # root-owned install (`mix local.hex` → permission denied).
 # Note: Erlang builds from source (~2 min with pre-cached deps), Elixir is precompiled
-ARG ERLANG_VERSION=26.2.5
+ARG ERLANG_VERSION=26.2.5.21
 ARG ELIXIR_VERSION=1.17.3
 RUN export ASDF_DIR=/opt/asdf ASDF_DATA_DIR=/opt/asdf && \
     . /opt/asdf/asdf.sh && \
