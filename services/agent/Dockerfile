@@ -116,6 +116,10 @@ RUN chown agent:agent /home/agent/.ssh/authorized_keys && \
 
 # The shell Logan works in: tmux started through `su`, which resets PATH from /etc/environment.
 RUN su -s /bin/bash agent -c 'mix --version' | grep -q "Mix ${ELIXIR_VERSION}"
+# PAM shells (ssh, `su`) drop the ENV LANG/ELIXIR_ERL_OPTIONS above, so Elixir ran latin1 there and
+# warned on every call. pam_env reads /etc/environment for both; prove a login shell is UTF-8.
+RUN printf 'LANG=C.UTF-8\nELIXIR_ERL_OPTIONS=+fnu\n' >> /etc/environment && \
+    su - agent -c 'elixir -e "IO.puts :file.native_name_encoding()"' 2>&1 | tee /dev/stderr | grep -qx utf8
 
 RUN sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config \
     && sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config \
