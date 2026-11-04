@@ -13,7 +13,7 @@ written for a non-operator is `borg/README-blue-disk.md`, which also lives on th
 | Users | `logan` (admin, sudo), `megan`, `immich` (runs the Immich containers), `agent` (runs the agent sandbox). Group `selfhosted` owns `/var/selfhosted`. |
 | Services | Immich (photos, port 2283), nginx-proxy-manager (80/443, admin 81), agent sandbox container (ssh 2222, Phoenix 4000). All are `docker compose` projects started by systemd units. |
 | Backup disk | Blue 3.6 TB USB HDD, ext4 label `borg-main`, UUID `8c0fd48b-10ed-42cd-bedb-5ae24c97d016`, mounted at `/mnt/borg` from fstab with `nofail`. Must stay on a USB 3 port. |
-| Other disks | TOURO (sda, 466 GB NTFS): media only, re-downloadable, 8 pending sectors, not a backup target. Photos disk (sdd, 56 GB HFS+): fully staged, flaky USB bridge. Samsung 840 (sdc, 112 GB): staged, to become ext4 `scratch` at `/mnt/scratch`. |
+| Other disks | TOURO (sda, 466 GB NTFS): media only, re-downloadable, 8 pending sectors, not a backup target. Photos disk (sdd, 56 GB HFS+): fully staged, flaky USB bridge. Samsung 840 (sdc, 112 GB SATA SSD): wiped 2026-11-04, now ext4 `scratch` mounted at `/mnt/scratch` (owned by logan, `nofail`; throwaway space, not backed up by any job, not a backup target). |
 | Secrets | Proton Pass vault `homelab`. `BORG_PASSPHRASE`, `BORG_KEY_full` (exported repo key), `IMMICH_DB_PASSWORD`, plus a pass-cli PAT stored at `/home/logan/secrets/proton-pass-pat`. |
 
 ## 2. Two installers
@@ -201,10 +201,12 @@ same history and can be fast-forwarded (`git push origin main:master`) whenever 
 Commits are small and prefixed with the area they touch (`borg:`, `agent:`, `migration:`,
 `nvim:`).
 
-## 10. Open items (as of 2026-11-03)
+## 10. Open items (as of 2026-11-04)
 
-- GATE 5c: confirm the 2026-11-04 04:00 archive lists the four new staging trees, then wipe the
-  Samsung (`sdc`) and format it ext4 `scratch` at `/mnt/scratch`.
+- Phase 5 is done: all four old-disk trees are staged, verified and present in the 2026-11-04
+  archive, and the Samsung is now `/mnt/scratch`. Nothing else is left on the old disks except
+  re-downloadable media on TOURO.
+
 - `precious` (second copy of Immich + `/home/megan`) stays disabled until there is a trustworthy
   second disk. TOURO is a candidate only if a full write test clears its pending sectors.
 - `offsite` waits for a destination (a Hetzner storage box or a friend's box with borg over ssh).
