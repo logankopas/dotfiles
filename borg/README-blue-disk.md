@@ -169,6 +169,22 @@ Paste the text below, then paste this whole file after it:
 > run it, and help me restore `home/megan` and the Immich photos to another disk. Do not run any
 > command that modifies the backup disk.
 
+## The second disk (TOURO)
+
+There is a second, smaller USB disk labelled **borg-precious** (a 466 GB HGST "Touro"). It holds a
+second copy of only the irreplaceable things: the Immich photos and videos, the Immich database
+dumps, and Megan's home folder. It is there in case this disk fails. Everything above works the
+same way on it with three substitutions:
+
+| On this disk | On the second disk |
+|---|---|
+| `/dev/disk/by-label/borg-main` | `/dev/disk/by-label/borg-precious` |
+| `repos/full` | `repos/precious` |
+| archives named `L-Desktop-full-...` | archives named `L-Desktop-precious-...` |
+
+The passphrase is the same `BORG_PASSPHRASE`. Its spare key is the password manager item
+`BORG_KEY_precious`.
+
 ## If L-Desktop still works
 
 On the computer itself none of the above is needed: the disk is mounted at `/mnt/borg`, the
