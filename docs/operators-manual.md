@@ -65,7 +65,7 @@ data is in `/var/lib/borg/status` (`sudo borg-backup status`).
 | `backup-full.timer` | daily 04:00 | `borg-backup backup full`: Immich DB dump, create, prune, compact |
 | `backup-check-full.timer` | Saturday 01:00 | `borg check` (metadata) then a restore test of 80 sampled files |
 | `backup-verify-full.timer` | first Sunday 01:00 | `borg check --verify-data` (reads every chunk; hours) then the restore test |
-| `backup-precious.timer`, `backup-check-precious.timer`, `backup-verify-precious.timer` | stopped | job `precious` is `ENABLED=no` until a second healthy disk exists |
+| `backup-precious.timer`, `backup-check-precious.timer`, `backup-verify-precious.timer` | 03:00 / Sat 00:00 / first Sunday 00:00 | fire, but job `precious` is `ENABLED=no`, so the script exits 0 and clears any stale `precious_*` status (a disabled job never shows in the banner). Flip to `yes` when a second healthy disk exists. |
 
 **Logs**: `/var/log/borg/<job>-<cmd>-<timestamp>.log` holds the full borg output including the
 `--list` of every changed file; `<job>-<cmd>-latest.log` points at the newest. Logs are gzipped

@@ -111,9 +111,21 @@ run()  { logf "+ $*"; "$@" >> "$LOG" 2>&1; }                                  # 
 
 is_ssh_repo() { [[ $REPO == ssh://* || $REPO == *:* && $REPO != /* ]]; }
 
+status_clear_job() {   # drop every "<job>_*" key (and a unit_failed that points at this job)
+    grep -q -- "^${JOB}_\|^unit_failed=.*@${JOB}\.service$" "$STATUS_FILE" 2>/dev/null || return 0
+    local tmp; tmp=$(mktemp "$STATUS_DIR/.status.XXXXXX") || return 1
+    if grep -q -- "^unit_failed=.*@${JOB}\.service$" "$STATUS_FILE"; then
+        grep -v -- "^${JOB}_\|^unit_failed" "$STATUS_FILE" > "$tmp" || :
+    else
+        grep -v -- "^${JOB}_" "$STATUS_FILE" > "$tmp" || :
+    fi
+    chmod 644 "$tmp" && mv -f "$tmp" "$STATUS_FILE"
+}
+
 job_enabled_or_exit() {
     if [[ $ENABLED != yes ]]; then
         echo "borg-backup: job '$JOB' is disabled (ENABLED=$ENABLED in $JOBS_DIR/$JOB.conf); nothing to do"
+        status_clear_job          # a disabled job must not linger in the status file / MOTD
         exit 0
     fi
 }
