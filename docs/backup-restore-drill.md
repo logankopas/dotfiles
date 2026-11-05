@@ -37,7 +37,7 @@ borg key export --paper /mnt/borg/repos/full /root/borg-key-full-paper.txt
 shred -u /root/borg-key-full*.txt
 touch /etc/borg/key-exported-full         # clears the MOTD warning
 ```
-Repeat for `precious` (`/mnt/borg-precious/repos/precious`) and `offsite`.
+Done for `full` (`BORG_KEY_full`) and `precious` (`BORG_KEY_precious`); repeat for `offsite` when it exists.
 
 To use an exported key on another machine: `borg key import <repo> <keyfile>`.
 

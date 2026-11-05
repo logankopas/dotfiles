@@ -13,7 +13,8 @@ written for a non-operator is `borg/README-blue-disk.md`, which also lives on th
 | Users | `logan` (admin, sudo), `megan`, `immich` (runs the Immich containers), `agent` (runs the agent sandbox). Group `selfhosted` owns `/var/selfhosted`. |
 | Services | Immich (photos, port 2283), nginx-proxy-manager (80/443, admin 81), agent sandbox container (ssh 2222, Phoenix 4000). All are `docker compose` projects started by systemd units. |
 | Backup disk | Blue 3.6 TB USB HDD, ext4 label `borg-main`, UUID `8c0fd48b-10ed-42cd-bedb-5ae24c97d016`, mounted at `/mnt/borg` from fstab with `nofail`. Must stay on a USB 3 port. |
-| Other disks | TOURO (sda, 466 GB NTFS): media only, re-downloadable, 8 pending sectors, not a backup target. Photos disk (sdd, 56 GB HFS+): fully staged, flaky USB bridge. Samsung 840 (sdc, 112 GB SATA SSD): wiped 2026-11-04, now ext4 `scratch` mounted at `/mnt/scratch` (owned by logan, `nofail`; throwaway space, not backed up by any job, not a backup target). |
+| Second backup disk | TOURO, HGST 466 GB 2.5" USB HDD, ext4 label `borg-precious`, UUID `5163e663-cd58-4c31-a3b7-98717586ce30`, mounted at `/mnt/borg-precious` (`nofail`). Passed a full `badblocks -w` pass and a SMART long test on 2026-11-04 (pending sectors 8 -> 0, reallocated 0). Holds the `precious` repo only. Old consumer drive: it is a second copy, never the primary; its weekly check is the canary. |
+| Other disks | Photos disk (sdd, 56 GB HFS+): fully staged, flaky USB bridge, can be retired. Samsung 840 (sdc, 112 GB SATA SSD): wiped 2026-11-04, now ext4 `scratch` at `/mnt/scratch` (owned by logan, `nofail`; throwaway space, not backed up, not a backup target). The old TOURO media (192 GB of movies/series, re-downloadable) sits in a plain folder on the blue disk, `/mnt/borg/media`, outside the repo and outside every job. |
 | Secrets | Proton Pass vault `homelab`. `BORG_PASSPHRASE`, `BORG_KEY_full` (exported repo key), `IMMICH_DB_PASSWORD`, plus a pass-cli PAT stored at `/home/logan/secrets/proton-pass-pat`. |
 
 ## 2. Two installers
@@ -65,7 +66,10 @@ data is in `/var/lib/borg/status` (`sudo borg-backup status`).
 | `backup-full.timer` | daily 04:00 | `borg-backup backup full`: Immich DB dump, create, prune, compact |
 | `backup-check-full.timer` | Saturday 01:00 | `borg check` (metadata) then a restore test of 80 sampled files |
 | `backup-verify-full.timer` | first Sunday 01:00 | `borg check --verify-data` (reads every chunk; hours) then the restore test |
-| `backup-precious.timer`, `backup-check-precious.timer`, `backup-verify-precious.timer` | 03:00 / Sat 00:00 / first Sunday 00:00 | fire, but job `precious` is `ENABLED=no`, so the script exits 0 and clears any stale `precious_*` status (a disabled job never shows in the banner). Flip to `yes` when a second healthy disk exists. |
+| `backup-precious.timer` | daily 03:00 | `borg-backup backup precious`: Immich DB dump, create, prune, compact onto TOURO |
+| `backup-check-precious.timer` | Saturday 00:00 | `borg check` then a restore test of 40 sampled files |
+| `backup-verify-precious.timer` | first Sunday 00:00 | `borg check --verify-data` then the restore test |
+| any job with `ENABLED=no` | its timers still fire | the script exits 0 and clears that job's `precious_*`-style status keys, so a parked job never shows in the banner |
 
 **Logs**: `/var/log/borg/<job>-<cmd>-<timestamp>.log` holds the full borg output including the
 `--list` of every changed file; `<job>-<cmd>-latest.log` points at the newest. Logs are gzipped
@@ -201,14 +205,13 @@ same history and can be fast-forwarded (`git push origin main:master`) whenever 
 Commits are small and prefixed with the area they touch (`borg:`, `agent:`, `migration:`,
 `nvim:`).
 
-## 10. Open items (as of 2026-11-04)
+## 10. Open items (as of 2026-11-05)
 
-- Phase 5 is done: all four old-disk trees are staged, verified and present in the 2026-11-04
-  archive, and the Samsung is now `/mnt/scratch`. Nothing else is left on the old disks except
-  re-downloadable media on TOURO.
-
-- `precious` (second copy of Immich + `/home/megan`) stays disabled until there is a trustworthy
-  second disk. TOURO is a candidate only if a full write test clears its pending sectors.
+- Migration finished 2026-11-05: every old disk is staged and verified, the Samsung is `/mnt/scratch`,
+  and TOURO carries the `precious` repo (first archive, check, restore test and key export all done).
+- Rotating offsite pair: the owner plans to buy two disks that alternate between home and another
+  house. Each is just another `precious`-style job (copy `jobs/precious.conf`, new label, new
+  timer); `/mnt/borg/media` should move to one of them or stay on the blue disk.
 - `offsite` waits for a destination (a Hetzner storage box or a friend's box with borg over ssh).
   Everything is prepared in `borg/jobs/offsite.conf`.
 - Quarterly restore drill: table at the end of `docs/backup-restore-drill.md`.

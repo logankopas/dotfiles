@@ -156,6 +156,8 @@ still readable with `borg extract` even when a check reports errors.
 
 - Never run `borg check --repair`, `borg delete`, `borg prune`, `borg compact` or `borg init` on it.
 - Never format it, never "fix" it when Windows or macOS offers to, never store other files on it.
+  (The one exception already there is the folder `media`: plain movie and series files, not part of
+  the backups, safe to copy or ignore.)
 - Never copy the `repos/full` folder with Finder/Explorer and then work on the copy while it is
   still copying. Copying the folder to another disk is fine as a safeguard, once it has finished.
 
