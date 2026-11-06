@@ -90,6 +90,22 @@ su -s /bin/bash agent -c "tmux new-session -d -s agent"
 # supervisord opens that log before the program runs. Home is ephemeral, so every boot.
 install -d -o agent -g agent /home/agent/.gardenos
 
+# PostgreSQL cluster (Dockerfile: PostgreSQL section; supervisord runs it from conf.d/postgres.conf).
+# Data lives on the workspace so databases survive rebuilds; initialised once, on the first boot
+# that finds no PG_VERSION. Superuser postgres/postgres, password auth on localhost (Phoenix's
+# generated dev/test config); the socket directory is under /run, which is fresh every boot.
+# A failed initdb must not stop the container from booting: supervisord then logs the missing
+# cluster and gives up on the program, and everything else still runs.
+install -d -o agent -g agent -m 2775 /run/postgresql
+PGDATA=/home/agent/workspace/.postgres/17
+if [ ! -s "$PGDATA/PG_VERSION" ]; then
+    install -d -o agent -g agent -m 700 /home/agent/workspace/.postgres "$PGDATA"
+    PWFILE=$(mktemp) && printf 'postgres\n' > "$PWFILE" && chown agent "$PWFILE"
+    su -s /bin/bash agent -c "/usr/lib/postgresql/17/bin/initdb -D $PGDATA -U postgres --pwfile=$PWFILE --auth=scram-sha-256 --encoding=UTF8 --locale=C.UTF-8" \
+        || echo "Warning: initdb failed; postgres will not start"
+    rm -f "$PWFILE"
+fi
+
 # PID 1 from here on: reaps orphans, runs the programs the [include] globs find, and on
 # `docker stop` stops each one within its stopwaitsecs (compose stop_grace_period covers it).
 exec /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf

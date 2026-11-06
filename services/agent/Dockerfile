@@ -90,6 +90,23 @@ RUN install -m 0755 -d /etc/apt/keyrings \
     && apt-get update && apt-get install -y docker-ce-cli docker-compose-plugin \
     && rm -rf /var/lib/apt/lists/*
 
+# PostgreSQL for doc-editor/ZedDocs development and tests (MVP spec 2026-11-06: Postgres from the
+# start). From the PGDG repo, not Ubuntu's 14, so dev runs the major version production will.
+# postgresql-common is told not to create its default cluster under /var/lib (ephemeral, owned by
+# a `postgres` user): the entrypoint initialises one cluster on the workspace, owned by agent, and
+# supervisord runs it (conf.d/postgres.conf). The data directory is per major version, so a bump
+# starts a fresh, empty cluster instead of failing on the old one's files.
+ARG PG_MAJOR=17
+RUN curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /etc/apt/keyrings/postgresql.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/postgresql.gpg] https://apt.postgresql.org/pub/repos/apt $(. /etc/os-release && echo "$VERSION_CODENAME")-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update && apt-get install -y postgresql-common \
+    && sed -i 's/^#\?create_main_cluster.*/create_main_cluster = false/' /etc/postgresql-common/createcluster.conf \
+    && apt-get install -y postgresql-${PG_MAJOR} postgresql-client-${PG_MAJOR} \
+    && rm -rf /var/lib/apt/lists/* \
+    && /usr/lib/postgresql/${PG_MAJOR}/bin/postgres --version | grep -q "(PostgreSQL) ${PG_MAJOR}\." \
+    && test -f /usr/share/postgresql/${PG_MAJOR}/extension/ltree.control \
+    && test -z "$(ls -A /var/lib/postgresql/${PG_MAJOR} 2>/dev/null)"
+
 # Create homelab group for shared access (GID 1005)
 # This group will be used for shared directories between host and container
 RUN groupadd -g 1005 homelab
@@ -169,5 +186,6 @@ USER root
 
 # supervisord is PID 1 (entrypoint.sh execs it); its config replaces the package default.
 COPY supervisord.conf /etc/supervisor/supervisord.conf
+COPY postgres.conf /etc/supervisor/conf.d/postgres.conf
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
