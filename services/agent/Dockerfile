@@ -3,6 +3,9 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=America/Edmonton
 ENV TERM=xterm-256color
+# Opt out of tool telemetry wherever the DO_NOT_TRACK convention is honoured (bd 1.3.4 metrics: verified
+# 2026-11-06, OFF with DO_NOT_TRACK=1 and a fresh HOME). `bd metrics off` alone lives in ~/.config, lost on rebuild.
+ENV DO_NOT_TRACK=1
 
 # Base packages
 RUN apt-get update && apt-get install -y \
@@ -135,8 +138,9 @@ RUN chown agent:agent /home/agent/.ssh/authorized_keys && \
 RUN su -s /bin/bash agent -c 'mix --version' | grep -q "Mix ${ELIXIR_VERSION}"
 # PAM shells (ssh, `su`) drop the ENV LANG/ELIXIR_ERL_OPTIONS above, so Elixir ran latin1 there and
 # warned on every call. pam_env reads /etc/environment for both; prove a login shell is UTF-8.
-RUN printf 'LANG=C.UTF-8\nELIXIR_ERL_OPTIONS=+fnu\n' >> /etc/environment && \
-    su - agent -c 'elixir -e "IO.puts :file.native_name_encoding()"' 2>&1 | tee /dev/stderr | grep -qx utf8
+RUN printf 'LANG=C.UTF-8\nELIXIR_ERL_OPTIONS=+fnu\nDO_NOT_TRACK=1\n' >> /etc/environment && \
+    su - agent -c 'elixir -e "IO.puts :file.native_name_encoding()"' 2>&1 | tee /dev/stderr | grep -qx utf8 && \
+    su - agent -c 'printenv DO_NOT_TRACK' | grep -qx 1
 
 RUN sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config \
     && sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config \
