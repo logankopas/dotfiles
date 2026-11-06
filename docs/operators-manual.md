@@ -212,8 +212,8 @@ Commits are small and prefixed with the area they touch (`borg:`, `agent:`, `mig
 - Rotating offsite pair: the owner plans to buy two disks that alternate between home and another
   house. Each is just another `precious`-style job (copy `jobs/precious.conf`, new label, new
   timer); `/mnt/borg/media` should move to one of them or stay on the blue disk.
-- `offsite` waits for a destination (a Hetzner storage box or a friend's box with borg over ssh).
-  Everything is prepared in `borg/jobs/offsite.conf`.
+- `offsite` waits for a destination. Options were compared on 2026-11-06 (see `docs/journal.md`);
+  recommendation Hetzner Storage Box BX11. Everything is prepared in `borg/jobs/offsite.conf`.
 - Quarterly restore drill: table at the end of `docs/backup-restore-drill.md`.
 - `~/staging` is a holding pen: sort it, delete `._*` AppleDouble files, import the camera RAW
   files from `photos-disk` into Immich.

@@ -29,7 +29,7 @@ cd ~/dotfiles && sudo ./homelab.sh --skip-docker --skip-secrets  # every later d
 | `systemd/` | One `.service` per docker service, plus the borg templates `backup@`, `backup-check@`, `backup-verify@`, `backup-failed@` and their timers. Symlinked into `/etc/systemd/system`. |
 | `borg/` | `borg-backup.sh` (the one script behind every backup job), `jobs/*.conf`, `excludes-*`, `hooks/`, the recovery `README-blue-disk.md` that is placed on the backup disk, and `migration/` (one-off tooling that staged the old disks). |
 | `motd/` | `40-backup-status`, the login banner block that shows backup, check and restore state. |
-| `docs/` | `operators-manual.md` (start here to run the machine), `backup-restore-drill.md` (key export, restore commands, quarterly drill). |
+| `docs/` | `operators-manual.md` (start here to run the machine), `backup-restore-drill.md` (key export, restore commands, quarterly drill), `journal.md` (dated log of decisions, findings and research). |
 | `nvim/` | Neovim config (lazy.nvim, LSP, CodeCompanion with Claude Code adapters; see `nvim/codecompanion-cheatsheet.md`). |
 | `git_template/` | Git hooks that rebuild ctags on commit/checkout/merge. |
 | `setup_venv_autoactivate.sh` | Adds a `cd` hook that activates `./venv` when present. |
