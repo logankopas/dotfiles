@@ -7,7 +7,8 @@ ENV TERM=xterm-256color
 # 2026-11-06, OFF with DO_NOT_TRACK=1 and a fresh HOME). `bd metrics off` alone lives in ~/.config, lost on rebuild.
 ENV DO_NOT_TRACK=1
 
-# Base packages
+# Base packages. poppler-utils = pdftotext for ZedDocs E6 PDF text extraction (alm-kvvc2); the
+# build fails if pdftotext is missing.
 RUN apt-get update && apt-get install -y \
     sudo \
     git \
@@ -29,7 +30,9 @@ RUN apt-get update && apt-get install -y \
     libncurses-dev \
     libssl-dev \
     supervisor \
-    && rm -rf /var/lib/apt/lists/*
+    poppler-utils \
+    && rm -rf /var/lib/apt/lists/* \
+    && pdftotext -v 2>&1 | grep -q '^pdftotext version'
 
 # Install just (command runner) - available to all users
 RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
