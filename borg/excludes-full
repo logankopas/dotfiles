@@ -35,5 +35,10 @@ var/lib/flatpak
 # snaps reinstall
 var/lib/snapd
 
+# the agent container's dev PostgreSQL 17 cluster (doc-editor/ZedDocs). A live data dir copied
+# file by file is never a usable backup (borg rc 1 "file changed while we backed it up");
+# dev data is re-seeded. If it ever needs keeping, add a pg_dumpall pre-hook like immich-db-dump.
+home/*/agent-workspace/.postgres
+
 # --- build artefacts inside project dirs (approved; the projects themselves are kept) ---
 re:^home/[^/]+/(projects|agent-workspace)/.*/(node_modules|target|_build|deps|\.venv|__pycache__|\.mypy_cache|\.pytest_cache)(/|$)

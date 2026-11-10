@@ -191,7 +191,7 @@ Rules learned the hard way:
 | Banner says | Do |
 |---|---|
 | `Backup full: FAILED` + log path | `less` the log. Preflight failures (disk not mounted, passphrase unreadable) are the first lines. `mount /mnt/borg` then `systemctl start backup@full.service`. |
-| `WARN (rc 1)` | Borg finished with warnings. `grep -E '^[A-Z]|warning' <log>`; usually a file changed during the read. Nothing to do unless it repeats. |
+| `WARN (rc 1)` | Borg finished with warnings. `grep -vE '^[AME] ' <log> \| grep -iE 'warn\|error\|changed\|vanish'` (plus `grep '^E ' <log>` for files borg could not read); usually a file changed during the read. Nothing to do unless it repeats. |
 | `OVERDUE` | The timer did not fire or the run never finished. `systemctl status backup-full.timer backup@full.service`; `journalctl -u backup@full.service`. |
 | `Check full: FAILED` | `borg check` found a problem or the restore test had `bad`/`missing` files. Read the check log. Do not run `--repair` without a second copy of the repo. |
 | `!! backup@full.service failed at ...` | The unit itself failed (script crash, timeout 18 h, killed). `journalctl -u backup@full.service`. |
