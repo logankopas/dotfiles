@@ -45,6 +45,16 @@ RUN curl -fsSL "https://github.com/dolthub/dolt/releases/download/v${DOLT_VERSIO
     && install -m 0755 "/tmp/dolt-linux-$(dpkg --print-architecture)/bin/dolt" /usr/local/bin/dolt \
     && rm -rf /tmp/dolt-linux-* \
     && dolt version | grep -q "${DOLT_VERSION}"
+# uv (pinned) and Ansible for provisioning the ZedDocs VM (MVP spec §14). ansible-core >= 2.18 needs
+# Python >= 3.11 on the controller and the image's python3 is 3.10, so uv installs its own Python
+# under /opt/uv (world-readable, every user) and runs ansible-core from that.
+ARG UV_VERSION=0.13.6
+ARG ANSIBLE_CORE_VERSION=2.21.5
+RUN curl -LsSf "https://astral.sh/uv/${UV_VERSION}/install.sh" | env UV_INSTALL_DIR=/usr/local/bin UV_NO_MODIFY_PATH=1 sh \
+    && env UV_TOOL_DIR=/opt/uv/tools UV_TOOL_BIN_DIR=/usr/local/bin UV_PYTHON_INSTALL_DIR=/opt/uv/python \
+       uv tool install --python 3.13 "ansible-core==${ANSIBLE_CORE_VERSION}" \
+    && uv --version | grep -q "${UV_VERSION}" \
+    && ansible --version | grep -q "core ${ANSIBLE_CORE_VERSION}"
 # Install asdf — used ONLY as the installer for Erlang/Elixir at build time. It is not on PATH
 # at runtime: its bin/asdf resolves ../lib relative to the symlink (so /usr/local/bin/asdf broke),
 # and its shims need a per-user .tool-versions + ASDF_DATA_DIR that the agent user never had.
