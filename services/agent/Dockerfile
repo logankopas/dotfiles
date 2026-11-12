@@ -147,6 +147,13 @@ COPY ./authorized_keys /home/agent/.ssh/authorized_keys
 RUN chown agent:agent /home/agent/.ssh/authorized_keys && \
     chmod 644 /home/agent/.ssh/authorized_keys
 
+# sshd runs ~/.ssh/rc at each login: it points ~/.ssh/agent.sock at that login's forwarded agent, so
+# tmux shells and seats reach Logan's deploy key at a fixed path (ZedDocs provisioning, 2026-11-12).
+COPY --chown=agent:agent --chmod=644 ./ssh-rc /home/agent/.ssh/rc
+RUN sh -n /home/agent/.ssh/rc \
+    && su -s /bin/sh agent -c 'cd && SSH_AUTH_SOCK=/tmp/probe.sock sh .ssh/rc && readlink .ssh/agent.sock' | grep -qx /tmp/probe.sock \
+    && rm /home/agent/.ssh/agent.sock
+
 # The shell Logan works in: tmux started through `su`, which resets PATH from /etc/environment.
 RUN su -s /bin/bash agent -c 'mix --version' | grep -q "Mix ${ELIXIR_VERSION}"
 # PAM shells (ssh, `su`) drop the ENV LANG/ELIXIR_ERL_OPTIONS above, so Elixir ran latin1 there and
