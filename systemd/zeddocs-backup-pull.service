@@ -1,0 +1,21 @@
+[Unit]
+Description=ZedDocs off-site backup pull (doc-editor ops/backup-pull)
+Requires=docker.service
+After=docker.service
+RequiresMountsFor=/mnt/app-backups
+
+[Service]
+Type=simple
+WorkingDirectory=/var/selfhosted/zeddocs-backup-pull
+Environment=
+# Never write into an unmounted /mnt/app-backups (that would fill the root disk).
+ExecStartPre=/usr/bin/mountpoint -q /mnt/app-backups
+ExecStart=/usr/bin/docker compose up
+ExecStop=/usr/bin/docker compose down
+Restart=always
+RestartSec=10s
+User=immich
+Group=selfhosted
+
+[Install]
+WantedBy=multi-user.target

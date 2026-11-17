@@ -573,6 +573,15 @@ setup_permissions() {
         log_info "Nginx proxy permissions set"
     fi
 
+    # ZedDocs backup pull (doc-editor ops/backup-pull): the disk belongs to the image's uid 10001
+    if mountpoint -q /mnt/app-backups; then
+        chown 10001:10001 /mnt/app-backups
+        chmod 700 /mnt/app-backups
+        log_info "zeddocs-backup-pull permissions set"
+    else
+        log_warn "/mnt/app-backups is not mounted; zeddocs-backup-pull.service will refuse to start"
+    fi
+
     # Agent container permissions
     if [[ -d /var/selfhosted/agent ]]; then
         mkdir -p /var/selfhosted/agent/workspace
@@ -603,6 +612,14 @@ build_images() {
         cd /var/selfhosted/agent
         docker build -t agent:local . 2>&1 | tail -5
         log_info "Agent image built"
+    fi
+
+    # The workspace's host path is services/agent/docker-compose.yml's volume source.
+    local zbp_ops=/home/logan/agent-workspace/projects/doc-editor/ops
+    if [[ -f "$zbp_ops/backup-pull/Dockerfile" ]]; then
+        log_info "Building zeddocs-backup-pull image..."
+        docker build -t zeddocs-backup-pull:local -f "$zbp_ops/backup-pull/Dockerfile" "$zbp_ops" 2>&1 | tail -5
+        log_info "zeddocs-backup-pull image built (restart the unit to pick it up)"
     fi
 
     log_info "Docker images build complete"

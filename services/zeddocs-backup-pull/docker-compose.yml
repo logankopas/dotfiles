@@ -1,0 +1,19 @@
+# ZedDocs off-site backup pull (E16 spec §3.5): pulls the VM's encrypted restic repository daily onto
+# /mnt/app-backups. Ciphertext only; the restic key never comes here. The image is built by homelab.sh
+# build_images from doc-editor ops/backup-pull (the agent workspace's checkout); its README says more.
+services:
+  app:
+    image: zeddocs-backup-pull:local
+    restart: unless-stopped
+    environment:
+      # zeddocs-1; the image's /etc/ssh/ssh_known_hosts holds its key under this address.
+      BACKUP_HOST: "162.223.228.244"
+      TZ: "UTC"
+    volumes:
+      # Owned by the image's uid 10001 (homelab.sh setup_permissions).
+      - /mnt/app-backups:/backups
+      # The pull key pair, generated on first start; its public half is in `docker logs`.
+      - keys:/keys
+
+volumes:
+  keys:
