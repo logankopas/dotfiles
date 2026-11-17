@@ -14,7 +14,7 @@ written for a non-operator is `borg/README-blue-disk.md`, which also lives on th
 | Services | Immich (photos, port 2283), nginx-proxy-manager (80/443, admin 81), agent sandbox container (ssh 2222, Phoenix 4000). All are `docker compose` projects started by systemd units. |
 | Backup disk | Blue 3.6 TB USB HDD, ext4 label `borg-main`, UUID `8c0fd48b-10ed-42cd-bedb-5ae24c97d016`, mounted at `/mnt/borg` from fstab with `nofail`. Must stay on a USB 3 port. |
 | Second backup disk | TOURO, HGST 466 GB 2.5" USB HDD, ext4 label `borg-precious`, UUID `5163e663-cd58-4c31-a3b7-98717586ce30`, mounted at `/mnt/borg-precious` (`nofail`). Passed a full `badblocks -w` pass and a SMART long test on 2026-11-04 (pending sectors 8 -> 0, reallocated 0). Holds the `precious` repo only. Old consumer drive: it is a second copy, never the primary; its weekly check is the canary. |
-| Other disks | Photos disk (sdd, 56 GB HFS+): fully staged, flaky USB bridge, can be retired. Samsung 840 (sdc, 112 GB SATA SSD): wiped 2026-11-04, now ext4 `scratch` at `/mnt/scratch` (owned by logan, `nofail`; throwaway space, not backed up, not a backup target). The old TOURO media (192 GB of movies/series, re-downloadable) sits in a plain folder on the blue disk, `/mnt/borg/media`, outside the repo and outside every job. |
+| Other disks | Photos disk (sdd, 56 GB HFS+): fully staged, flaky USB bridge, can be retired. Samsung 840 (sdc, 112 GB SATA SSD): ext4 label `app-backups`, UUID `77d10136-feea-4261-8401-25ad18b264cb`, mounted at `/mnt/app-backups` (owned by logan, `nofail`). The whole disk is the backup destination for an app the owner is building; it is a source of job `full` (listed explicitly, because it is a separate filesystem), not a borg target. The old TOURO media (192 GB of movies/series, re-downloadable) sits in a plain folder on the blue disk, `/mnt/borg/media`, outside the repo and outside every job. |
 | Secrets | Proton Pass vault `homelab`. `BORG_PASSPHRASE`, `BORG_KEY_full` (exported repo key), `IMMICH_DB_PASSWORD`, plus a pass-cli PAT stored at `/home/logan/secrets/proton-pass-pat`. |
 
 ## 2. Two installers
@@ -110,7 +110,7 @@ script refuses to run unless it is a mountpoint; empty for ssh repos), `SOURCES`
 `COMPRESSION`, `KEEP_DAILY/WEEKLY/MONTHLY`, `CHECK_QUICK_ARGS`, `RESTORE_TEST_DIRS`,
 `RESTORE_TEST_PER_DIR`, `RESTORE_TEST_MAX_BYTES`, `PRE_HOOKS`, `POST_HOOKS`, `LOCK_WAIT`.
 
-Job `full` backs up `/etc /home /root /var` with `--one-file-system`, lz4, 7/4/6 retention, to
+Job `full` backs up `/etc /home /root /var /mnt/app-backups` with `--one-file-system`, lz4, 7/4/6 retention, to
 `/mnt/borg/repos/full` (repokey-blake2). Archives are named `{hostname}-full-{now}`. Excluded:
 docker's image store, caches, journal, the job's own logs, rebuildable toolchains, flatpak and
 snap stores, and build artefacts under `~/projects` and `~/agent-workspace` (see the excludes file;
@@ -207,7 +207,8 @@ Commits are small and prefixed with the area they touch (`borg:`, `agent:`, `mig
 
 ## 10. Open items (as of 2026-11-05)
 
-- Migration finished 2026-11-05: every old disk is staged and verified, the Samsung is `/mnt/scratch`,
+- Migration finished 2026-11-05: every old disk is staged and verified, the Samsung was `/mnt/scratch`
+  (since 2026-11-17 `/mnt/app-backups`, see section 1),
   and TOURO carries the `precious` repo (first archive, check, restore test and key export all done).
 - Rotating offsite pair: the owner plans to buy two disks that alternate between home and another
   house. Each is just another `precious`-style job (copy `jobs/precious.conf`, new label, new

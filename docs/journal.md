@@ -119,3 +119,11 @@ hand; export the key to `BORG_KEY_offsite` + paper.
 `--verify-data` downloads every chunk; the first one decides whether it stays monthly or becomes
 quarterly for offsite. The rotating disk pair still makes sense alongside: the online copy covers
 the house, the disks cover a provider or account problem and restore at disk speed.
+
+## 2026-11-17 — Samsung becomes `/mnt/app-backups`
+
+- The `scratch` role was a placeholder. The Samsung 840 now holds backups written by an app the
+  owner is building: same ext4 filesystem (it was empty, so no reformat), relabelled
+  `app-backups`, mounted at `/mnt/app-backups`, same UUID in fstab.
+- Added `/mnt/app-backups` to `SOURCES` of `full` (and the parked `offsite`) and to the `full`
+  restore-test dirs. It has to be listed because the job runs with `--one-file-system`.
