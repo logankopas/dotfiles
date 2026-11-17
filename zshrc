@@ -120,3 +120,32 @@ export NVM_DIR="$HOME/.config/nvm"
 export PATH="/home/logan/.kimi-code/bin:$PATH"
 
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
+
+# Load the ZedDocs deploy key with a timeout and open a forwarding session into the agent container.
+#   zeddocs                      15-minute key, plain login shell
+#   zeddocs 1h                   1-hour key
+#   zeddocs 30m tmux attach      30-minute key, straight into tmux
+# Keep the session open while the key is needed: closing it removes the forwarded socket.
+export ZEDDOCS_KEY=~/.ssh/zeddocs_ed25519
+export ZEDDOCS_CONTAINER=agent
+zeddocs() {
+    local key=${ZEDDOCS_KEY:-$HOME/.ssh/zeddocs-deploy}      # path to the private key
+    local host=${ZEDDOCS_CONTAINER:-agent-container}         # the Host alias for the container
+    local ttl=${1:-15m}
+    local sock=$HOME/.ssh/zeddocs-agent.sock
+    (( $# )) && shift
+
+    # A local agent of our own: a forwarded agent refuses `ssh-add -t`.
+    # ssh-add -l exits 2 when no agent answers on the socket, so start one only then.
+    SSH_AUTH_SOCK=$sock ssh-add -l >/dev/null 2>&1
+    if (( $? == 2 )); then
+        rm -f -- $sock
+        ssh-agent -a $sock >/dev/null || { print -u2 "zeddocs: could not start ssh-agent"; return 1 }
+    fi
+
+    SSH_AUTH_SOCK=$sock ssh-add -t $ttl -- $key || return 1
+    SSH_AUTH_SOCK=$sock ssh -A -t $host "$@"
+}
+
+  # Drop the key before its timeout.
+  zeddocs-drop() { SSH_AUTH_SOCK=$HOME/.ssh/zeddocs-agent.sock ssh-add -D }
