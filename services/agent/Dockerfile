@@ -55,6 +55,17 @@ RUN curl -LsSf "https://astral.sh/uv/${UV_VERSION}/install.sh" | env UV_INSTALL_
        uv tool install --python 3.13 "ansible-core==${ANSIBLE_CORE_VERSION}" \
     && uv --version | grep -q "${UV_VERSION}" \
     && ansible --version | grep -q "core ${ANSIBLE_CORE_VERSION}"
+# Playwright (Python) + headless Chromium: seats screenshot and audit web pages (Logan 2026-11-18, the
+# ZedDocs UI/UX pass). Same uv layout as ansible; scripts run /opt/uv/tools/playwright/bin/python.
+# Browsers in /opt/ms-playwright for every uid; --with-deps apt-installs Chromium's libraries.
+ARG PLAYWRIGHT_VERSION=1.64.1
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/ms-playwright
+RUN env UV_TOOL_DIR=/opt/uv/tools UV_TOOL_BIN_DIR=/usr/local/bin UV_PYTHON_INSTALL_DIR=/opt/uv/python \
+       uv tool install --python 3.13 "playwright==${PLAYWRIGHT_VERSION}" \
+    && playwright install --with-deps --only-shell chromium \
+    && rm -rf /var/lib/apt/lists/* \
+    && chmod -R a+rX /opt/ms-playwright \
+    && playwright --version | grep -q "${PLAYWRIGHT_VERSION}"
 # Install asdf — used ONLY as the installer for Erlang/Elixir at build time. It is not on PATH
 # at runtime: its bin/asdf resolves ../lib relative to the symlink (so /usr/local/bin/asdf broke),
 # and its shims need a per-user .tool-versions + ASDF_DATA_DIR that the agent user never had.
