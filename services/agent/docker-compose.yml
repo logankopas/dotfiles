@@ -20,3 +20,13 @@ services:
     ports:
       - "2222:22"
       - "4000:4000"   # doc-editor Phoenix dev server (mix phx.server), 2026-10-27
+    # homelab: NPM proxies gardenos.kopas.me to agent_sandbox:4100 (gardenos-web; web UI spec
+    # 2026-11-18 section 9). default keeps the agent_default network the container already uses.
+    networks:
+      - default
+      - homelab
+
+networks:
+  homelab:
+    external: true
+    name: homelab
