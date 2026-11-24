@@ -222,5 +222,7 @@ USER root
 # supervisord is PID 1 (entrypoint.sh execs it); its config replaces the package default.
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 COPY postgres.conf /etc/supervisor/conf.d/postgres.conf
+# Pin: concurrent doc-editor gates need max_connections 300 (alm-qabfs); fail the build without it.
+RUN grep -q -- '-c max_connections=300' /etc/supervisor/conf.d/postgres.conf
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
